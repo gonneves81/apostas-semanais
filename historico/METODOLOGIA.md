@@ -33,3 +33,56 @@
 - Não reportar acertos para jogos sem previsão prévia arquivada.
 
 Todos os valores devem ser verificáveis e o site deve declarar explicitamente as limitações dos dados.
+
+
+## Avaliador reproduzível (implementado em 19-10-2026)
+
+O programa `scripts/avaliar_previsoes.py` recebe um arquivo pré-jogo imutável e um ficheiro independente de resultados finais verificados. Exemplo de execução depois de existirem resultados:
+
+```bash
+python3 scripts/avaliar_previsoes.py \
+  --previsoes historico/2026-10-19-previsoes.json \
+  --resultados historico/2026-10-19-resultados.json \
+  --historico-dir historico
+```
+
+O formato de resultados exigido é:
+
+```json
+{
+  "week_start": "AAAA-MM-DD",
+  "source": "Fontes dos resultados",
+  "games": [
+    {
+      "id": 123,
+      "date": "AAAA-MM-DD",
+      "home": "Equipa casa",
+      "away": "Equipa fora",
+      "home_goals": 0,
+      "away_goals": 0,
+      "half_home": 0,
+      "half_away": 0,
+      "corners_total": 0,
+      "status": "FT",
+      "verified": true,
+      "source": "https://fonte-oficial.example/jogo"
+    }
+  ]
+}
+```
+
+**Os números acima são apenas um exemplo de esquema; não são resultados de qualquer encontro.** Nunca copiar o exemplo como resultados verdadeiros. `half_home`, `half_away` e `corners_total` são opcionais e devem ser omitidos quando não verificados. A correspondência exige o mesmo ID, data e nomes de ambas as equipas, resultado final, fonte HTTPS e `verified=true`. A publicação de previsões tem de ser anterior ao pontapé de saída, em Europe/Lisbon. Ficheiros de resultados inexistentes ou incompletos não devem ser inventados.
+
+O programa gera `historico/AAAA-MM-DD-avaliacao.json` (linhas auditáveis por mercado, resultado binário, Brier, log loss, Top 20, problemas e contagens) e recalcula o `historico/desempenho.json` acumulado. As taxas de classificação binária por mercado consideram como evento previsto `p>=0,5`; **não são taxas de retorno de apostas**. O indicador `picks_correct / picks_evaluated` usa apenas escolhas Top 20 arquivadas antecipadamente. Não existe ROI do modelo sem odds reais pré-jogo comprovadas.
+
+O programa foi acompanhado de testes com dados **sintéticos**, para confirmar exclusão de previsões posteriores ao início, resultados não verificados, jogos trocados e fórmulas. Testes sintéticos não medem a precisão desportiva. A primeira calibração real só deve ser divulgada após número suficiente de jogos avaliados e validação temporal fora da amostra.
+
+## Índice de cobertura dos dados e Top 5
+
+O rótulo `Dados N/100` da interface é uma heurística de cobertura: 25 pontos por amostra de resultados, 25 por recortes casa/fora, 10 por forma, 15 por probabilidades disponíveis, 10 por xG documentado, 10 por contexto verificável de lesões/suspensões e 5 por H2H com fonte. **Nunca interpretar o índice como probabilidade de acerto**.
+
+O Top 5 diário ordena pela probabilidade estimada e apresenta em separado a cobertura estatística e a odd justa (1/p). A odd justa **não é uma cotação de casa** e o limite de 1,20 aplica-se à odd comercial que o utilizador introduz na construção ou no registo dos boletins reais. Os filtros de probabilidade e odd justa são independentes.
+
+## Boletins reais pessoais
+
+`apostas-reais.js` guarda localmente, apenas no navegador do utilizador, registos que este confirma terem sido realmente apostados, com stake e odds manuais. Resultados, cash out, reembolsos e liquidações são **introduzidos pelo utilizador e não verificados pelo site**. O saldo e ROI pessoal incluem só os boletins liquidados, sem misturar rascunhos nem métricas do modelo. Não existe sincronização entre dispositivos. O ficheiro JSON pode ser exportado para cópia de segurança; a app pública não recebe estes registos pessoais.
