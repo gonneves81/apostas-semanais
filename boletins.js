@@ -28,6 +28,95 @@
     let minimum = 70, active = 1, expanded = false, pageLimit = 30;
     let persistAvailable = true, lastOpenGame = null, toastTimer = null;
     let slips = {1:{stake:'',items:[]},2:{stake:'',items:[]},3:{stake:'',items:[]}};
+
+    // Calendar state shared between Escolhas and Todos os jogos.
+    let choiceDay='ALL', choiceSort='prob';
+    const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    const baseStart=String(D.start||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const weekDays=baseStart?Array.from({length:7},(_,i)=>{
+      const d=new Date(Date.UTC(Number(baseStart[1]),Number(baseStart[2])-1,Number(baseStart[3])+i,12));
+      return {key:d.toISOString().slice(0,10),day:d.getUTCDate(),label:dayNames[i]+' '+String(d.getUTCDate()).padStart(2,'0')};
+    }):[];
+    function todayInPortugal(){
+      try{
+        const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+        const val=k=>parts.find(x=>x.type===k)?.value||'';
+        return val('year')+'-'+val('month')+'-'+val('day');
+      }catch(e){return new Date().toISOString().slice(0,10);}
+    }
+    const ptToday=todayInPortugal();
+    const marketChips=[
+      ['ALL','Todos'],['BTTS','AM'],['O25','+2,5'],['AND','AM e +2,5'],['OR','AM ou +2,5'],
+      ['O15','+1,5'],['W1','Casa'],['X','Empate'],['W2','Fora'],['1X2','1X2'],
+      ['C85','Cantos +8,5'],['C95','Cantos +9,5'],
+      ['HT1','Casa 1.ª p.'],['HT2','Fora 1.ª p.'],['SH1','Casa 2.ª p.'],['SH2','Fora 2.ª p.']
+    ];
+    function dateKey(g){
+      if(typeof g.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(g.date))return g.date;
+      return weekDays.find(d=>d.day===Number(g.day))?.key||'';
+    }
+    function byKickoff(a,b){
+      return dateKey(a.g).localeCompare(dateKey(b.g))||
+        String(a.g.time||'').localeCompare(String(b.g.time||''))||
+        String(a.g.home||'').localeCompare(String(b.g.home||''),'pt');
+    }
+    function dateOptions(scope){
+      const league=scope==='choices'?($('as-league')?.value||'ALL'):'ALL';
+      const days=weekDays.map(d=>{
+        const count=ALL.filter(g=>dateKey(g)===d.key&&(league==='ALL'||g.league===league)).length;
+        return { ...d,count };
+      });
+      const selected=choiceDay;
+      const today=days.find(d=>d.key===ptToday);
+      const pill=(key,text,count)=>'<button type="button" data-as-day="'+key+'" aria-pressed="'+(selected===key?'true':'false')+'" class="'+(selected===key?'active':'')+'">'+text+(count!==undefined?'<span>'+count+'</span>':'')+'</button>';
+      return '<div class="as-calendar-main"><div class="as-daybar-head"><b>Jogos por dia</b><div class="as-sort-toggle" aria-label="Ordenação">'+
+        '<button type="button" data-as-sort="date" data-as-sort-scope="'+scope+'" class="'+((scope==='choices'?choiceSort:($('order-filter')?.value||'date'))==='date'?'active':'')+'">Por data</button>'+
+        '<button type="button" data-as-sort="prob" data-as-sort-scope="'+scope+'" class="'+((scope==='choices'?choiceSort:($('order-filter')?.value||'date'))==='prob'?'active':'')+'">Por probabilidade</button>'+
+        '</div></div>'+
+        '<div class="as-day-pills" role="group" aria-label="Filtrar jogos por dia">'+
+        pill('ALL','Toda a semana',ALL.filter(g=>league==='ALL'||g.league===league).length)+
+        (today?pill(today.key,'Hoje · '+today.label,today.count):'')+
+        days.map(d=>pill(d.key,d.label,d.count)).join('')+'</div></div>';
+    }
+    function drawDateBars(){
+      for(const scope of ['choices','games']){
+        const node=$('as-datebar-'+scope);
+        if(!node)continue;
+        node.innerHTML=dateOptions(scope);
+        if(scope==='choices'){
+          const current=$('as-market')?.value||'ALL';
+          node.insertAdjacentHTML('beforeend','<div class="as-market-chips" role="group" aria-label="Filtrar por mercado">'+
+            marketChips.map(([k,label])=>'<button type="button" data-as-market="'+k+'" aria-pressed="'+(current===k?'true':'false')+'" class="'+(current===k?'active':'')+'">'+label+'</button>').join('')+'</div>');
+        } else {
+          const selected=$('metric-filter')?.value;
+          const possible=[['BTTS','AM'],['O25','+2,5'],['AND','AM e +2,5'],['OR','AM ou +2,5'],['O15','+1,5'],['W1','Casa'],['W2','Fora'],['C85','Cantos +8,5'],['C95','Cantos +9,5'],['HT1','Casa 1.ª p.'],['SH1','Casa 2.ª p.']];
+          node.insertAdjacentHTML('beforeend','<div class="as-market-chips" role="group" aria-label="Mercado em foco">'+
+            possible.map(([k,label])=>'<button type="button" data-as-focus="'+k+'" aria-pressed="'+(selected===k?'true':'false')+'" class="'+(selected===k?'active':'')+'">'+label+'</button>').join('')+'</div>');
+        }
+      }
+    }
+    function synchronizeDay(key){
+      if(key!=='ALL' && !weekDays.some(d=>d.key===key))key='ALL';
+      choiceDay=key;
+      const dd=$('day-filter');
+      if(dd){
+        const val=key==='ALL'?'all':String(weekDays.find(d=>d.key===key)?.day||'all');
+        if(dd.value!==val){dd.value=val;dd.dispatchEvent(new Event('change',{bubbles:true}));}
+      }
+      pageLimit=30;renderChoices();drawDateBars();
+    }
+    function mountDateBars(){
+      const choices=$('as-choice-controls'),gamePanel=document.querySelector('#view-games .filter-panel');
+      if(choices&&!$('as-datebar-choices')){
+        const b=document.createElement('div');b.className='as-date-toolbar';b.id='as-datebar-choices';choices.after(b);
+      }
+      if(gamePanel&&!$('as-datebar-games')){
+        const b=document.createElement('div');b.className='as-date-toolbar';b.id='as-datebar-games';
+        const chips=gamePanel.querySelector('.filter-chips');
+        if(chips)chips.after(b);else gamePanel.prepend(b);
+      }
+      drawDateBars();
+    }
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const probability = (g, k) => {
       if (!g || g.verified === false) return NaN;
@@ -262,9 +351,10 @@
       const minOpts=[40,45,50,55,60,65,70,75,80,85,90,95].map(v=>'<option value="'+v+'"'+(v===minimum?' selected':'')+'>'+v+'% ou mais</option>').join('');
       controls.innerHTML=
         '<div class="as-field"><label for="as-min">Probabilidade mínima</label><select id="as-min">'+minOpts+'</select></div>'+
-        '<div class="as-field"><label for="as-market">Tipo de prognóstico</label><select id="as-market"><option value="ALL">Todos os mercados</option>'+MARKETS.map(([k,n])=>'<option value="'+k+'">'+esc(n)+'</option>').join('')+'</select></div>'+
+        '<div class="as-field"><label for="as-market">Tipo de prognóstico</label><select id="as-market"><option value="ALL">Todos os mercados</option><option value="1X2">1X2 · Casa/Empate/Fora</option>'+MARKETS.map(([k,n])=>'<option value="'+k+'">'+esc(n)+'</option>').join('')+'</select></div>'+
         '<div class="as-field"><label for="as-league">Competição</label><select id="as-league"><option value="ALL">Todas as 12 competições</option>'+D.leagues.map(l=>'<option value="'+esc(l.code)+'">'+esc(l.name)+'</option>').join('')+'</select></div>';
       native.before(controls);
+      mountDateBars();
       const desc=document.createElement('p');desc.className='as-choice-description';desc.id='as-choice-description';native.after(desc);
       const list=document.createElement('div');list.className='as-list';list.id='as-smart-ranks';desc.after(list);
       const more=document.createElement('button');more.className='as-more';more.id='as-more';more.type='button';more.textContent='Mostrar mais opções';list.after(more);
@@ -279,8 +369,8 @@
       $('as-min').addEventListener('change',e=>{
         minimum=Number(e.target.value)||70;pageLimit=30;save();renderChoices();refreshInline();
       });
-      $('as-market').addEventListener('change',()=>{pageLimit=30;renderChoices();});
-      $('as-league').addEventListener('change',()=>{pageLimit=30;renderChoices();});
+      $('as-market').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
+      $('as-league').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
       rank.addEventListener('change',()=>{pageLimit=30;renderChoices();});
       more.addEventListener('click',()=>{pageLimit+=30;renderChoices();});
       renderChoices();
@@ -299,8 +389,8 @@
       const marketSel=$('as-market')?.value || 'ALL';
       const leagueSel=$('as-league')?.value || 'ALL';
       const market=Object.hasOwn(marketName,mode)?mode:marketSel;
-      let rows=ALL.filter(g=>g.verified!==false&&(leagueSel==='ALL'||g.league===leagueSel)).flatMap(g=>
-        MARKETS.map(([k])=>market==='ALL'||k===market?rowFor(g,k):null).filter(Boolean)
+      let rows=ALL.filter(g=>g.verified!==false&&(leagueSel==='ALL'||g.league===leagueSel)&&(choiceDay==='ALL'||dateKey(g)===choiceDay)).flatMap(g=>
+        MARKETS.map(([k])=>market==='ALL'||k===market||(market==='1X2'&&['W1','X','W2'].includes(k))?rowFor(g,k):null).filter(Boolean)
       ).filter(x=>x.p*100+1e-8>=minimum);
       rows.sort((a,b)=>b.p-a.p||String(a.g.home).localeCompare(String(b.g.home),'pt'));
       if (mode==='TOP') {
@@ -309,10 +399,11 @@
       } else if (mode!=='PROB') {
         rows=rows.slice(0,20);
       }
+      if(choiceSort==='date')rows.sort(byKickoff);
       const showing=mode==='PROB'?rows.slice(0,pageLimit):rows;
       $('as-more').hidden=(mode!=='PROB'||rows.length<=pageLimit);
       const description=$('as-choice-description');
-      description.textContent=rows.length+' prognósticos com probabilidade ≥'+minimum+'% e odd justa ≥1,20.'+
+      description.textContent=rows.length+' prognósticos'+(choiceDay==='ALL'?' na semana':(' em '+(weekDays.find(d=>d.key===choiceDay)?.label||choiceDay)))+' com probabilidade ≥'+minimum+'% e odd justa ≥1,20.'+
         (mode==='TOP'?' Máximo de um mercado por jogo.':'')+
         ' As odds são estimativas matemáticas, não preços da casa de apostas.';
       if (!showing.length) {
@@ -349,6 +440,26 @@
     }
     function register() {
       document.addEventListener('click',e=>{
+        const dayBtn=e.target.closest('[data-as-day]');
+        if(dayBtn){synchronizeDay(dayBtn.dataset.asDay);return;}
+        const sortBtn=e.target.closest('[data-as-sort]');
+        if(sortBtn){
+          const mode=sortBtn.dataset.asSort;
+          if(sortBtn.dataset.asSortScope==='games'){
+            const o=$('order-filter');if(o){o.value=mode;o.dispatchEvent(new Event('change',{bubbles:true}));}
+          }else{choiceSort=mode;pageLimit=30;renderChoices();}
+          drawDateBars();return;
+        }
+        const marketBtn=e.target.closest('[data-as-market]');
+        if(marketBtn){
+          const select=$('as-market');if(select){select.value=marketBtn.dataset.asMarket;select.dispatchEvent(new Event('change',{bubbles:true}));}
+          const mode=$('rank-filter');if(mode&&mode.value!=='TOP'&&mode.value!=='PROB'){
+            mode.value='PROB';mode.dispatchEvent(new Event('change',{bubbles:true}));
+          }
+          drawDateBars();return;
+        }
+        const focusBtn=e.target.closest('[data-as-focus]');
+        if(focusBtn){const select=$('metric-filter');if(select){select.value=focusBtn.dataset.asFocus;select.dispatchEvent(new Event('change',{bubbles:true}));}drawDateBars();return;}
         const gameOpen=e.target.closest('[data-open]');
         if (gameOpen) lastOpenGame=Number(gameOpen.dataset.open);
         const btn=e.target.closest('[data-add-slip]');
@@ -371,6 +482,13 @@
         if (cp){copySlip(Number(cp.dataset.slipCopy));return;}
       });
       document.addEventListener('change',e=>{
+        if(e.target.id==='day-filter'){
+          const v=e.target.value;
+          const next=v==='all'?'ALL':(weekDays.find(d=>d.day===Number(v))?.key||'ALL');
+          if(choiceDay!==next){choiceDay=next;pageLimit=30;renderChoices();}
+          drawDateBars();return;
+        }
+        if(e.target.id==='order-filter'||e.target.id==='metric-filter'){drawDateBars();return;}
         const sel=e.target.closest('[data-pick-select]');
         if (sel){
           const wrap=sel.closest('.as-inline'),g=byId.get(Number(sel.dataset.pickSelect)),p=probability(g,sel.value);
@@ -409,6 +527,7 @@
     setupChoices();
     renderDock();
     register();
+    drawDateBars();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
