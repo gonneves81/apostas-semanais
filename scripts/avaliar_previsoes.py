@@ -199,7 +199,10 @@ def evaluate(archive, results):
         if not isinstance(pick, dict):
             continue
         key = str(pick.get("market") or "")
-        target = outcome_index.get((pick.get("id"), key))
+        aliases = {"O15":"o15","O25":"o25","BTTS":"btts","W1":"w1","W2":"w2",
+                   "AND":"and","OR":"or","X":"draw","BTTS_NO":"no"}
+        assessed_key = aliases.get(key, key)
+        target = outcome_index.get((pick.get("id"), assessed_key))
         if target is not None and valid_probability(pick.get("p")):
             top_rows.append({"game_id": pick["id"], "market": key,
                              "correct": bool(target), "probability": pick["p"]})
