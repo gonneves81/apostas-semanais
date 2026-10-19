@@ -174,6 +174,54 @@ jobs:
                 secondOdd.value='1,50';secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
                 if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('49,50'))throw Error('Retorno completo nao restaurado');
 
+                // Selecionar AM nos jogos deve pré-selecionar o mercado BTTS
+                // no boletim, não +1,5 mesmo que tenha maior probabilidade.
+                document.querySelector('[data-go="games"]').click();
+                await new Promise(r=>setTimeout(r,180));
+                async function checkGameMarket(market){
+                  const filter=document.querySelector('#metric-filter');
+                  filter.value=market;filter.dispatchEvent(new Event('change',{bubbles:true}));
+                  await new Promise(r=>setTimeout(r,180));
+                  const cards=Array.from(document.querySelectorAll('#game-list .game-card'));
+                  const card=cards.find(c=>c.querySelector('[data-pick-select] option[value="'+market+'"]'));
+                  if(!card)throw Error('Sem cartão de jogo com mercado '+market);
+                  const sel=card.querySelector('[data-pick-select]');
+                  if(sel.value!==market)throw Error('Prognóstico pré-selecionado '+sel.value+', mas mercado ativo '+market);
+                  const actions=Array.from(card.querySelectorAll('[data-add-slip]'));
+                  if(actions.length!==3||actions.some(b=>b.disabled||b.dataset.market!==market)){
+                    throw Error('Botões do boletim não correspondem ao mercado '+market);
+                  }
+                  return card;
+                }
+                const bttsCard=await checkGameMarket('BTTS');
+                const bttsId=Number(bttsCard.querySelector('[data-pick-select]').dataset.pickSelect);
+                bttsCard.querySelector('[data-add-slip="1"]').click();
+                const updatedSlips=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-19_2026-10-25')||'{}');
+                if(!updatedSlips['1']?.items.some(x=>x.id===bttsId&&x.market==='BTTS')){
+                  throw Error('Botão Aposta 1 adicionou outro mercado em vez de AM');
+                }
+                await checkGameMarket('O25');
+                await checkGameMarket('AND');
+                const orCard=await checkGameMarket('OR');
+                orCard.querySelector('[data-open]').click();
+                await new Promise(r=>setTimeout(r,160));
+                const modalSelect=document.querySelector('#modal-content [data-pick-select]');
+                if(!modalSelect||modalSelect.value!=='OR')throw Error('Detalhe do jogo não herdou AM OU +2,5');
+                document.querySelector('#modal-close').click();
+                const dayControl=document.querySelector('#day-filter');
+                dayControl.value='20';dayControl.dispatchEvent(new Event('change',{bubbles:true}));
+                const cornerFilter=document.querySelector('#metric-filter');
+                cornerFilter.value='C85';cornerFilter.dispatchEvent(new Event('change',{bubbles:true}));
+                await new Promise(r=>setTimeout(r,220));
+                const cornerCard=Array.from(document.querySelectorAll('#game-list .game-card'))
+                  .find(c=>c.querySelector('[data-pick-select]'));
+                if(!cornerCard)throw Error('Sem jogo europeu para testar dados de cantos ausentes');
+                const cornerSelect=cornerCard.querySelector('[data-pick-select]');
+                if(cornerSelect.querySelector('option[value="C85"]'))throw Error('Amostra escolhida tinha previsão de cantos, não testa ausência');
+                if(cornerSelect.value!=='')throw Error('Sem previsão de cantos deve selecionar aviso, não outro mercado');
+                if(Array.from(cornerCard.querySelectorAll('[data-add-slip]')).some(b=>!b.disabled)){
+                  throw Error('Mercado sem previsão não bloqueia inclusão incorreta no boletim');
+                }
                 document.body.dataset.smoke='PASS';
               }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
             },1000);
