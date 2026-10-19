@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "last_updated": "2026-10-19",
+  "status": "Sem resultados apurados ainda",
+  "summary": {
+    "games_evaluated": null,
+    "picks_correct": null,
+    "picks_evaluated": null,
+    "hit_rate": null,
+    "brier": null
+  },
+  "weeks": [],
+  "markets": [],
+  "leagues": [],
+  "calibration": []
+}
