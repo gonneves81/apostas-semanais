@@ -121,3 +121,11 @@
   .as-sort-toggle{margin-top:7px}
   .as-date-toolbar{padding:10px}
 }
+
+
+/* Cálculo automático de odds e retorno */
+.as-slip-calculation{padding:8px 14px 12px;background:#ecf9f4;border-top:1px solid #daeee6;color:#336f60;font-size:11px;line-height:1.55;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.as-slip-return [data-slip-return-value],.as-ticket-stat [data-slip-total-odd]{font-variant-numeric:tabular-nums}
+.as-slip-oddrow input[aria-invalid="true"]{border-color:#c98575;background:#fff8f5}
+.as-slip-missing[hidden]{display:none}
+@media(max-width:720px){.as-slip-calculation{padding:8px 12px 12px;font-size:10px}}
