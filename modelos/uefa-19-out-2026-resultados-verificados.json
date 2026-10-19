@@ -1,0 +1,659 @@
+{
+  "schema": 1,
+  "createdAt": "2026-10-19T12:34:36.723Z",
+  "period": "Before games on 2026-10-20",
+  "disclaimer": "Verified final scores from UEFA news pages, only the first one/two league-phase fixtures; Poisson estimates are exploratory, not calibrated and do not include domestic last 10, H2H, xG, injuries or corners.",
+  "model": {
+    "version": "UEFA-Poisson-shrink-v0.1",
+    "pseudoMatches": 5,
+    "formula": "Posterior attack=(GF+5*competitionMeanGoalsPerTeam)/(n+5); defence similarly with GA; lambda_home=(attack_home*defence_away/competitionMean)*homeAdjustment, away analogous / homeAdjustment; normalized independent Poisson",
+    "corners": "Not estimated"
+  },
+  "competitions": {
+    "UCL": {
+      "url": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/",
+      "matches": [
+        [
+          "2026-09-08",
+          "AEK Athens",
+          "LASK",
+          1,
+          0
+        ],
+        [
+          "2026-09-08",
+          "Club Brugge",
+          "Aston Villa",
+          2,
+          3
+        ],
+        [
+          "2026-09-08",
+          "Borussia Dortmund",
+          "Villarreal",
+          3,
+          2
+        ],
+        [
+          "2026-09-08",
+          "Porto",
+          "Manchester City",
+          0,
+          2
+        ],
+        [
+          "2026-09-08",
+          "Lille",
+          "Real Betis",
+          2,
+          3
+        ],
+        [
+          "2026-09-08",
+          "Real Madrid",
+          "Inter",
+          2,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Barcelona",
+          "Feyenoord",
+          5,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Stuttgart",
+          "Viking",
+          3,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Liverpool",
+          "Atlético de Madrid",
+          2,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Paris Saint-Germain",
+          "Slovan Bratislava",
+          6,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Sporting CP",
+          "Galatasaray",
+          3,
+          1
+        ],
+        [
+          "2026-09-09",
+          "Napoli",
+          "Arsenal",
+          0,
+          1
+        ],
+        [
+          "2026-09-10",
+          "Fenerbahçe",
+          "Roma",
+          1,
+          1
+        ],
+        [
+          "2026-09-10",
+          "PSV Eindhoven",
+          "Shakhtar Donetsk",
+          1,
+          1
+        ],
+        [
+          "2026-09-10",
+          "Como",
+          "Leipzig",
+          4,
+          1
+        ],
+        [
+          "2026-09-10",
+          "Bayern München",
+          "Bodø/Glimt",
+          5,
+          0
+        ],
+        [
+          "2026-09-10",
+          "Manchester United",
+          "Sabah",
+          4,
+          0
+        ],
+        [
+          "2026-09-10",
+          "Slavia Praha",
+          "Lens",
+          2,
+          3
+        ],
+        [
+          "2026-10-13",
+          "Lens",
+          "Sporting CP",
+          0,
+          2
+        ],
+        [
+          "2026-10-13",
+          "Sabah",
+          "Slavia Praha",
+          2,
+          0
+        ],
+        [
+          "2026-10-13",
+          "Arsenal",
+          "Lille",
+          3,
+          0
+        ],
+        [
+          "2026-10-13",
+          "Atlético de Madrid",
+          "Manchester United",
+          2,
+          0
+        ],
+        [
+          "2026-10-13",
+          "Inter",
+          "Club Brugge",
+          3,
+          4
+        ],
+        [
+          "2026-10-13",
+          "Galatasaray",
+          "Barcelona",
+          1,
+          4
+        ],
+        [
+          "2026-10-13",
+          "Leipzig",
+          "PSV Eindhoven",
+          1,
+          0
+        ],
+        [
+          "2026-10-13",
+          "Viking",
+          "Bayern München",
+          3,
+          3
+        ],
+        [
+          "2026-10-13",
+          "Villarreal",
+          "Napoli",
+          3,
+          1
+        ],
+        [
+          "2026-10-14",
+          "Feyenoord",
+          "Como",
+          3,
+          2
+        ],
+        [
+          "2026-10-14",
+          "LASK",
+          "Liverpool",
+          3,
+          6
+        ],
+        [
+          "2026-10-14",
+          "Roma",
+          "Real Madrid",
+          3,
+          4
+        ],
+        [
+          "2026-10-14",
+          "Aston Villa",
+          "Fenerbahçe",
+          6,
+          0
+        ],
+        [
+          "2026-10-14",
+          "Shakhtar Donetsk",
+          "AEK Athens",
+          3,
+          1
+        ],
+        [
+          "2026-10-14",
+          "Bodø/Glimt",
+          "Borussia Dortmund",
+          1,
+          0
+        ],
+        [
+          "2026-10-14",
+          "Manchester City",
+          "Paris Saint-Germain",
+          2,
+          4
+        ],
+        [
+          "2026-10-14",
+          "Real Betis",
+          "Porto",
+          3,
+          2
+        ],
+        [
+          "2026-10-14",
+          "Slovan Bratislava",
+          "Stuttgart",
+          0,
+          3
+        ]
+      ]
+    },
+    "UEL": {
+      "url": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/",
+      "matches": [
+        [
+          "2026-09-16",
+          "Ararat-Armenia",
+          "Sparta Praha",
+          1,
+          4
+        ],
+        [
+          "2026-09-16",
+          "Omonia",
+          "Celta",
+          1,
+          0
+        ],
+        [
+          "2026-09-16",
+          "Milan",
+          "Benfica",
+          0,
+          2
+        ],
+        [
+          "2026-09-16",
+          "Leverkusen",
+          "Celje",
+          2,
+          0
+        ],
+        [
+          "2026-09-16",
+          "Hapoel Beer-Sheva",
+          "GNK Dinamo",
+          0,
+          0
+        ],
+        [
+          "2026-09-16",
+          "Olympiacos",
+          "Jagiellonia",
+          2,
+          1
+        ],
+        [
+          "2026-09-16",
+          "Anderlecht",
+          "Lyon",
+          1,
+          2
+        ],
+        [
+          "2026-09-16",
+          "Sturm Graz",
+          "Rennes",
+          0,
+          0
+        ],
+        [
+          "2026-09-16",
+          "Sunderland",
+          "AZ Alkmaar",
+          1,
+          0
+        ],
+        [
+          "2026-09-17",
+          "OFI Crete",
+          "Hoffenheim",
+          2,
+          0
+        ],
+        [
+          "2026-09-17",
+          "Levski Sofia",
+          "Salzburg",
+          0,
+          1
+        ],
+        [
+          "2026-09-17",
+          "Beşiktaş",
+          "Marseille",
+          4,
+          1
+        ],
+        [
+          "2026-09-17",
+          "Celtic",
+          "Ferencváros",
+          1,
+          3
+        ],
+        [
+          "2026-09-17",
+          "Crystal Palace",
+          "Lech Poznań",
+          4,
+          0
+        ],
+        [
+          "2026-09-17",
+          "Viktoria Plzeň",
+          "Union SG",
+          0,
+          3
+        ],
+        [
+          "2026-09-17",
+          "Juventus",
+          "N.E.C. Nijmegen",
+          5,
+          0
+        ],
+        [
+          "2026-09-17",
+          "Lillestrøm",
+          "Torreense",
+          1,
+          2
+        ],
+        [
+          "2026-09-17",
+          "Real Sociedad",
+          "Bournemouth",
+          1,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Sparta Praha",
+          "Lillestrøm",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "AZ Alkmaar",
+          "Hapoel Beer-Sheva",
+          2,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Salzburg",
+          "Milan",
+          0,
+          4
+        ],
+        [
+          "2026-10-15",
+          "Lech Poznań",
+          "Leverkusen",
+          0,
+          4
+        ],
+        [
+          "2026-10-15",
+          "Celje",
+          "Omonia",
+          0,
+          3
+        ],
+        [
+          "2026-10-15",
+          "Lyon",
+          "Crystal Palace",
+          3,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Union SG",
+          "Real Sociedad",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Torreense",
+          "Sunderland",
+          1,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Bournemouth",
+          "Sturm Graz",
+          3,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Ferencváros",
+          "Viktoria Plzeň",
+          2,
+          1
+        ],
+        [
+          "2026-10-15",
+          "GNK Dinamo",
+          "Anderlecht",
+          1,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Jagiellonia",
+          "Ararat-Armenia",
+          3,
+          1
+        ],
+        [
+          "2026-10-15",
+          "N.E.C. Nijmegen",
+          "Levski Sofia",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Marseille",
+          "Olympiacos",
+          0,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Celta",
+          "Juventus",
+          1,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Benfica",
+          "Celtic",
+          4,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Rennes",
+          "OFI Crete",
+          2,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Hoffenheim",
+          "Beşiktaş",
+          2,
+          3
+        ]
+      ]
+    },
+    "UECL": {
+      "url": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/",
+      "matches": [
+        [
+          "2026-10-15",
+          "Lugano",
+          "Crvena Zvezda",
+          3,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Hajduk Split",
+          "Ajax",
+          2,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Gent",
+          "Aarhus",
+          1,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Egnatia",
+          "Midtjylland",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "KuPS Kuopio",
+          "Trabzonspor",
+          2,
+          4
+        ],
+        [
+          "2026-10-15",
+          "Mjällby",
+          "Inter Escaldes",
+          2,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Panathinaikos",
+          "Borac",
+          2,
+          1
+        ],
+        [
+          "2026-10-15",
+          "CSKA Sofia",
+          "Monaco",
+          1,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Riga",
+          "Kairat Almaty",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Universitatea Craiova",
+          "Getafe",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Atalanta",
+          "Pafos",
+          3,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Brighton",
+          "Kauno Žalgiris",
+          4,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Copenhagen",
+          "Braga",
+          3,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Twente",
+          "Thun",
+          1,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Hearts",
+          "Nordsjælland",
+          1,
+          1
+        ],
+        [
+          "2026-10-15",
+          "Sint-Truidense",
+          "Iberia Tbilisi",
+          2,
+          0
+        ],
+        [
+          "2026-10-15",
+          "Freiburg",
+          "Jablonec",
+          3,
+          2
+        ],
+        [
+          "2026-10-15",
+          "Brann",
+          "Lincoln Red Imps",
+          2,
+          1
+        ]
+      ]
+    }
+  }
+}
