@@ -17,6 +17,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verificar sintaxe JavaScript
         run: node --check boletins.js
+      - name: Validar interface interativa no Chromium
+        run: |
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
+          if [ -z "$CHROME" ]; then
+            echo "Chromium indisponivel no runner"
+            exit 1
+          fi
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=4500 --dump-dom "file://$PWD/index.html#top20" > /tmp/apostas-dom.html 2>/tmp/chrome-stderr.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('/tmp/apostas-dom.html').read_text(encoding='utf-8')
+          assert 'id="as-ticket-dock"' in s, "Painel de apostas nao carregado"
+          assert 'id="as-smart-ranks"' in s, "Filtro por probabilidade nao carregado"
+          assert 'id="as-min"' in s, "Seletor de percentagem em falta"
+          assert 'data-add-slip="1"' in s, "Botoes de adicionar ao boletim nao renderizados"
+          assert 'Aposta 3' in s, "Terceiro boletim ausente"
+          print("Site dinamico carregado: 3 boletins e filtros OK")
+          PY
       - name: Verificar arquivos e conteudo
         run: |
           python3 - <<'PY'
