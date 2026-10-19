@@ -1,0 +1,19 @@
+{
+  "name": "Apostas Semanais",
+  "short_name": "Apostas",
+  "description": "Análises e previsões estatísticas semanais de futebol.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fa",
+  "theme_color": "#0c2034",
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
