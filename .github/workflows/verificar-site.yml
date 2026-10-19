@@ -141,6 +141,39 @@ jobs:
                 if(!status)throw Error('Controlo liquidacao nao existe');
                 status.value='won';status.dispatchEvent(new Event('change',{bubbles:true}));
                 if(!document.querySelector('#qa-real-history').textContent.includes('65,0%'))throw Error('ROI liquidado nao calculado corretamente');
+                // Cálculo ao escrever: dois jogos, primeira odd preenchida e
+                // segunda ainda vazia; o resumo deve ser explicitamente parcial.
+                const firstGame=Number(saved.bets[0].selections[0].game_id);
+                const secondPick=Array.from(document.querySelectorAll('#as-smart-ranks [data-add-slip="3"]')).find(x=>Number(x.dataset.game)!==firstGame);
+                if(!secondPick)throw Error('Nao ha segunda selecao distinta para teste');
+                secondPick.click();
+                const secondGame=Number(secondPick.dataset.game);
+                const dock2=document.querySelector('#as-ticket-dock');
+                if(dock2.querySelectorAll('[data-slip-odd="3"]').length!==2)throw Error('Segunda selecao nao adicionada');
+                if(!dock2.querySelector('[data-slip-odd-label]').textContent.includes('1/2'))throw Error('Odd parcial nao indicada');
+                if(dock2.querySelector('[data-slip-total-odd]').textContent!=='1,65')throw Error('Primeira odd nao acumulada');
+                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('16,50'))throw Error('Retorno parcial incorreto');
+                const secondOdd=dock2.querySelector('[data-slip-odd="3"][data-game="'+secondGame+'"]');
+                if(!secondOdd)throw Error('Segundo campo de odd indisponivel');
+                secondOdd.focus();
+                secondOdd.value='1,50';
+                secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
+                if(document.activeElement!==secondOdd)throw Error('Input perde foco ao digitar');
+                if(dock2.querySelector('[data-slip-total-odd]').textContent!=='2,475')throw Error('Odd combinada nao calculada em tempo real');
+                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('24,75'))throw Error('Retorno nao atualizou ao digitar segunda odd');
+                if(dock2.querySelector('[data-slip-return-label]').textContent!=='Retorno potencial bruto')throw Error('Retorno total incorretamente marcado parcial');
+                const stakeLive=dock2.querySelector('[data-slip-stake="3"]');
+                stakeLive.value='20';stakeLive.dispatchEvent(new Event('input',{bubbles:true}));
+                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('49,50'))throw Error('Retorno nao multiplicou stake em tempo real');
+                if(!dock2.querySelector('[data-slip-calculation]').textContent.includes('1,65 × 1,50 ×'))throw Error('Formula nao mostra multiplicacao das odds');
+                const persisted=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-19_2026-10-25')||'{}');
+                if(persisted['3']?.stake!=='20'||persisted['3']?.items.length!==2)throw Error('Valores nao persistem enquanto sao digitados');
+                secondOdd.value='1,10';secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
+                if(!dock2.querySelector('[data-slip-odd-label]').textContent.includes('1/2'))throw Error('Odd abaixo de 1,20 deve ficar parcial');
+                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('33,00'))throw Error('Retorno parcial de odd valida incorreto');
+                secondOdd.value='1,50';secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
+                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('49,50'))throw Error('Retorno completo nao restaurado');
+
                 document.body.dataset.smoke='PASS';
               }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
             },1000);
