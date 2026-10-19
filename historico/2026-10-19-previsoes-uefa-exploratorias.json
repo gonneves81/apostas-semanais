@@ -1,0 +1,2572 @@
+{
+  "schema": 1,
+  "week_start": "2026-10-19",
+  "week_end": "2026-10-25",
+  "archived_at": "2026-10-19T12:36:51.612Z",
+  "model_version": "UEFA-Poisson-shrink-v0.1",
+  "sources": {
+    "UCL": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/",
+    "UEL": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/",
+    "UECL": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/",
+    "UCLprior": "UEFA 2025/26 655 goals in 189 matches"
+  },
+  "methodology": "Only 1-2 previous UEFA group stage match results each team; 5 match-pseudo-count prior; home effect x1.08; independent Poisson; no calibration or full team-season last10, xG, corners, injuries. Exploratory forecasts, not reliable picks.",
+  "competitionMeans": {
+    "UCL": {
+      "rawMean": 2.0417,
+      "priorMean": 1.7822,
+      "n": 36
+    },
+    "UEL": {
+      "rawMean": 1.4306,
+      "priorMean": 1.4306,
+      "n": 36
+    },
+    "UECL": {
+      "rawMean": 1.4722,
+      "priorMean": 1.4722,
+      "n": 18
+    }
+  },
+  "games": [
+    {
+      "id": 85,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "17:45",
+      "home": "Fenerbahçe",
+      "away": "Slavia Praha",
+      "probabilities": {
+        "w1": 0.36200855,
+        "draw": 0.22071534,
+        "w2": 0.4172761,
+        "o15": 0.86887403,
+        "o25": 0.68754097,
+        "btts": 0.68838487,
+        "no": 0.31161513,
+        "and": 0.59785098,
+        "or": 0.77807486
+      },
+      "first": {
+        "w1": 0.30781002,
+        "draw": 0.34894422,
+        "w2": 0.34324575
+      },
+      "second": {
+        "w1": 0.32225487,
+        "draw": 0.31645248,
+        "w2": 0.36129265
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09053388
+        },
+        {
+          "score": "1-2",
+          "p": 0.08332339
+        },
+        {
+          "score": "2-1",
+          "p": 0.07718417
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 86,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "17:45",
+      "home": "Sabah",
+      "away": "Borussia Dortmund",
+      "probabilities": {
+        "w1": 0.37869732,
+        "draw": 0.23270796,
+        "w2": 0.38859472,
+        "o15": 0.83366489,
+        "o25": 0.62792788,
+        "btts": 0.64298925,
+        "no": 0.35701075,
+        "and": 0.54012606,
+        "or": 0.73079106
+      },
+      "first": {
+        "w1": 0.31234578,
+        "draw": 0.36900891,
+        "w2": 0.31864532
+      },
+      "second": {
+        "w1": 0.32915604,
+        "draw": 0.33473414,
+        "w2": 0.33610982
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10286319
+        },
+        {
+          "score": "1-2",
+          "p": 0.08386134
+        },
+        {
+          "score": "2-1",
+          "p": 0.08266354
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 87,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Roma",
+      "away": "Slovan Bratislava",
+      "probabilities": {
+        "w1": 0.66432745,
+        "draw": 0.16211482,
+        "w2": 0.17355773,
+        "o15": 0.92934451,
+        "o25": 0.80535655,
+        "btts": 0.72419274,
+        "no": 0.27580726,
+        "and": 0.66868637,
+        "or": 0.86086292
+      },
+      "first": {
+        "w1": 0.52158396,
+        "draw": 0.28771971,
+        "w2": 0.19069633
+      },
+      "second": {
+        "w1": 0.55242596,
+        "draw": 0.25638688,
+        "w2": 0.19118717
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.07937135
+        },
+        {
+          "score": "3-1",
+          "p": 0.07566472
+        },
+        {
+          "score": "2-2",
+          "p": 0.05801407
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 88,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Porto",
+      "away": "PSV Eindhoven",
+      "probabilities": {
+        "w1": 0.37927834,
+        "draw": 0.24609625,
+        "w2": 0.37462542,
+        "o15": 0.79079846,
+        "o25": 0.56189671,
+        "btts": 0.59197205,
+        "no": 0.40802795,
+        "and": 0.47752264,
+        "or": 0.67634613
+      },
+      "first": {
+        "w1": 0.30568848,
+        "draw": 0.39156008,
+        "w2": 0.30275144
+      },
+      "second": {
+        "w1": 0.32391563,
+        "draw": 0.35541814,
+        "w2": 0.32066623
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11444941
+        },
+        {
+          "score": "2-1",
+          "p": 0.08425272
+        },
+        {
+          "score": "1-2",
+          "p": 0.08365331
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 89,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Liverpool",
+      "away": "Villarreal",
+      "probabilities": {
+        "w1": 0.55095014,
+        "draw": 0.1804355,
+        "w2": 0.26861437,
+        "o15": 0.94392004,
+        "o25": 0.83784527,
+        "btts": 0.79389338,
+        "no": 0.20610662,
+        "and": 0.74244061,
+        "or": 0.88929805
+      },
+      "first": {
+        "w1": 0.44737567,
+        "draw": 0.29131559,
+        "w2": 0.26130875
+      },
+      "second": {
+        "w1": 0.4701923,
+        "draw": 0.26329847,
+        "w2": 0.26650923
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.06946711
+        },
+        {
+          "score": "2-2",
+          "p": 0.06614411
+        },
+        {
+          "score": "3-1",
+          "p": 0.06252567
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 90,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Manchester City",
+      "away": "AEK Athens",
+      "probabilities": {
+        "w1": 0.47339081,
+        "draw": 0.22198769,
+        "w2": 0.3046215,
+        "o15": 0.85264746,
+        "o25": 0.65939342,
+        "btts": 0.65968118,
+        "no": 0.34031882,
+        "and": 0.56445075,
+        "or": 0.75462385
+      },
+      "first": {
+        "w1": 0.37609866,
+        "draw": 0.35605601,
+        "w2": 0.26784532
+      },
+      "second": {
+        "w1": 0.39849161,
+        "draw": 0.3223237,
+        "w2": 0.27918469
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09523043
+        },
+        {
+          "score": "2-1",
+          "p": 0.09055764
+        },
+        {
+          "score": "1-2",
+          "p": 0.07112035
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 91,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Paris Saint-Germain",
+      "away": "Barcelona",
+      "probabilities": {
+        "w1": 0.4582228,
+        "draw": 0.18585002,
+        "w2": 0.35592718,
+        "o15": 0.95281031,
+        "o25": 0.85876548,
+        "btts": 0.82603481,
+        "no": 0.17396519,
+        "and": 0.77918284,
+        "or": 0.90561744
+      },
+      "first": {
+        "w1": 0.38876891,
+        "draw": 0.28933688,
+        "w2": 0.32189422
+      },
+      "second": {
+        "w1": 0.40514036,
+        "draw": 0.26298286,
+        "w2": 0.33187677
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-2",
+          "p": 0.06760984
+        },
+        {
+          "score": "2-1",
+          "p": 0.05977893
+        },
+        {
+          "score": "3-2",
+          "p": 0.05750941
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 92,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Napoli",
+      "away": "Bodø/Glimt",
+      "probabilities": {
+        "w1": 0.45738262,
+        "draw": 0.23634074,
+        "w2": 0.30627664,
+        "o15": 0.80990021,
+        "o25": 0.59052158,
+        "btts": 0.60754989,
+        "no": 0.39245011,
+        "and": 0.49928026,
+        "or": 0.69879121
+      },
+      "first": {
+        "w1": 0.35817558,
+        "draw": 0.37968926,
+        "w2": 0.26213517
+      },
+      "second": {
+        "w1": 0.38105625,
+        "draw": 0.34399097,
+        "w2": 0.27495278
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10826963
+        },
+        {
+          "score": "2-1",
+          "p": 0.09230468
+        },
+        {
+          "score": "1-0",
+          "p": 0.07980049
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 93,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Stuttgart",
+      "away": "Atlético de Madrid",
+      "probabilities": {
+        "w1": 0.55004321,
+        "draw": 0.21513626,
+        "w2": 0.23482053,
+        "o15": 0.83693241,
+        "o25": 0.63323878,
+        "btts": 0.61850623,
+        "no": 0.38149377,
+        "and": 0.52218782,
+        "or": 0.72955719
+      },
+      "first": {
+        "w1": 0.42265122,
+        "draw": 0.35837515,
+        "w2": 0.21897363
+      },
+      "second": {
+        "w1": 0.45078159,
+        "draw": 0.32278811,
+        "w2": 0.2264303
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.09689957
+        },
+        {
+          "score": "1-1",
+          "p": 0.09631841
+        },
+        {
+          "score": "2-0",
+          "p": 0.0774163
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 94,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "17:45",
+      "home": "Como",
+      "away": "Manchester United",
+      "probabilities": {
+        "w1": 0.44229325,
+        "draw": 0.21209331,
+        "w2": 0.34561344,
+        "o15": 0.89086463,
+        "o25": 0.72777657,
+        "btts": 0.71835169,
+        "no": 0.28164831,
+        "and": 0.63714928,
+        "or": 0.80897897
+      },
+      "first": {
+        "w1": 0.3636091,
+        "draw": 0.33510147,
+        "w2": 0.30128943
+      },
+      "second": {
+        "w1": 0.38235918,
+        "draw": 0.30383999,
+        "w2": 0.31380083
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.08169236
+        },
+        {
+          "score": "1-1",
+          "p": 0.0812024
+        },
+        {
+          "score": "2-2",
+          "p": 0.07219297
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 95,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "17:45",
+      "home": "Lille",
+      "away": "Galatasaray",
+      "probabilities": {
+        "w1": 0.47884952,
+        "draw": 0.2065886,
+        "w2": 0.31456188,
+        "o15": 0.89858346,
+        "o25": 0.74253976,
+        "btts": 0.72581381,
+        "no": 0.27418619,
+        "and": 0.64871863,
+        "or": 0.81963493
+      },
+      "first": {
+        "w1": 0.38882589,
+        "draw": 0.32868699,
+        "w2": 0.28248712
+      },
+      "second": {
+        "w1": 0.40959486,
+        "draw": 0.29769875,
+        "w2": 0.29270639
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.0827619
+        },
+        {
+          "score": "1-1",
+          "p": 0.07709517
+        },
+        {
+          "score": "2-2",
+          "p": 0.07138312
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 96,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Aston Villa",
+      "away": "Viking",
+      "probabilities": {
+        "w1": 0.72454484,
+        "draw": 0.13721293,
+        "w2": 0.13824223,
+        "o15": 0.95213163,
+        "o25": 0.85713489,
+        "btts": 0.7469303,
+        "no": 0.2530697,
+        "and": 0.70619004,
+        "or": 0.89787516
+      },
+      "first": {
+        "w1": 0.57323039,
+        "draw": 0.25873111,
+        "w2": 0.16803849
+      },
+      "second": {
+        "w1": 0.60592032,
+        "draw": 0.22851788,
+        "w2": 0.16556179
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "3-1",
+          "p": 0.07407442
+        },
+        {
+          "score": "2-1",
+          "p": 0.06728088
+        },
+        {
+          "score": "4-1",
+          "p": 0.06116544
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 97,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Club Brugge",
+      "away": "Lens",
+      "probabilities": {
+        "w1": 0.49503949,
+        "draw": 0.19491013,
+        "w2": 0.31005038,
+        "o15": 0.92595728,
+        "o25": 0.79808644,
+        "btts": 0.76948259,
+        "no": 0.23051741,
+        "and": 0.70641842,
+        "or": 0.86115061
+      },
+      "first": {
+        "w1": 0.40564454,
+        "draw": 0.30928698,
+        "w2": 0.28506848
+      },
+      "second": {
+        "w1": 0.42603425,
+        "draw": 0.28021858,
+        "w2": 0.29374717
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.07507417
+        },
+        {
+          "score": "2-2",
+          "p": 0.07068696
+        },
+        {
+          "score": "1-1",
+          "p": 0.06306417
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 98,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Bayern München",
+      "away": "Arsenal",
+      "probabilities": {
+        "w1": 0.43698122,
+        "draw": 0.22155335,
+        "w2": 0.34146544,
+        "o15": 0.86349778,
+        "o25": 0.67807919,
+        "btts": 0.67944571,
+        "no": 0.32055429,
+        "and": 0.58714907,
+        "or": 0.77037583
+      },
+      "first": {
+        "w1": 0.35483897,
+        "draw": 0.35155083,
+        "w2": 0.2936102
+      },
+      "second": {
+        "w1": 0.37439468,
+        "draw": 0.31867588,
+        "w2": 0.30692944
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09229664
+        },
+        {
+          "score": "2-1",
+          "p": 0.08600483
+        },
+        {
+          "score": "1-2",
+          "p": 0.07524674
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 99,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Inter",
+      "away": "Shakhtar Donetsk",
+      "probabilities": {
+        "w1": 0.33536403,
+        "draw": 0.21126553,
+        "w2": 0.45337044,
+        "o15": 0.89120163,
+        "o25": 0.72841375,
+        "btts": 0.71773877,
+        "no": 0.28226123,
+        "and": 0.6368533,
+        "or": 0.80929922
+      },
+      "first": {
+        "w1": 0.29468945,
+        "draw": 0.33449921,
+        "w2": 0.37081134
+      },
+      "second": {
+        "w1": 0.30653397,
+        "draw": 0.30319905,
+        "w2": 0.39026698
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-2",
+          "p": 0.08255263
+        },
+        {
+          "score": "1-1",
+          "p": 0.08088548
+        },
+        {
+          "score": "2-2",
+          "p": 0.07191121
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 100,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Real Madrid",
+      "away": "Leipzig",
+      "probabilities": {
+        "w1": 0.57283678,
+        "draw": 0.19286674,
+        "w2": 0.23429648,
+        "o15": 0.89878478,
+        "o25": 0.74292964,
+        "btts": 0.70374305,
+        "no": 0.29625695,
+        "and": 0.62990178,
+        "or": 0.81677091
+      },
+      "first": {
+        "w1": 0.45063402,
+        "draw": 0.32076891,
+        "w2": 0.22859707
+      },
+      "second": {
+        "w1": 0.47748652,
+        "draw": 0.28864185,
+        "w2": 0.23387164
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.08790368
+        },
+        {
+          "score": "1-1",
+          "p": 0.07384127
+        },
+        {
+          "score": "3-1",
+          "p": 0.06976277
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 101,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Real Betis",
+      "away": "Feyenoord",
+      "probabilities": {
+        "w1": 0.61756213,
+        "draw": 0.16655962,
+        "w2": 0.21587825,
+        "o15": 0.94822267,
+        "o25": 0.84785412,
+        "btts": 0.78513251,
+        "no": 0.21486749,
+        "and": 0.73803841,
+        "or": 0.89494822
+      },
+      "first": {
+        "w1": 0.49403903,
+        "draw": 0.28036632,
+        "w2": 0.22559465
+      },
+      "second": {
+        "w1": 0.52068833,
+        "draw": 0.25184459,
+        "w2": 0.22746708
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.06908949
+        },
+        {
+          "score": "3-1",
+          "p": 0.06757192
+        },
+        {
+          "score": "2-2",
+          "p": 0.0610556
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 102,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Sporting CP",
+      "away": "LASK",
+      "probabilities": {
+        "w1": 0.68653359,
+        "draw": 0.16210194,
+        "w2": 0.15136447,
+        "o15": 0.90761245,
+        "o25": 0.76028022,
+        "btts": 0.66774816,
+        "no": 0.33225184,
+        "and": 0.60430036,
+        "or": 0.82372802
+      },
+      "first": {
+        "w1": 0.53193259,
+        "draw": 0.29809185,
+        "w2": 0.16997556
+      },
+      "second": {
+        "w1": 0.56550001,
+        "draw": 0.26429179,
+        "w2": 0.1702082
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.08683877
+        },
+        {
+          "score": "3-1",
+          "p": 0.07923544
+        },
+        {
+          "score": "2-0",
+          "p": 0.06937839
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefachampionsleague/news/02a8-2176fa83582b-d99f0b27f405-1000--champions-league-league-phase-fixtures-by-team/"
+    },
+    {
+      "id": 103,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Ararat-Armenia",
+      "away": "AZ Alkmaar",
+      "probabilities": {
+        "w1": 0.28962941,
+        "draw": 0.23717217,
+        "w2": 0.47319842,
+        "o15": 0.80112445,
+        "o25": 0.57721913,
+        "btts": 0.59395907,
+        "no": 0.40604093,
+        "and": 0.48420179,
+        "or": 0.68697642
+      },
+      "first": {
+        "w1": 0.25002413,
+        "draw": 0.38329776,
+        "w2": 0.36667812
+      },
+      "second": {
+        "w1": 0.2620173,
+        "draw": 0.34705546,
+        "w2": 0.39092724
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10975729
+        },
+        {
+          "score": "1-2",
+          "p": 0.09390253
+        },
+        {
+          "score": "0-1",
+          "p": 0.08503486
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 104,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Ferencváros",
+      "away": "Torreense",
+      "probabilities": {
+        "w1": 0.53114068,
+        "draw": 0.22348233,
+        "w2": 0.24537698,
+        "o15": 0.81924261,
+        "o25": 0.60497861,
+        "btts": 0.60134129,
+        "no": 0.39865871,
+        "and": 0.49917467,
+        "or": 0.70714522
+      },
+      "first": {
+        "w1": 0.40700661,
+        "draw": 0.36949908,
+        "w2": 0.22349431
+      },
+      "second": {
+        "w1": 0.43454407,
+        "draw": 0.33331934,
+        "w2": 0.23213658
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10216662
+        },
+        {
+          "score": "2-1",
+          "p": 0.09711054
+        },
+        {
+          "score": "1-0",
+          "p": 0.08323179
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 105,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "GNK Dinamo",
+      "away": "N.E.C. Nijmegen",
+      "probabilities": {
+        "w1": 0.58434222,
+        "draw": 0.24301388,
+        "w2": 0.1726439,
+        "o15": 0.69641968,
+        "o25": 0.43615136,
+        "btts": 0.43419839,
+        "no": 0.56580161,
+        "and": 0.32130903,
+        "or": 0.54904073
+      },
+      "first": {
+        "w1": 0.41936603,
+        "draw": 0.4226288,
+        "w2": 0.15800517
+      },
+      "second": {
+        "w1": 0.4546443,
+        "draw": 0.38034499,
+        "w2": 0.16501071
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-0",
+          "p": 0.14654986
+        },
+        {
+          "score": "2-0",
+          "p": 0.1210618
+        },
+        {
+          "score": "1-1",
+          "p": 0.11288936
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 106,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Juventus",
+      "away": "Rennes",
+      "probabilities": {
+        "w1": 0.55981507,
+        "draw": 0.23255322,
+        "w2": 0.20763171,
+        "o15": 0.76262756,
+        "o25": 0.52179215,
+        "btts": 0.52087857,
+        "no": 0.47912143,
+        "and": 0.41035353,
+        "or": 0.63231719
+      },
+      "first": {
+        "w1": 0.4152566,
+        "draw": 0.39455112,
+        "w2": 0.19019228
+      },
+      "second": {
+        "w1": 0.44673746,
+        "draw": 0.35530007,
+        "w2": 0.19796247
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-0",
+          "p": 0.11212897
+        },
+        {
+          "score": "1-1",
+          "p": 0.11052504
+        },
+        {
+          "score": "2-0",
+          "p": 0.09966972
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 107,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Lech Poznań",
+      "away": "Sunderland",
+      "probabilities": {
+        "w1": 0.1577627,
+        "draw": 0.20540368,
+        "w2": 0.63683362,
+        "o15": 0.79024976,
+        "o25": 0.56109222,
+        "btts": 0.51512646,
+        "no": 0.48487354,
+        "and": 0.41769274,
+        "or": 0.65852593
+      },
+      "first": {
+        "w1": 0.15838394,
+        "draw": 0.37020327,
+        "w2": 0.47141279
+      },
+      "second": {
+        "w1": 0.1624929,
+        "draw": 0.33028942,
+        "w2": 0.50721768
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "0-2",
+          "p": 0.11018414
+        },
+        {
+          "score": "0-1",
+          "p": 0.10844115
+        },
+        {
+          "score": "1-2",
+          "p": 0.09899978
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 108,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "OFI Crete",
+      "away": "Leverkusen",
+      "probabilities": {
+        "w1": 0.2678181,
+        "draw": 0.24946507,
+        "w2": 0.48271683,
+        "o15": 0.75298548,
+        "o25": 0.50860118,
+        "btts": 0.53607275,
+        "no": 0.46392725,
+        "and": 0.41757867,
+        "or": 0.62709526
+      },
+      "first": {
+        "w1": 0.22898325,
+        "draw": 0.40650795,
+        "w2": 0.3645088
+      },
+      "second": {
+        "w1": 0.24084121,
+        "draw": 0.36821466,
+        "w2": 0.39094413
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11849408
+        },
+        {
+          "score": "0-1",
+          "p": 0.1059021
+        },
+        {
+          "score": "1-2",
+          "p": 0.09421431
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 109,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Union SG",
+      "away": "Hapoel Beer-Sheva",
+      "probabilities": {
+        "w1": 0.53685672,
+        "draw": 0.25328621,
+        "w2": 0.20985706,
+        "o15": 0.70245041,
+        "o25": 0.44349856,
+        "btts": 0.46314544,
+        "no": 0.53685456,
+        "and": 0.34407486,
+        "or": 0.56256914
+      },
+      "first": {
+        "w1": 0.39012916,
+        "draw": 0.42567027,
+        "w2": 0.18420057
+      },
+      "second": {
+        "w1": 0.42184916,
+        "draw": 0.38471113,
+        "w2": 0.19343972
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-0",
+          "p": 0.13561497
+        },
+        {
+          "score": "1-1",
+          "p": 0.11907058
+        },
+        {
+          "score": "2-0",
+          "p": 0.10664543
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 110,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Sturm Graz",
+      "away": "Marseille",
+      "probabilities": {
+        "w1": 0.42322213,
+        "draw": 0.27184456,
+        "w2": 0.30493331,
+        "o15": 0.69861015,
+        "o25": 0.43881013,
+        "btts": 0.49069361,
+        "no": 0.50930639,
+        "and": 0.3621211,
+        "or": 0.56738264
+      },
+      "first": {
+        "w1": 0.31878272,
+        "draw": 0.43590698,
+        "w2": 0.2453103
+      },
+      "second": {
+        "w1": 0.3425813,
+        "draw": 0.39648403,
+        "w2": 0.26093468
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12857251
+        },
+        {
+          "score": "1-0",
+          "p": 0.11759107
+        },
+        {
+          "score": "0-1",
+          "p": 0.09599905
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 111,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Bournemouth",
+      "away": "Milan",
+      "probabilities": {
+        "w1": 0.49392993,
+        "draw": 0.23819298,
+        "w2": 0.26787708,
+        "o15": 0.78776957,
+        "o25": 0.55746774,
+        "btts": 0.5731592,
+        "no": 0.4268408,
+        "and": 0.46157092,
+        "or": 0.66905602
+      },
+      "first": {
+        "w1": 0.37751476,
+        "draw": 0.38860474,
+        "w2": 0.2338805
+      },
+      "second": {
+        "w1": 0.40362308,
+        "draw": 0.35153713,
+        "w2": 0.24483979
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11158828
+        },
+        {
+          "score": "2-1",
+          "p": 0.09561918
+        },
+        {
+          "score": "1-0",
+          "p": 0.0929068
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 112,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Beşiktaş",
+      "away": "Crystal Palace",
+      "probabilities": {
+        "w1": 0.48488764,
+        "draw": 0.20311192,
+        "w2": 0.31200045,
+        "o15": 0.9067818,
+        "o25": 0.75862581,
+        "btts": 0.7380798,
+        "no": 0.2619202,
+        "and": 0.6649496,
+        "or": 0.831756
+      },
+      "first": {
+        "w1": 0.39453967,
+        "draw": 0.32306646,
+        "w2": 0.28239387
+      },
+      "second": {
+        "w1": 0.41529867,
+        "draw": 0.29260459,
+        "w2": 0.29209674
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "2-1",
+          "p": 0.08095042
+        },
+        {
+          "score": "1-1",
+          "p": 0.0731302
+        },
+        {
+          "score": "2-2",
+          "p": 0.0713954
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 113,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Celtic",
+      "away": "Celta",
+      "probabilities": {
+        "w1": 0.35716307,
+        "draw": 0.24477755,
+        "w2": 0.39805938,
+        "o15": 0.79416751,
+        "o25": 0.56685765,
+        "btts": 0.59533537,
+        "no": 0.40466463,
+        "and": 0.4817915,
+        "or": 0.68040152
+      },
+      "first": {
+        "w1": 0.29223633,
+        "draw": 0.38968989,
+        "w2": 0.31807378
+      },
+      "second": {
+        "w1": 0.3088816,
+        "draw": 0.3536573,
+        "w2": 0.3374611
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11354387
+        },
+        {
+          "score": "1-2",
+          "p": 0.08652898
+        },
+        {
+          "score": "2-1",
+          "p": 0.08128324
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 114,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Viktoria Plzeň",
+      "away": "Levski Sofia",
+      "probabilities": {
+        "w1": 0.3260348,
+        "draw": 0.27165428,
+        "w2": 0.40231092,
+        "o15": 0.70407633,
+        "o25": 0.44549406,
+        "btts": 0.49868517,
+        "no": 0.50131483,
+        "and": 0.36993519,
+        "or": 0.57424404
+      },
+      "first": {
+        "w1": 0.25932343,
+        "draw": 0.43397662,
+        "w2": 0.30669995
+      },
+      "second": {
+        "w1": 0.27625766,
+        "draw": 0.39484416,
+        "w2": 0.32889818
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12874998
+        },
+        {
+          "score": "0-1",
+          "p": 0.11198422
+        },
+        {
+          "score": "1-0",
+          "p": 0.0983749
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 115,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Jagiellonia",
+      "away": "Anderlecht",
+      "probabilities": {
+        "w1": 0.52620603,
+        "draw": 0.23621218,
+        "w2": 0.23758179,
+        "o15": 0.77531094,
+        "o25": 0.53955159,
+        "btts": 0.54874863,
+        "no": 0.45125137,
+        "and": 0.4370757,
+        "or": 0.65122452
+      },
+      "first": {
+        "w1": 0.39590268,
+        "draw": 0.39199351,
+        "w2": 0.21210381
+      },
+      "second": {
+        "w1": 0.42463986,
+        "draw": 0.35391051,
+        "w2": 0.22144962
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11167294
+        },
+        {
+          "score": "1-0",
+          "p": 0.1021349
+        },
+        {
+          "score": "2-1",
+          "p": 0.09741223
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 116,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Lillestrøm",
+      "away": "Real Sociedad",
+      "probabilities": {
+        "w1": 0.4178618,
+        "draw": 0.25887845,
+        "w2": 0.32325975,
+        "o15": 0.7438491,
+        "o25": 0.49633997,
+        "btts": 0.53808497,
+        "no": 0.46191503,
+        "and": 0.41506052,
+        "or": 0.61936442
+      },
+      "first": {
+        "w1": 0.3224686,
+        "draw": 0.41430933,
+        "w2": 0.26322208
+      },
+      "second": {
+        "w1": 0.3446852,
+        "draw": 0.37632394,
+        "w2": 0.27899086
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12302445
+        },
+        {
+          "score": "1-0",
+          "p": 0.10022398
+        },
+        {
+          "score": "2-1",
+          "p": 0.08807015
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 117,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Celje",
+      "away": "Salzburg",
+      "probabilities": {
+        "w1": 0.34743542,
+        "draw": 0.26741688,
+        "w2": 0.3851477,
+        "o15": 0.72038694,
+        "o25": 0.46586492,
+        "btts": 0.51632772,
+        "no": 0.48367228,
+        "and": 0.38919209,
+        "or": 0.59300054
+      },
+      "first": {
+        "w1": 0.27503443,
+        "draw": 0.42644554,
+        "w2": 0.29852003
+      },
+      "second": {
+        "w1": 0.29303511,
+        "draw": 0.38785398,
+        "w2": 0.31911091
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12713562
+        },
+        {
+          "score": "0-1",
+          "p": 0.10343747
+        },
+        {
+          "score": "1-0",
+          "p": 0.0971414
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 118,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Olympiacos",
+      "away": "Sparta Praha",
+      "probabilities": {
+        "w1": 0.40043479,
+        "draw": 0.25540442,
+        "w2": 0.34416079,
+        "o15": 0.75859871,
+        "o25": 0.51624853,
+        "btts": 0.55549393,
+        "no": 0.44450607,
+        "and": 0.43456286,
+        "or": 0.6371796
+      },
+      "first": {
+        "w1": 0.31390045,
+        "draw": 0.40751529,
+        "w2": 0.27858426
+      },
+      "second": {
+        "w1": 0.33450532,
+        "draw": 0.37012384,
+        "w2": 0.29537084
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12093107
+        },
+        {
+          "score": "1-0",
+          "p": 0.09240065
+        },
+        {
+          "score": "2-1",
+          "p": 0.08657155
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 119,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Omonia",
+      "away": "Benfica",
+      "probabilities": {
+        "w1": 0.40655845,
+        "draw": 0.26040026,
+        "w2": 0.33304128,
+        "o15": 0.74093406,
+        "o25": 0.49247545,
+        "btts": 0.53613766,
+        "no": 0.46386234,
+        "and": 0.41235328,
+        "or": 0.61625983
+      },
+      "first": {
+        "w1": 0.31497037,
+        "draw": 0.41605241,
+        "w2": 0.26897722
+      },
+      "second": {
+        "w1": 0.33648939,
+        "draw": 0.37803058,
+        "w2": 0.28548003
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12378438
+        },
+        {
+          "score": "1-0",
+          "p": 0.09960723
+        },
+        {
+          "score": "0-1",
+          "p": 0.08835828
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 120,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Hoffenheim",
+      "away": "Lyon",
+      "probabilities": {
+        "w1": 0.28309095,
+        "draw": 0.21962077,
+        "w2": 0.49728828,
+        "o15": 0.85117374,
+        "o25": 0.65689616,
+        "btts": 0.65291789,
+        "no": 0.34708211,
+        "and": 0.55806694,
+        "or": 0.75174711
+      },
+      "first": {
+        "w1": 0.25347536,
+        "draw": 0.35535161,
+        "w2": 0.39117303
+      },
+      "second": {
+        "w1": 0.26349498,
+        "draw": 0.32129186,
+        "w2": 0.41521316
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09485095
+        },
+        {
+          "score": "1-2",
+          "p": 0.09252107
+        },
+        {
+          "score": "2-1",
+          "p": 0.06790144
+        }
+      ],
+      "robust": "Muito limitada (2 jogos UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaeuropaleague/news/02a8-2174cafa5bb6-82bbc20c9b92-1000--2026-27-europa-league-all-the-league-phase-fixtures-and-re/"
+    },
+    {
+      "id": 121,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "15:30",
+      "home": "Kairat Almaty",
+      "away": "Panathinaikos",
+      "probabilities": {
+        "w1": 0.38642028,
+        "draw": 0.25311075,
+        "w2": 0.36046897,
+        "o15": 0.76753932,
+        "o25": 0.5286137,
+        "btts": 0.56590736,
+        "no": 0.43409264,
+        "and": 0.44649461,
+        "or": 0.64802645
+      },
+      "first": {
+        "w1": 0.30651904,
+        "draw": 0.40327101,
+        "w2": 0.29020995
+      },
+      "second": {
+        "w1": 0.325914,
+        "draw": 0.36623697,
+        "w2": 0.30784902
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11941275
+        },
+        {
+          "score": "1-0",
+          "p": 0.08732997
+        },
+        {
+          "score": "2-1",
+          "p": 0.08505338
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 122,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Iberia Tbilisi",
+      "away": "Mjällby",
+      "probabilities": {
+        "w1": 0.27392327,
+        "draw": 0.25487481,
+        "w2": 0.47120192,
+        "o15": 0.73931406,
+        "o25": 0.49033756,
+        "btts": 0.52388432,
+        "no": 0.47611568,
+        "and": 0.40266139,
+        "or": 0.61156049
+      },
+      "first": {
+        "w1": 0.23107414,
+        "draw": 0.413899,
+        "w2": 0.35502686
+      },
+      "second": {
+        "w1": 0.24366782,
+        "draw": 0.37526483,
+        "w2": 0.38106734
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12122293
+        },
+        {
+          "score": "0-1",
+          "p": 0.10978846
+        },
+        {
+          "score": "1-2",
+          "p": 0.09279108
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 123,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Nordsjælland",
+      "away": "CSKA Sofia",
+      "probabilities": {
+        "w1": 0.46051308,
+        "draw": 0.24703273,
+        "w2": 0.29245418,
+        "o15": 0.77166716,
+        "o25": 0.53440098,
+        "btts": 0.56205888,
+        "no": 0.43794112,
+        "and": 0.44551362,
+        "or": 0.65094624
+      },
+      "first": {
+        "w1": 0.35365943,
+        "draw": 0.3987872,
+        "w2": 0.24755337
+      },
+      "second": {
+        "w1": 0.37799206,
+        "draw": 0.36146138,
+        "w2": 0.26054656
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11654526
+        },
+        {
+          "score": "1-0",
+          "p": 0.09542699
+        },
+        {
+          "score": "2-1",
+          "p": 0.09293933
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 124,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Crvena Zvezda",
+      "away": "Copenhagen",
+      "probabilities": {
+        "w1": 0.28892162,
+        "draw": 0.22463082,
+        "w2": 0.48644757,
+        "o15": 0.83890424,
+        "o25": 0.63646436,
+        "btts": 0.63878402,
+        "no": 0.36121598,
+        "and": 0.53965459,
+        "or": 0.73559379
+      },
+      "first": {
+        "w1": 0.25534813,
+        "draw": 0.36275572,
+        "w2": 0.38189615
+      },
+      "second": {
+        "w1": 0.26614352,
+        "draw": 0.3281664,
+        "w2": 0.40569008
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09912943
+        },
+        {
+          "score": "1-2",
+          "p": 0.09295717
+        },
+        {
+          "score": "0-1",
+          "p": 0.07059747
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 125,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Jablonec",
+      "away": "Brighton",
+      "probabilities": {
+        "w1": 0.26109166,
+        "draw": 0.2128599,
+        "w2": 0.52604843,
+        "o15": 0.8598921,
+        "o25": 0.6718101,
+        "btts": 0.65793117,
+        "no": 0.34206883,
+        "and": 0.5672317,
+        "or": 0.76250957
+      },
+      "first": {
+        "w1": 0.24026005,
+        "draw": 0.34824504,
+        "w2": 0.41149491
+      },
+      "second": {
+        "w1": 0.24860271,
+        "draw": 0.31430904,
+        "w2": 0.43708826
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-2",
+          "p": 0.09326097
+        },
+        {
+          "score": "1-1",
+          "p": 0.09069947
+        },
+        {
+          "score": "0-2",
+          "p": 0.0664181
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 126,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Kauno Žalgiris",
+      "away": "Brann",
+      "probabilities": {
+        "w1": 0.25778435,
+        "draw": 0.22677291,
+        "w2": 0.51544274,
+        "o15": 0.8169881,
+        "o25": 0.60146121,
+        "btts": 0.60320263,
+        "no": 0.39679737,
+        "and": 0.49949622,
+        "or": 0.70516762
+      },
+      "first": {
+        "w1": 0.23144989,
+        "draw": 0.37208103,
+        "w2": 0.39646908
+      },
+      "second": {
+        "w1": 0.24094015,
+        "draw": 0.33603209,
+        "w2": 0.42302776
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10370641
+        },
+        {
+          "score": "1-2",
+          "p": 0.09634326
+        },
+        {
+          "score": "0-1",
+          "p": 0.08269059
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 127,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Getafe",
+      "away": "Lugano",
+      "probabilities": {
+        "w1": 0.398656,
+        "draw": 0.2379414,
+        "w2": 0.36340259,
+        "o15": 0.81646121,
+        "o25": 0.60064184,
+        "btts": 0.62159671,
+        "no": 0.37840329,
+        "and": 0.51376114,
+        "or": 0.70847741
+      },
+      "first": {
+        "w1": 0.32212329,
+        "draw": 0.37812056,
+        "w2": 0.29975615
+      },
+      "second": {
+        "w1": 0.34083732,
+        "draw": 0.34303758,
+        "w2": 0.31612509
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10783558
+        },
+        {
+          "score": "2-1",
+          "p": 0.08599377
+        },
+        {
+          "score": "1-2",
+          "p": 0.08160164
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 128,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Inter Escaldes",
+      "away": "Universitatea Craiova",
+      "probabilities": {
+        "w1": 0.34250897,
+        "draw": 0.26214853,
+        "w2": 0.3953425,
+        "o15": 0.73674424,
+        "o25": 0.48696045,
+        "btts": 0.53259866,
+        "no": 0.46740134,
+        "and": 0.40793973,
+        "or": 0.61161937
+      },
+      "first": {
+        "w1": 0.27432435,
+        "draw": 0.4183369,
+        "w2": 0.30733876
+      },
+      "second": {
+        "w1": 0.29157572,
+        "draw": 0.38022401,
+        "w2": 0.32820026
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12465892
+        },
+        {
+          "score": "0-1",
+          "p": 0.09939714
+        },
+        {
+          "score": "1-0",
+          "p": 0.09116664
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 129,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Pafos",
+      "away": "Riga",
+      "probabilities": {
+        "w1": 0.35744329,
+        "draw": 0.24565044,
+        "w2": 0.39690627,
+        "o15": 0.79139382,
+        "o25": 0.56277072,
+        "btts": 0.59220078,
+        "no": 0.40779922,
+        "and": 0.47799394,
+        "or": 0.67697757
+      },
+      "first": {
+        "w1": 0.29197979,
+        "draw": 0.39112227,
+        "w2": 0.31689794
+      },
+      "second": {
+        "w1": 0.30872659,
+        "draw": 0.35498016,
+        "w2": 0.33629325
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.11420684
+        },
+        {
+          "score": "1-2",
+          "p": 0.08642292
+        },
+        {
+          "score": "2-1",
+          "p": 0.0813454
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 130,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Trabzonspor",
+      "away": "Hearts",
+      "probabilities": {
+        "w1": 0.50780423,
+        "draw": 0.220926,
+        "w2": 0.27126977,
+        "o15": 0.84177138,
+        "o25": 0.64118267,
+        "btts": 0.63766746,
+        "no": 0.36233254,
+        "and": 0.54034193,
+        "or": 0.7385082
+      },
+      "first": {
+        "w1": 0.39616084,
+        "draw": 0.35967615,
+        "w2": 0.24416301
+      },
+      "second": {
+        "w1": 0.42127296,
+        "draw": 0.32498225,
+        "w2": 0.2537448
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09732553
+        },
+        {
+          "score": "2-1",
+          "p": 0.0941946
+        },
+        {
+          "score": "1-0",
+          "p": 0.07117695
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 131,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Ajax",
+      "away": "Atalanta",
+      "probabilities": {
+        "w1": 0.32411498,
+        "draw": 0.23542434,
+        "w2": 0.44046068,
+        "o15": 0.81793269,
+        "o25": 0.60293269,
+        "btts": 0.61988115,
+        "no": 0.38011885,
+        "and": 0.51318631,
+        "or": 0.70962753
+      },
+      "first": {
+        "w1": 0.27487949,
+        "draw": 0.3762753,
+        "w2": 0.34884521
+      },
+      "second": {
+        "w1": 0.28861568,
+        "draw": 0.34107323,
+        "w2": 0.3703111
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.10669484
+        },
+        {
+          "score": "1-2",
+          "p": 0.09039497
+        },
+        {
+          "score": "2-1",
+          "p": 0.07599487
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 132,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Aarhus",
+      "away": "Egnatia",
+      "probabilities": {
+        "w1": 0.37207483,
+        "draw": 0.27157259,
+        "w2": 0.35635258,
+        "o15": 0.70762793,
+        "o25": 0.44987488,
+        "btts": 0.50396085,
+        "no": 0.49603915,
+        "and": 0.37510702,
+        "or": 0.57872872
+      },
+      "first": {
+        "w1": 0.28851208,
+        "draw": 0.43274078,
+        "w2": 0.27874714
+      },
+      "second": {
+        "w1": 0.3085233,
+        "draw": 0.39380246,
+        "w2": 0.29767424
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12885383
+        },
+        {
+          "score": "1-0",
+          "p": 0.10550522
+        },
+        {
+          "score": "0-1",
+          "p": 0.10274196
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 133,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Monaco",
+      "away": "Freiburg",
+      "probabilities": {
+        "w1": 0.44312695,
+        "draw": 0.22814397,
+        "w2": 0.32872907,
+        "o15": 0.84129357,
+        "o25": 0.64039402,
+        "btts": 0.64907979,
+        "no": 0.35092021,
+        "and": 0.5493139,
+        "or": 0.74015992
+      },
+      "first": {
+        "w1": 0.35466909,
+        "draw": 0.36371594,
+        "w2": 0.28161498
+      },
+      "second": {
+        "w1": 0.37548208,
+        "draw": 0.32962378,
+        "w2": 0.29489414
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09976589
+        },
+        {
+          "score": "2-1",
+          "p": 0.08907402
+        },
+        {
+          "score": "1-2",
+          "p": 0.07549513
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 134,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Midtjylland",
+      "away": "Sint-Truidense",
+      "probabilities": {
+        "w1": 0.34250897,
+        "draw": 0.26214853,
+        "w2": 0.3953425,
+        "o15": 0.73674424,
+        "o25": 0.48696045,
+        "btts": 0.53259866,
+        "no": 0.46740134,
+        "and": 0.40793973,
+        "or": 0.61161937
+      },
+      "first": {
+        "w1": 0.27432435,
+        "draw": 0.4183369,
+        "w2": 0.30733876
+      },
+      "second": {
+        "w1": 0.29157572,
+        "draw": 0.38022401,
+        "w2": 0.32820026
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12465892
+        },
+        {
+          "score": "0-1",
+          "p": 0.09939714
+        },
+        {
+          "score": "1-0",
+          "p": 0.09116664
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 135,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Thun",
+      "away": "Hajduk Split",
+      "probabilities": {
+        "w1": 0.34250897,
+        "draw": 0.26214853,
+        "w2": 0.3953425,
+        "o15": 0.73674424,
+        "o25": 0.48696045,
+        "btts": 0.53259866,
+        "no": 0.46740134,
+        "and": 0.40793973,
+        "or": 0.61161937
+      },
+      "first": {
+        "w1": 0.27432435,
+        "draw": 0.4183369,
+        "w2": 0.30733876
+      },
+      "second": {
+        "w1": 0.29157572,
+        "draw": 0.38022401,
+        "w2": 0.32820026
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12465892
+        },
+        {
+          "score": "0-1",
+          "p": 0.09939714
+        },
+        {
+          "score": "1-0",
+          "p": 0.09116664
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 136,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Borac",
+      "away": "KuPS Kuopio",
+      "probabilities": {
+        "w1": 0.47310354,
+        "draw": 0.21958527,
+        "w2": 0.30731119,
+        "o15": 0.86053681,
+        "o25": 0.6729266,
+        "btts": 0.67055748,
+        "no": 0.32944252,
+        "and": 0.57803113,
+        "or": 0.76545295
+      },
+      "first": {
+        "w1": 0.37741605,
+        "draw": 0.35166271,
+        "w2": 0.27092124
+      },
+      "second": {
+        "w1": 0.39947546,
+        "draw": 0.31836844,
+        "w2": 0.2821561
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.09252635
+        },
+        {
+          "score": "2-1",
+          "p": 0.08954981
+        },
+        {
+          "score": "1-2",
+          "p": 0.07082505
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 137,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Lincoln Red Imps",
+      "away": "Twente",
+      "probabilities": {
+        "w1": 0.34250897,
+        "draw": 0.26214853,
+        "w2": 0.3953425,
+        "o15": 0.73674424,
+        "o25": 0.48696045,
+        "btts": 0.53259866,
+        "no": 0.46740134,
+        "and": 0.40793973,
+        "or": 0.61161937
+      },
+      "first": {
+        "w1": 0.27432435,
+        "draw": 0.4183369,
+        "w2": 0.30733876
+      },
+      "second": {
+        "w1": 0.29157572,
+        "draw": 0.38022401,
+        "w2": 0.32820026
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12465892
+        },
+        {
+          "score": "0-1",
+          "p": 0.09939714
+        },
+        {
+          "score": "1-0",
+          "p": 0.09116664
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    },
+    {
+      "id": 138,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Braga",
+      "away": "Gent",
+      "probabilities": {
+        "w1": 0.27687013,
+        "draw": 0.25639403,
+        "w2": 0.46673584,
+        "o15": 0.73599468,
+        "o25": 0.48597869,
+        "btts": 0.52133548,
+        "no": 0.47866452,
+        "and": 0.39938386,
+        "or": 0.60793031
+      },
+      "first": {
+        "w1": 0.23252371,
+        "draw": 0.41578328,
+        "w2": 0.35169301
+      },
+      "second": {
+        "w1": 0.24539207,
+        "draw": 0.37708948,
+        "w2": 0.37751845
+      },
+      "corners": null,
+      "scores": [
+        {
+          "score": "1-1",
+          "p": 0.12195162
+        },
+        {
+          "score": "0-1",
+          "p": 0.11044841
+        },
+        {
+          "score": "1-2",
+          "p": 0.09228357
+        }
+      ],
+      "robust": "Muito limitada (1 jogo UEFA/equipa)",
+      "modelStatus": "exploratory_uefa",
+      "source": "https://www.uefa.com/uefaconferenceleague/news/02a8-2174cb200f25-b94693ddff4e-1000--2026-27-conference-league-all-the-league-phase-fixtures/"
+    }
+  ],
+  "top20": []
+}
