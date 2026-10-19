@@ -188,7 +188,7 @@
       const options=allMarkets(g);
       if (!options.length) return '<p class="as-inline-empty">Não há mercados deste jogo que cumpram '+minimum+'% e odd justa ≥ 1,20. Podes reduzir o mínimo na área “Escolhas”.</p>';
       const first=options[0];
-      return '<label class="as-inline-label" for="as-select-'+g.id+'-'+Math.round(Math.random()*999999)+'">Escolher prognóstico para o boletim</label>'+
+      return '<label class="as-inline-label">Escolher prognóstico para o boletim</label>'+
         '<select aria-label="Prognóstico para '+esc(g.home)+' e '+esc(g.away)+'" data-pick-select="'+g.id+'">'+options.map(x=>'<option value="'+x.k+'">'+esc(marketName[x.k])+' · '+fmtPct(x.p)+' · '+fmtOdd(fairOdd(x.p))+'</option>').join('')+'</select>'+
         '<div class="as-inline-metrics">Probabilidade '+fmtPct(first.p)+' · odd justa '+fmtOdd(fairOdd(first.p))+'</div>'+actionButtons(g,first.k);
     }
