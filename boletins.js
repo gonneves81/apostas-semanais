@@ -43,7 +43,7 @@
       return Number.isFinite(v) && v > 0 && v <= 1 ? v : NaN;
     };
     const fairOdd = p => Number.isFinite(p) && p > 0 ? Number((1/p).toFixed(2)) : NaN;
-    const fairEligible = p => Number.isFinite(fairOdd(p)) && fairOdd(p) >= 1.20;
+    const fairEligible = p => Number.isFinite(p) && p > 0 && (1 / p) >= 1.20;
     const fmtOdd = x => Number.isFinite(Number(x)) ? Number(x).toFixed(2).replace('.',',') : '—';
     const fmtPct = p => Number.isFinite(p) ? (p*100).toFixed(1).replace('.',',') + '%' : '—';
     const fmtEur = x => Number.isFinite(x) ? new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(x) : '—';
