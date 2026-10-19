@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "version": "v1-baseline-2026-10-19",
+  "status": "baseline",
+  "summary": "Modelo inicial Poisson; calibração histórica ainda não avaliada.",
+  "history": [
+    {
+      "version": "v1-baseline-2026-10-19",
+      "date": "2026-10-19",
+      "validated": false
+    }
+  ],
+  "rules": [
+    "Arquivar previsões antes de jogar",
+    "Avaliar Brier score e log loss após resultados",
+    "Ajustar pesos apenas com validação fora da amostra temporal",
+    "Não confundir acerto ocasional com melhoria estatística"
+  ]
+}
