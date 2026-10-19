@@ -248,7 +248,7 @@ jobs:
           from pathlib import Path
           import json, re
           html = Path("index.html").read_text(encoding="utf-8")
-          assert '<script src="./boletins.js?v=4" defer></script>' in html
+          assert '<script src="./boletins.js?v=5" defer></script>' in html
           assert '<script src="./qualidade.js?v=2" defer></script>' in html
           assert '<script src="./apostas-reais.js?v=1" defer></script>' in html
           assert '<link rel="stylesheet" href="./melhorias.css?v=1">' in html
