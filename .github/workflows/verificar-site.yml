@@ -6,6 +6,9 @@ on:
       - "index.html"
       - "boletins.js"
       - "boletins.css"
+      - "qualidade.js"
+      - "apostas-reais.js"
+      - "melhorias.css"
       - ".github/workflows/verificar-site.yml"
   workflow_dispatch:
 permissions:
@@ -16,7 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verificar sintaxe JavaScript
-        run: node --check boletins.js
+        run: |
+          node --check boletins.js
+          node --check qualidade.js
+          node --check apostas-reais.js
       - name: Validar interface interativa no Chromium
         run: |
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
@@ -31,6 +37,11 @@ jobs:
           assert 'id="as-ticket-dock"' in s, "Painel de apostas nao carregado"
           assert 'id="as-smart-ranks"' in s, "Filtro por probabilidade nao carregado"
           assert 'id="as-min"' in s, "Seletor de percentagem em falta"
+          assert 'id="as-fair"' in s, "Filtro da odd justa em falta"
+          assert 'id="qa-top5"' in s, "Top 5 por mercado em falta"
+          assert 'id="qa-real-history"' in s, "Historico de apostas reais em falta"
+          assert 'id="qa-model-audit"' in s, "Monitor de evolucao do modelo em falta"
+          assert 'qa-index' in s, "Qualidade de dados ausente"
           assert 'id="as-datebar-choices"' in s, "Filtro por dia em escolhas em falta"
           assert 'id="as-datebar-games"' in s, "Filtro por dia em jogos em falta"
           assert 'data-as-sort="date"' in s, "Ordenacao por data em falta"
@@ -46,7 +57,7 @@ jobs:
           page=Path("index.html").read_text(encoding="utf-8")
           test_script="""<script>
           document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(()=>{
+            setTimeout(async()=>{
               try{
                 const root=document.querySelector('#as-smart-ranks');
                 if(!root) throw Error('Lista de escolhas nao existe');
@@ -83,6 +94,30 @@ jobs:
                 if(!allDay)throw Error('Agenda de Todos os jogos em falta');
                 allDay.click();
                 if(document.querySelector('#day-filter').value!=='all')throw Error('Limpar filtro diario falhou');
+                const fairFilter=document.querySelector('#as-fair');
+                if(!fairFilter)throw Error('Filtro odd justa nao existe');
+                const top=document.querySelector('#qa-top5');
+                if(!top||!top.querySelector('.qa-five'))throw Error('Top 5 por mercado sem previsoes');
+                const metric=document.querySelector('#qa-model-audit');
+                if(!metric)throw Error('Avaliacao do modelo nao existe');
+                const coverage=document.querySelector('.as-choice .qa-index');
+                if(!coverage)throw Error('Qualidade de dados nao apresentada');
+                const history=document.querySelector('#qa-real-history');
+                if(!history)throw Error('Historico real nao montado');
+                window.confirm=()=>true;
+                const tab3=document.querySelector('#as-ticket-dock [data-slip-tab="3"]');
+                if(tab3)tab3.click();
+                await new Promise(r=>setTimeout(r,180));
+                const register=document.querySelector('#as-ticket-dock [data-qa-register="3"]');
+                if(!register)throw Error('Botao registo aposta real nao existe');
+                register.click();
+                const saved=JSON.parse(localStorage.getItem('as_apostas_reais_historico_v1')||'{}');
+                if(!saved.bets||saved.bets.length!==1)throw Error('Aposta real nao arquivada');
+                if(saved.bets[0].combined_odd!==1.65||saved.bets[0].stake!==10)throw Error('Odd/stake nao preservadas');
+                const status=document.querySelector('#qa-real-history [data-real-status]');
+                if(!status)throw Error('Controlo liquidacao nao existe');
+                status.value='won';status.dispatchEvent(new Event('change',{bubbles:true}));
+                if(!document.querySelector('#qa-real-history').textContent.includes('65,0%'))throw Error('ROI liquidado nao calculado corretamente');
                 document.body.dataset.smoke='PASS';
               }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
             },1000);
@@ -109,7 +144,10 @@ jobs:
           from pathlib import Path
           import json, re
           html = Path("index.html").read_text(encoding="utf-8")
-          assert '<script src="./boletins.js?v=2" defer></script>' in html
+          assert '<script src="./boletins.js?v=3" defer></script>' in html
+          assert '<script src="./qualidade.js?v=1" defer></script>' in html
+          assert '<script src="./apostas-reais.js?v=1" defer></script>' in html
+          assert '<link rel="stylesheet" href="./melhorias.css?v=1">' in html
           assert '<link rel="stylesheet" href="./boletins.css?v=2">' in html
           assert 'id="rank-list"' in html and 'id="view-games"' in html
           data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
