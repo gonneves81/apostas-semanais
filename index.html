@@ -24,6 +24,7 @@
 .hero-pdf{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}.hero-pdf a{background:#ecfff8;color:#076b55;padding:9px 12px;font-size:12px;font-weight:800;border-radius:9px;text-decoration:none}.hero-pdf a:hover{background:white}.hero-pdf span{color:#c3dbe5;font-size:11px}
 </style>
 <link rel="stylesheet" href="./boletins.css?v=2">
+<link rel="stylesheet" href="./melhorias.css?v=1">
 </head>
 <body>
 <header class="topbar"><div class="wrap topbar-inner">
@@ -206,6 +207,8 @@ el('match-search').addEventListener('input',e=>{state.query=e.target.value;games
 renderAll();const hash=location.hash.replace('#','');if(hash==='jogos')go('games');else if(hash==='top20')go('rank');else if(hash==='metodo')go('method');else if(hash==='acertos')go('history');else go('overview');
 })();
 </script>
-<script src="./boletins.js?v=2" defer></script>
+<script src="./boletins.js?v=3" defer></script>
+<script src="./qualidade.js?v=1" defer></script>
+<script src="./apostas-reais.js?v=1" defer></script>
 </body>
 </html>
