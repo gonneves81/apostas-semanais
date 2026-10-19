@@ -31,6 +31,10 @@ jobs:
           assert 'id="as-ticket-dock"' in s, "Painel de apostas nao carregado"
           assert 'id="as-smart-ranks"' in s, "Filtro por probabilidade nao carregado"
           assert 'id="as-min"' in s, "Seletor de percentagem em falta"
+          assert 'id="as-datebar-choices"' in s, "Filtro por dia em escolhas em falta"
+          assert 'id="as-datebar-games"' in s, "Filtro por dia em jogos em falta"
+          assert 'data-as-sort="date"' in s, "Ordenacao por data em falta"
+          assert 'data-as-market="BTTS"' in s, "Atalhos de mercados em falta"
           assert 'data-add-slip="1"' in s, "Botoes de adicionar ao boletim nao renderizados"
           assert 'Aposta 3' in s, "Terceiro boletim ausente"
           print("Site dinamico carregado: 3 boletins e filtros OK")
@@ -67,6 +71,18 @@ jobs:
                 const minimum=document.querySelector('#as-min');
                 minimum.value='65'; minimum.dispatchEvent(new Event('change',{bubbles:true}));
                 if(!document.querySelector('#as-smart-ranks .as-choice'))throw Error('Filtro 65% nao retornou escolhas');
+                const dayBtn=document.querySelector('#as-datebar-choices [data-as-day]:not([data-as-day="ALL"])');
+                if(!dayBtn)throw Error('Filtro por dia em falta');
+                dayBtn.click();
+                if(document.querySelector('#day-filter').value!==String(Number(dayBtn.dataset.asDay.slice(-2))))throw Error('Filtro diario nao sincronizado');
+                document.querySelector('#as-datebar-choices [data-as-sort="date"]').click();
+                if(!document.querySelector('#as-datebar-choices [data-as-sort="date"].active'))throw Error('Ordenacao por data nao ativada');
+                document.querySelector('#as-datebar-choices [data-as-market="O25"]').click();
+                if(document.querySelector('#as-market').value!=='O25')throw Error('Atalho mercado +2,5 nao sincronizado');
+                const allDay=document.querySelector('#as-datebar-games [data-as-day="ALL"]');
+                if(!allDay)throw Error('Agenda de Todos os jogos em falta');
+                allDay.click();
+                if(document.querySelector('#day-filter').value!=='all')throw Error('Limpar filtro diario falhou');
                 document.body.dataset.smoke='PASS';
               }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
             },1000);
@@ -93,8 +109,8 @@ jobs:
           from pathlib import Path
           import json, re
           html = Path("index.html").read_text(encoding="utf-8")
-          assert '<script src="./boletins.js?v=1" defer></script>' in html
-          assert '<link rel="stylesheet" href="./boletins.css?v=1">' in html
+          assert '<script src="./boletins.js?v=2" defer></script>' in html
+          assert '<link rel="stylesheet" href="./boletins.css?v=2">' in html
           assert 'id="rank-list"' in html and 'id="view-games"' in html
           data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
           assert len(data["games"]) > 10 and len(data["leagues"]) == 12
