@@ -1,0 +1,549 @@
+{
+  "schema": 1,
+  "created_on": "2026-10-19",
+  "week_start": "2026-10-19",
+  "week_end": "2026-10-25",
+  "note": "54 encontros extraídos de fontes oficiais da UEFA. Não foram calculadas nem publicadas probabilidades para estes jogos neste registo.",
+  "matches": [
+    {
+      "id": 85,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "17:45",
+      "home": "Fenerbahçe",
+      "away": "Slavia Praha",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 86,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "17:45",
+      "home": "Sabah",
+      "away": "Borussia Dortmund",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 87,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Roma",
+      "away": "Slovan Bratislava",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 88,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Porto",
+      "away": "PSV Eindhoven",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 89,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Liverpool",
+      "away": "Villarreal",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 90,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Manchester City",
+      "away": "AEK Athens",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 91,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Paris Saint-Germain",
+      "away": "Barcelona",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 92,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Napoli",
+      "away": "Bodø/Glimt",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 93,
+      "league": "UCL",
+      "date": "2026-10-20",
+      "time_pt": "20:00",
+      "home": "Stuttgart",
+      "away": "Atlético de Madrid",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 94,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "17:45",
+      "home": "Como",
+      "away": "Manchester United",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 95,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "17:45",
+      "home": "Lille",
+      "away": "Galatasaray",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 96,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Aston Villa",
+      "away": "Viking",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 97,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Club Brugge",
+      "away": "Lens",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 98,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Bayern München",
+      "away": "Arsenal",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 99,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Inter",
+      "away": "Shakhtar Donetsk",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 100,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Real Madrid",
+      "away": "Leipzig",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 101,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Real Betis",
+      "away": "Feyenoord",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 102,
+      "league": "UCL",
+      "date": "2026-10-21",
+      "time_pt": "20:00",
+      "home": "Sporting CP",
+      "away": "LASK",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefachampionsleague/news/02a8-217681c8e6a0-a5803de82802-1000--champions-league-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 103,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Ararat-Armenia",
+      "away": "AZ Alkmaar",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 104,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Ferencváros",
+      "away": "Torreense",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 105,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "GNK Dinamo",
+      "away": "N.E.C. Nijmegen",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 106,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Juventus",
+      "away": "Rennes",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 107,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Lech Poznań",
+      "away": "Sunderland",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 108,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "OFI Crete",
+      "away": "Leverkusen",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 109,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Union SG",
+      "away": "Hapoel Beer-Sheva",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 110,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Sturm Graz",
+      "away": "Marseille",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 111,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Bournemouth",
+      "away": "Milan",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 112,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Beşiktaş",
+      "away": "Crystal Palace",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 113,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Celtic",
+      "away": "Celta",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 114,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Viktoria Plzeň",
+      "away": "Levski Sofia",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 115,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Jagiellonia",
+      "away": "Anderlecht",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 116,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Lillestrøm",
+      "away": "Real Sociedad",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 117,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Celje",
+      "away": "Salzburg",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 118,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Olympiacos",
+      "away": "Sparta Praha",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 119,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Omonia",
+      "away": "Benfica",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 120,
+      "league": "UEL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Hoffenheim",
+      "away": "Lyon",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaeuropaleague/news/02a8-2177235a4c1e-d46626efd61c-1000--europa-league-2026-27-todos-os-jogos-e-resultados-da-fase-de/"
+    },
+    {
+      "id": 121,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "15:30",
+      "home": "Kairat Almaty",
+      "away": "Panathinaikos",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 122,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Iberia Tbilisi",
+      "away": "Mjällby",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 123,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Nordsjælland",
+      "away": "CSKA Sofia",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 124,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Crvena Zvezda",
+      "away": "Copenhagen",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 125,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Jablonec",
+      "away": "Brighton",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 126,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Kauno Žalgiris",
+      "away": "Brann",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 127,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Getafe",
+      "away": "Lugano",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 128,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Inter Escaldes",
+      "away": "Universitatea Craiova",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 129,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Pafos",
+      "away": "Riga",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 130,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "17:45",
+      "home": "Trabzonspor",
+      "away": "Hearts",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 131,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Ajax",
+      "away": "Atalanta",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 132,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Aarhus",
+      "away": "Egnatia",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 133,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Monaco",
+      "away": "Freiburg",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 134,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Midtjylland",
+      "away": "Sint-Truidense",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 135,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Thun",
+      "away": "Hajduk Split",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 136,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Borac",
+      "away": "KuPS Kuopio",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 137,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Lincoln Red Imps",
+      "away": "Twente",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    },
+    {
+      "id": 138,
+      "league": "UECL",
+      "date": "2026-10-22",
+      "time_pt": "20:00",
+      "home": "Braga",
+      "away": "Gent",
+      "forecast": null,
+      "official_calendar": "https://pt.uefa.com/uefaconferenceleague/news/02a8-217720890415-f3a2772d0267-1000--conference-league-de-2026-27-todos-os-jogos-da-fase-de-liga/"
+    }
+  ]
+}
