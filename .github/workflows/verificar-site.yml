@@ -9,6 +9,8 @@ on:
       - "qualidade.js"
       - "apostas-reais.js"
       - "melhorias.css"
+      - "scripts/avaliar_previsoes.py"
+      - "scripts/test_avaliar_previsoes.py"
       - ".github/workflows/verificar-site.yml"
   workflow_dispatch:
 permissions:
@@ -23,6 +25,8 @@ jobs:
           node --check boletins.js
           node --check qualidade.js
           node --check apostas-reais.js
+      - name: Testar métricas do modelo com casos sintéticos
+        run: python3 scripts/test_avaliar_previsoes.py -v
       - name: Validar interface interativa no Chromium
         run: |
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
