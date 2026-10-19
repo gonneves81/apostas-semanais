@@ -25,7 +25,7 @@
     const marketName = Object.fromEntries(MARKETS);
     const storageKey = 'apostas_semanal_slips_' + (D.start || 'semana') + '_' + (D.end || '');
     const settingsKey = 'apostas_semanal_filtro_v2';
-    let minimum = 70, active = 1, expanded = false, pageLimit = 30;
+    let minimum = 70, fairMinimum = 0, active = 1, expanded = false, pageLimit = 30;
     let persistAvailable = true, lastOpenGame = null, toastTimer = null;
     let slips = {1:{stake:'',items:[]},2:{stake:'',items:[]},3:{stake:'',items:[]}};
 
@@ -132,7 +132,7 @@
       return Number.isFinite(v) && v > 0 && v <= 1 ? v : NaN;
     };
     const fairOdd = p => Number.isFinite(p) && p > 0 ? Number((1/p).toFixed(2)) : NaN;
-    const fairEligible = p => Number.isFinite(p) && p > 0 && (1 / p) >= 1.20;
+    const fairEligible = p => Number.isFinite(p) && p > 0 && (fairMinimum <= 0 || 1/p + 1e-10 >= fairMinimum);
     const fmtOdd = x => Number.isFinite(Number(x)) ? Number(x).toFixed(2).replace('.',',') : '—';
     const fmtPct = p => Number.isFinite(p) ? (p*100).toFixed(1).replace('.',',') + '%' : '—';
     const fmtEur = x => Number.isFinite(x) ? new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(x) : '—';
@@ -161,26 +161,26 @@
               stake: /^[\d,.]{0,12}$/.test(String(slot.stake ?? '')) ? String(slot.stake ?? '') : '',
               items:slot.items.filter(v => Number.isInteger(Number(v.id)) && byId.has(Number(v.id)) &&
                 Object.prototype.hasOwnProperty.call(marketName,v.market) &&
-                Number.isFinite(probability(byId.get(Number(v.id)),v.market)) &&
-                fairEligible(probability(byId.get(Number(v.id)),v.market)))
+                Number.isFinite(probability(byId.get(Number(v.id)),v.market)))
                 .slice(0,50).map(v => ({id:Number(v.id),market:v.market,odd: v.odd ?? ''}))
             };
           }
         }
         const prev = JSON.parse(localStorage.getItem(settingsKey) || 'null');
         if (prev && Number.isFinite(Number(prev.min))) minimum = Math.max(10,Math.min(95,Number(prev.min)));
+        if (prev && Number.isFinite(Number(prev.fairMin))) fairMinimum = Math.max(0,Math.min(20,Number(prev.fairMin)));
       } catch (e) { persistAvailable = false; }
     }
     function save() {
-      try { localStorage.setItem(storageKey,JSON.stringify(slips)); localStorage.setItem(settingsKey,JSON.stringify({min:minimum})); }
+      try { localStorage.setItem(storageKey,JSON.stringify(slips)); localStorage.setItem(settingsKey,JSON.stringify({min:minimum,fairMin:fairMinimum})); }
       catch (e) { persistAvailable = false; }
     }
     function rowFor(g,k) {
       const p = probability(g,k);
       return Number.isFinite(p) && fairEligible(p) ? {g,k,p} : null;
     }
-    function allMarkets(g,cut=minimum) {
-      return MARKETS.map(([k]) => rowFor(g,k)).filter(r => r && r.p*100+1e-8 >= cut).sort((a,b)=>b.p-a.p);
+    function allMarkets(g,cut=0) {
+      return MARKETS.map(([k]) => {const p=probability(g,k);return Number.isFinite(p)?{g,k,p}:null;}).filter(r=>r && r.p*100+1e-8>=cut).sort((a,b)=>b.p-a.p);
     }
     function toast(msg) {
       let t = $('as-toast');
@@ -192,8 +192,8 @@
     function add(n,id,k) {
       const g=byId.get(Number(id));
       const p=probability(g,k);
-      if (!g || !Object.hasOwn(marketName,k) || !Number.isFinite(p) || !fairEligible(p) || p*100+1e-8<minimum) {
-        toast('Escolha indisponível: altera o filtro de percentagem ou o mercado.');
+      if (![1,2,3].includes(n) || !g || !Object.hasOwn(marketName,k) || !Number.isFinite(p)) {
+        toast('Prognóstico indisponível: faltam dados estatísticos deste jogo.');
         return;
       }
       const old=slips[n].items.find(v=>v.id===g.id);
@@ -338,19 +338,20 @@
       if (header) {
         const h=header.querySelector('h1'),p=header.querySelector('p');
         if (h) h.textContent='Escolhas e Top 20 da semana';
-        if (p) p.textContent='Escolhe a percentagem mínima e o mercado; vê todas as oportunidades do modelo com odd justa ≥1,20 e adiciona-as à Aposta 1, 2 ou 3.';
+        if (p) p.textContent='Filtra probabilidade, odd justa estimada, mercado e dia separadamente. As odds reais devem ser preenchidas nos boletins e ser de pelo menos 1,20.';
       }
       const first=rank.querySelector('option[value="TOP"]'),all=rank.querySelector('option[value="PROB"]');
-      if (first) first.textContent='Top 20 por probabilidade · odd justa ≥1,20';
+      if (first) first.textContent='Top 20 por probabilidade · análise do modelo';
       if (all) all.textContent='Todas as escolhas acima da percentagem';
       rank.value='TOP';
       const sectionNotice=view.querySelector('.notice');
-      if (sectionNotice) sectionNotice.innerHTML='<span class="notice-icon">i</span><div><b>Como usar:</b> as odds justas resultam de 1 ÷ probabilidade prevista e não são cotações da Betano. Não exigimos odds verificadas para montar os boletins. Introduz manualmente as odds reais que encontrares, desde 1,20, para calcular o retorno potencial.</div>';
+      if (sectionNotice) sectionNotice.innerHTML='<span class="notice-icon">i</span><div><b>Dois tipos de odds:</b> a <strong>odd justa</strong> é 1 ÷ probabilidade prevista e serve para analisar o modelo. A <strong>odd real</strong> é a cotação que introduzes no boletim e tem de ser ≥1,20. Não exigimos confirmação externa, mas o modelo não inventa cotações. Uma probabilidade alta não prova que uma aposta tenha valor.</div>';
       const controls=document.createElement('div');
       controls.className='as-choice-controls';controls.id='as-choice-controls';
       const minOpts=[40,45,50,55,60,65,70,75,80,85,90,95].map(v=>'<option value="'+v+'"'+(v===minimum?' selected':'')+'>'+v+'% ou mais</option>').join('');
       controls.innerHTML=
-        '<div class="as-field"><label for="as-min">Probabilidade mínima</label><select id="as-min">'+minOpts+'</select></div>'+
+        '<div class="as-field"><label for="as-min">Probabilidade mínima</label><select id="as-min">'+minOpts+'</select></div>'+ 
+        '<div class="as-field"><label for="as-fair">Odd justa estimada</label><select id="as-fair"><option value="0">Todas</option>'+[1.2,1.4,1.6,2,3].map(x=>'<option value="'+x+'"'+(fairMinimum===x?' selected':'')+'>A partir de '+fmtOdd(x)+'</option>').join('')+'</select></div>'+
         '<div class="as-field"><label for="as-market">Tipo de prognóstico</label><select id="as-market"><option value="ALL">Todos os mercados</option><option value="1X2">1X2 · Casa/Empate/Fora</option>'+MARKETS.map(([k,n])=>'<option value="'+k+'">'+esc(n)+'</option>').join('')+'</select></div>'+
         '<div class="as-field"><label for="as-league">Competição</label><select id="as-league"><option value="ALL">Todas as 12 competições</option>'+D.leagues.map(l=>'<option value="'+esc(l.code)+'">'+esc(l.name)+'</option>').join('')+'</select></div>';
       native.before(controls);
@@ -360,14 +361,17 @@
       const more=document.createElement('button');more.className='as-more';more.id='as-more';more.type='button';more.textContent='Mostrar mais opções';list.after(more);
       const nnav=document.querySelectorAll('[data-go="rank"]');nnav.forEach(v=>v.textContent=v.closest('.bottomnav')?'⚽ Escolhas':'Escolhas por %');
       const hero=$('view-overview')?.querySelector('.hero-alert span:last-child');
-      if (hero) hero.innerHTML='<b>Regra de odds:</b> mostrar apenas escolhas com odd justa ≥1,20. A odd é calculada pela percentagem prevista; para o boletim podes introduzir manualmente a odd da tua casa de apostas.';
+      if (hero) hero.innerHTML='<b>Odd mínima de aposta: 1,20 real.</b> As odds justas são apenas estimativas do modelo; vê todos os prognósticos, filtra por percentagem e preenche a cotação comercial no boletim.';
       const method=$('view-method');
       if (method) method.querySelectorAll('.method-card p').forEach(p=>{
-        if (p.textContent.includes('Critério das apostas:')) p.textContent='Critério das escolhas: odd justa calculada de pelo menos 1,20 e probabilidade acima do mínimo definido. Para calcular o retorno dos boletins, introduz as odds que encontrares; não precisam de validação externa, mas devem ser de pelo menos 1,20. Uma odd justa não é uma cotação comercial.';
+        if (p.textContent.includes('Critério das apostas:')) p.textContent='A probabilidade e a odd justa são filtros independentes. A odd justa (1 ÷ probabilidade) não é a cotação de uma casa de apostas. Para registar apostas reais e calcular retornos, é preciso introduzir manualmente cotação ≥1,20 e valor apostado; dados sem validação externa.';
         else if (p.textContent.includes('Não foram verificadas odds atuais')) p.textContent='As odds comerciais não são recolhidas automaticamente. O cálculo do retorno só utiliza as odds introduzidas pelo utilizador. Não apresenta promessas de valor esperado ou rentabilidade garantida.';
       });
       $('as-min').addEventListener('change',e=>{
         minimum=Number(e.target.value)||70;pageLimit=30;save();renderChoices();refreshInline();
+      });
+      $('as-fair').addEventListener('change',e=>{
+        fairMinimum=Math.max(0,Number(e.target.value)||0);pageLimit=30;save();renderChoices();
       });
       $('as-market').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
       $('as-league').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
@@ -403,11 +407,11 @@
       const showing=mode==='PROB'?rows.slice(0,pageLimit):rows;
       $('as-more').hidden=(mode!=='PROB'||rows.length<=pageLimit);
       const description=$('as-choice-description');
-      description.textContent=rows.length+' prognósticos'+(choiceDay==='ALL'?' na semana':(' em '+(weekDays.find(d=>d.key===choiceDay)?.label||choiceDay)))+' com probabilidade ≥'+minimum+'% e odd justa ≥1,20.'+
+      description.textContent=rows.length+' prognósticos'+(choiceDay==='ALL'?' na semana':(' em '+(weekDays.find(d=>d.key===choiceDay)?.label||choiceDay)))+' com probabilidade ≥'+minimum+'%'+(fairMinimum>0?' e odd justa ≥'+fmtOdd(fairMinimum):' (todas as odds justas)')+'.'+
         (mode==='TOP'?' Máximo de um mercado por jogo.':'')+
         ' As odds são estimativas matemáticas, não preços da casa de apostas.';
       if (!showing.length) {
-        list.innerHTML='<div class="as-placeholder"><strong>Sem escolhas para os filtros aplicados.</strong><p>Experimenta baixar a percentagem mínima ou selecionar outro mercado. Uma odd justa ≥1,20 limita naturalmente as probabilidades mais elevadas (acima de cerca de 83,3%).</p></div>';
+        list.innerHTML='<div class="as-placeholder"><strong>Sem escolhas para os filtros aplicados.</strong><p>Experimenta baixar a percentagem mínima, mostrar todas as odds justas ou selecionar outro mercado.</p></div>';
         return;
       }
       list.innerHTML=showing.map(({g,k,p})=>
