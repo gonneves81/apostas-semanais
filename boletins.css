@@ -86,3 +86,38 @@
   .as-add-actions button{padding:8px 4px;min-width:70px;font-size:11px}
   .as-ticket-dock{left:5px;right:5px}
 }
+
+
+/* Navigacao rapida por dia e mercado — 2026-10 */
+.as-date-toolbar{margin:0 0 16px;padding:14px 14px 12px;border:1px solid #dbe5ee;border-radius:15px;background:#fff;box-shadow:0 5px 22px rgba(9,37,61,.045);min-width:0}
+.as-calendar-main{display:flex;flex-direction:column;gap:10px}
+.as-daybar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.as-daybar-head>b{font-size:12px;color:#26465f;font-weight:850}
+.as-sort-toggle{display:inline-flex;gap:2px;background:#edf2f6;padding:3px;border-radius:10px}
+.as-sort-toggle button{border:none;background:none;color:#4e647a;font-size:12px;font-weight:800;border-radius:8px;padding:8px 12px;min-height:36px;white-space:nowrap}
+.as-sort-toggle button.active{background:#203d70;color:#fff}
+.as-day-pills,.as-market-chips{display:flex;align-items:center;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 8px;scroll-snap-type:x proximity}
+.as-day-pills button,.as-market-chips button{white-space:nowrap;flex:none;scroll-snap-align:start;border:1px solid #dae2e8;background:#f8fbfc;border-radius:99px;color:#29455a;min-height:39px;padding:8px 13px;font-size:12px;font-weight:750;transition:background .12s,border-color .12s}
+.as-day-pills button:hover,.as-market-chips button:hover{border-color:#3bb99d}
+.as-day-pills button.active,.as-market-chips button.active{background:#1e3c75;border-color:#1e3c75;color:#fff}
+.as-day-pills button span{font-size:10px;line-height:1;padding:3px 6px;border-radius:8px;margin-left:4px;background:#e9f0f5;color:#47708c;font-weight:850}
+.as-day-pills button.active span{background:#49639a;color:#fff}
+.as-market-chips{border-top:1px solid #edf1f3;margin-top:10px;padding-top:12px}
+.as-market-chips button{min-height:35px;font-size:11px;padding:6px 11px}
+#view-rank .as-choice-controls{margin-bottom:10px}
+#view-rank .as-date-toolbar{margin-bottom:14px}
+#view-games .as-date-toolbar{margin-top:5px;border:0;border-block:1px solid #e7eef2;box-shadow:none;border-radius:0;padding-inline:0}
+@media(max-width:720px){
+  .as-date-toolbar{padding:11px}
+  .as-daybar-head{align-items:start;gap:9px}
+  .as-daybar-head>b{padding-top:10px;font-size:11px}
+  .as-sort-toggle button{padding:7px 9px;font-size:11px;min-height:33px}
+  .as-day-pills button{padding:8px 11px;font-size:11px;min-height:37px}
+  .as-market-chips button{padding:7px 10px;font-size:11px}
+  #view-games .as-date-toolbar{margin-top:3px}
+}
+@media(max-width:360px){
+  .as-daybar-head{display:block}
+  .as-sort-toggle{margin-top:7px}
+  .as-date-toolbar{padding:10px}
+}
