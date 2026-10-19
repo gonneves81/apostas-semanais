@@ -213,10 +213,75 @@
     }
     function slipTotals(n) {
       const picks=slips[n].items;
-      const valid=picks.length>0 && picks.every(i=>manualValid(i.odd));
-      const multiplier=valid?picks.reduce((p,i)=>p*parseOdd(i.odd),1):null;
-      const amount=Number(String(slips[n].stake||'').replace(',','.'));
-      return {valid,multiplier,returnValue:valid&&Number.isFinite(amount)&&amount>0?multiplier*amount:null};
+      const filled=picks.filter(i=>manualValid(i.odd));
+      const entered=filled.length,total=picks.length,valid=total>0&&entered===total;
+      const partialMultiplier=entered?filled.reduce((x,i)=>x*parseOdd(i.odd),1):null;
+      const multiplier=valid?partialMultiplier:null;
+      const amount=Number(String(slips[n].stake||'').trim().replace(',','.'));
+      const stakeValid=String(slips[n].stake||'').trim()!==''&&Number.isFinite(amount)&&amount>0;
+      const partialReturn=partialMultiplier!==null&&stakeValid?partialMultiplier*amount:null;
+      return {valid,multiplier,returnValue:valid?partialReturn:null,partialMultiplier,
+              partialReturn,entered,total,amount,stakeValid,filled};
+    }
+    function fmtCombined(n) {
+      return Number.isFinite(n)?new Intl.NumberFormat('pt-PT',
+        {minimumFractionDigits:2,maximumFractionDigits:5}).format(n):'—';
+    }
+    function updateSlipNumbers() {
+      const dock=$('as-ticket-dock');
+      if(!dock||!expanded)return;
+      const t=slipTotals(active),partial=t.entered>0&&!t.valid;
+      const oddLabel=dock.querySelector('[data-slip-odd-label]');
+      const oddTotal=dock.querySelector('[data-slip-total-odd]');
+      const returnLabel=dock.querySelector('[data-slip-return-label]');
+      const returnTotal=dock.querySelector('[data-slip-return-value]');
+      const calculation=dock.querySelector('[data-slip-calculation]');
+      if(oddLabel)oddLabel.textContent=partial?'Odd parcial ('+t.entered+'/'+t.total+')':'Odd combinada';
+      if(oddTotal)oddTotal.textContent=t.partialMultiplier!==null?fmtCombined(t.partialMultiplier):'—';
+      if(returnLabel)returnLabel.textContent=partial?'Retorno parcial (não final)':'Retorno potencial bruto';
+      if(returnTotal)returnTotal.textContent=t.partialReturn!==null?fmtEur(t.partialReturn):'—';
+      if(calculation) {
+        let message='';
+        if(t.entered&&t.stakeValid) {
+          message=t.filled.map(i=>fmtOdd(parseOdd(i.odd))).join(' × ')+
+            ' × '+fmtEur(t.amount)+' = '+fmtEur(t.partialReturn);
+          if(!t.valid)message+=' · parcial: faltam '+(t.total-t.entered)+' odd(s)';
+        } else if(t.entered) {
+          message='Introduz o valor da aposta para veres o retorno automaticamente.';
+        } else if(t.total) {
+          message='Preenche as odds reais (mínimo 1,20) para calcular o retorno.';
+        } else {
+          message='Adiciona prognósticos para construir a aposta.';
+        }
+        calculation.textContent=message;
+      }
+      // Não reconstruir os inputs: mantém foco, cursor e teclado no telemóvel.
+      dock.querySelectorAll('[data-slip-odd]').forEach(input=>{
+        const ok=manualValid(input.value);
+        const warning=input.closest('.as-slip-item')?.querySelector('[data-slip-warning]');
+        input.setAttribute('aria-invalid',String(!!String(input.value).trim()&&!ok));
+        if(warning) {
+          warning.hidden=ok;
+          if(!ok)warning.textContent=String(input.value).trim()?
+            'Odd inferior a 1,20 ou inválida.':'Preenche a odd para completar o retorno.';
+        }
+      });
+    }
+    function persistSlipField(target) {
+      const odd=target.closest('[data-slip-odd]');
+      if(odd) {
+        const n=Number(odd.dataset.slipOdd),id=Number(odd.dataset.game),k=odd.dataset.market;
+        const item=slips[n]?.items.find(v=>v.id===id&&v.market===k);
+        if(item){item.odd=String(odd.value||'').trim();save();updateSlipNumbers();}
+        return true;
+      }
+      const stake=target.closest('[data-slip-stake]');
+      if(stake) {
+        const n=Number(stake.dataset.slipStake);
+        if(slips[n]){slips[n].stake=stake.value;save();updateSlipNumbers();}
+        return true;
+      }
+      return false;
     }
     function tabButtons() {
       return [1,2,3].map(n=>'<button type="button" data-slip-tab="'+n+'" class="'+(n===active?'active':'')+'" aria-pressed="'+(n===active?'true':'false')+'">Aposta '+n+' <b>'+slips[n].items.length+'</b></button>').join('');
@@ -230,7 +295,7 @@
         '<button type="button" class="as-slip-remove" data-slip-remove="'+n+'" data-game="'+g.id+'" data-market="'+esc(v.market)+'" aria-label="Remover seleção" title="Remover seleção">×</button></div>'+
         '<div class="as-slip-oddrow"><label for="as-odd-'+n+'-'+g.id+'">Odd que encontraste<br><small>(mín. 1,20)</small></label>'+
         '<input id="as-odd-'+n+'-'+g.id+'" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,65" value="'+esc(v.odd)+'" data-slip-odd="'+n+'" data-game="'+g.id+'" data-market="'+esc(v.market)+'" /></div>'+
-        (!oddOk ? '<div class="as-slip-missing">'+(String(v.odd).trim()?'Odd inferior a 1,20 ou inválida.':'Preenche a odd se quiseres calcular o retorno.')+'</div>':'')+
+        '<div class="as-slip-missing" data-slip-warning'+(oddOk?' hidden':'')+'>'+ (String(v.odd).trim()?'Odd inferior a 1,20 ou inválida.':'Preenche a odd para completar o retorno.')+'</div>'+
         '</div>';
     }
     function renderDock() {
@@ -241,7 +306,7 @@
       }
       const counts=[1,2,3].map(n=>slips[n].items.length);
       const total=counts.reduce((a,b)=>a+b,0);
-      const current=slips[active],t=slipTotals(active);
+      const current=slips[active];
       document.body.classList.toggle('as-ticket-open',expanded);
       dock.classList.toggle('is-open',expanded);
       const status=counts.map((x,i)=>(i+1)+': '+x).join(' · ');
@@ -249,14 +314,16 @@
         '<span><b>⚽ Os meus boletins · '+total+' seleções</b><small>Aposta '+status+' · '+(persistAvailable?'guardado neste navegador':'sem gravação local')+'</small></span><span class="as-chevron" aria-hidden="true">'+(expanded?'⌄':'⌃')+'</span></button>';
       if (expanded) {
         content+='<div class="as-ticket-body"><div class="as-ticket-tabs">'+tabButtons()+'</div>'+
-          '<div class="as-ticket-stats"><div class="as-ticket-stat"><span>Seleções</span><strong>'+current.items.length+'</strong></div><div class="as-ticket-stat"><span>Odd total inserida</span><strong>'+(t.valid?fmtOdd(t.multiplier):'—')+'</strong></div></div>'+
+          '<div class="as-ticket-stats"><div class="as-ticket-stat"><span>Seleções</span><strong>'+current.items.length+'</strong></div><div class="as-ticket-stat"><span data-slip-odd-label>Odd combinada</span><strong data-slip-total-odd>—</strong></div></div>'+
           '<p class="as-ticket-notice">Odd justa = cálculo do modelo. Introduz as odds da tua casa de apostas, sem necessidade de validação externa; não serão inventadas. Cada boletim aceita um mercado por jogo.</p>'+
           '<div class="as-slip-items">'+(current.items.length?current.items.map(v=>slipItem(v,active)).join(''):'<div class="as-slip-empty">Ainda não adicionaste escolhas à Aposta '+active+'. Seleciona um prognóstico em “Escolhas” ou nos cartões dos jogos e toca em + Aposta '+active+'.</div>')+'</div>'+
           '<div class="as-slip-stake"><label for="as-stake-'+active+'">Valor da aposta (€)</label><input id="as-stake-'+active+'" type="number" min="0" step="0.5" inputmode="decimal" value="'+esc(current.stake)+'" data-slip-stake="'+active+'" placeholder="0,00" /></div>'+
-          '<div class="as-slip-return"><span>Retorno potencial bruto</span><strong>'+(t.returnValue!==null?fmtEur(t.returnValue):'—')+'</strong></div>'+
+          '<div class="as-slip-return"><span data-slip-return-label>Retorno potencial bruto</span><strong data-slip-return-value>—</strong></div>'+
+          '<div class="as-slip-calculation" data-slip-calculation aria-live="polite"></div>'+
           '<div class="as-slip-footer"><button type="button" data-slip-copy="'+active+'">Copiar boletim</button><button type="button" class="as-danger" data-slip-clear="'+active+'">Limpar aposta</button></div></div>';
       }
       dock.innerHTML=content;
+      updateSlipNumbers();
     }
     function paintButtons() {
       document.querySelectorAll('[data-add-slip]').forEach(btn=>{
@@ -485,7 +552,9 @@
         const cp=e.target.closest('[data-slip-copy]');
         if (cp){copySlip(Number(cp.dataset.slipCopy));return;}
       });
+      document.addEventListener('input',e=>{persistSlipField(e.target);});
       document.addEventListener('change',e=>{
+        if(persistSlipField(e.target))return;
         if(e.target.id==='day-filter'){
           const v=e.target.value;
           const next=v==='all'?'ALL':(weekDays.find(d=>d.day===Number(v))?.key||'ALL');
@@ -503,18 +572,6 @@
           }
           paintButtons();
           return;
-        }
-        const odd=e.target.closest('[data-slip-odd]');
-        if (odd){
-          const n=Number(odd.dataset.slipOdd),id=Number(odd.dataset.game),k=odd.dataset.market;
-          const item=slips[n].items.find(v=>v.id===id&&v.market===k);
-          if(item){item.odd=String(odd.value||'').trim();save();renderDock();}
-          return;
-        }
-        const stake=e.target.closest('[data-slip-stake]');
-        if(stake){
-          const n=Number(stake.dataset.slipStake);
-          slips[n].stake=stake.value;save();renderDock();return;
         }
       });
       for(const root of [$('game-list'),$('opening-games')]){
