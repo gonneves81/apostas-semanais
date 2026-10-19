@@ -13,21 +13,40 @@ function start(){
   const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmtPct=x=>Number.isFinite(x)?(x*100).toFixed(1).replace('.',',')+'%':'—';
   const fmtOdd=x=>Number.isFinite(x)&&x>0?(1/x).toFixed(2).replace('.',','):'—';
-  const keys={BTTS:'Ambas marcam',AND:'Ambas E +2,5',O25:'Mais de 2,5',O15:'Mais de 1,5',W1:'Vitória da casa',W2:'Vitória fora',C85:'Mais de 8,5 cantos',C95:'Mais de 9,5 cantos',HT1:'Casa vence 1.ª parte',HT2:'Fora vence 1.ª parte',SH1:'Casa vence 2.ª parte',SH2:'Fora vence 2.ª parte'};
+  // A escolha no Top 5 corresponde exatamente ao mercado ativo nos chips.
+  const keys={
+    BTTS:'Ambas marcam',BTTS_NO:'Ambas não marcam',AND:'Ambas E +2,5',
+    OR:'Ambas OU +2,5',O25:'Mais de 2,5',O15:'Mais de 1,5',
+    W1:'Vitória da casa',X:'Empate',W2:'Vitória fora',
+    C85:'Mais de 8,5 cantos',C95:'Mais de 9,5 cantos',
+    HT1:'Casa vence 1.ª parte',HTX:'Empate 1.ª parte',HT2:'Fora vence 1.ª parte',
+    SH1:'Casa vence 2.ª parte',SHX:'Empate 2.ª parte',SH2:'Fora vence 2.ª parte'
+  };
   const marketGroups=[
     {id:'BTTS',name:'Ambas marcam',keys:['BTTS']},
-    {id:'AND',name:'Ambas marcam E +2,5',keys:['AND']},
+    {id:'BTTS_NO',name:'Ambas não marcam',keys:['BTTS_NO']},
     {id:'O25',name:'Mais de 2,5 golos',keys:['O25']},
+    {id:'AND',name:'Ambas E +2,5',keys:['AND']},
+    {id:'OR',name:'Ambas OU +2,5',keys:['OR']},
     {id:'O15',name:'Mais de 1,5 golos',keys:['O15']},
-    {id:'WIN',name:'Vitória direta',keys:['W1','W2']},
-    {id:'CORN',name:'Cantos +8,5 / +9,5',keys:['C85','C95']},
-    {id:'HALF',name:'Vitórias por parte',keys:['HT1','HT2','SH1','SH2']}
+    {id:'W1',name:'Vitória da casa',keys:['W1']},
+    {id:'X',name:'Empate',keys:['X']},
+    {id:'W2',name:'Vitória fora',keys:['W2']},
+    {id:'1X2',name:'1X2 · Casa, empate ou fora',keys:['W1','X','W2'],selectedOnly:true},
+    {id:'C85',name:'Cantos +8,5',keys:['C85']},
+    {id:'C95',name:'Cantos +9,5',keys:['C95']},
+    {id:'HT1',name:'Casa vence 1.ª parte',keys:['HT1']},
+    {id:'HTX',name:'Empate 1.ª parte',keys:['HTX']},
+    {id:'HT2',name:'Fora vence 1.ª parte',keys:['HT2']},
+    {id:'SH1',name:'Casa vence 2.ª parte',keys:['SH1']},
+    {id:'SHX',name:'Empate 2.ª parte',keys:['SHX']},
+    {id:'SH2',name:'Fora vence 2.ª parte',keys:['SH2']}
   ];
   const valid=v=>typeof v==='number'&&Number.isFinite(v)&&v>0&&v<=1;
   function prop(g,k){
     if(!g||g.verified===false)return NaN;
     const p=g.p||{},a=g.first||{},b=g.second||{};
-    const v=({BTTS:p.btts,AND:p.and,O25:p.o25,O15:p.o15,W1:p.w1,W2:p.w2,C85:g.c85,C95:g.c95,HT1:a.w1,HT2:a.w2,SH1:b.w1,SH2:b.w2})[k];
+    const v=({BTTS:p.btts,BTTS_NO:p.no,AND:p.and,OR:p.or,O25:p.o25,O15:p.o15,W1:p.w1,X:p.draw,W2:p.w2,C85:g.c85,C95:g.c95,HT1:a.w1,HTX:a.draw,HT2:a.w2,SH1:b.w1,SHX:b.draw,SH2:b.w2})[k];
     return valid(v)?v:NaN;
   }
   function matchDay(g){
@@ -120,8 +139,19 @@ function start(){
     section.id='qa-top5';section.className='qa-top5';
     section.innerHTML='<div class="qa-top5-head"><div><span class="eyebrow">Seleção estatística por mercado</span><h2>Top 5 do dia</h2><p id="qa-top5-desc">Prognósticos ordenados por probabilidade, com índice de cobertura dos dados.</p></div><div class="qa-top5-select"><label for="qa-top5-group">Mostrar</label><select id="qa-top5-group"><option value="ALL">Todos os mercados</option>'+marketGroups.map(g=>'<option value="'+g.id+'">'+escape(g.name)+'</option>').join('')+'</select></div></div><div id="qa-top5-cards" class="qa-top5-groups"></div>';
     bar.after(section);
-    $('qa-top5-group').addEventListener('change',e=>{chosenGroup=e.target.value;renderTopFive();});
-    topFiveSection=section;renderTopFive();
+    $('qa-top5-group').addEventListener('change',e=>{
+      const filter=$('as-market');
+      // Alterar o menu Mostrar atualiza também o filtro e os botões rápidos.
+      if(filter && Array.from(filter.options).some(opt=>opt.value===e.target.value)){
+        filter.value=e.target.value;
+        filter.dispatchEvent(new Event('change',{bubbles:true}));
+      }else{
+        chosenGroup=e.target.value;
+        renderTopFive();
+      }
+    });
+    topFiveSection=section;
+    syncMarketAndRender();
   }
   function getDay(){
     const active=$('as-datebar-choices')?.querySelector('[data-as-day].active');
@@ -140,12 +170,19 @@ function start(){
     const seen=new Set();
     return arr.filter(row=>{if(seen.has(row.g.id))return false;seen.add(row.g.id);return true;}).slice(0,5);
   }
+  function syncMarketAndRender(){
+    const market=$('as-market')?.value || 'ALL';
+    chosenGroup=(market==='ALL'||marketGroups.some(g=>g.id===market))?market:'ALL';
+    const selector=$('qa-top5-group');
+    if(selector && selector.value!==chosenGroup)selector.value=chosenGroup;
+    renderTopFive();
+  }
   function renderTopFive(){
     if(!topFiveSection)return;
     const filters=getFilters(),name=filters.day==='ALL'?'semana de '+(D.start||'')+' a '+(D.end||''):filters.day;
     const desc=$('qa-top5-desc');
     desc.textContent='Top 5 por mercado — '+name+' · previsão do modelo ≥'+filters.min+'%. Não são odds reais nem apostas garantidas.';
-    const groups=marketGroups.filter(g=>chosenGroup==='ALL'||chosenGroup===g.id);
+    const groups=marketGroups.filter(g=>chosenGroup===g.id||(chosenGroup==='ALL'&&!g.selectedOnly));
     $('qa-top5-cards').innerHTML=groups.map(group=>{
       const rows=groupOptions(group,filters);
       return '<div class="qa-group"><h3>'+escape(group.name)+' <small>'+rows.length+' resultado(s)</small></h3>'+
@@ -160,13 +197,16 @@ function start(){
   }
   mountTopFive();
   document.addEventListener('click',event=>{
-    if(event.target.closest('[data-as-day]')||event.target.closest('[data-as-market]')){
+    if(event.target.closest('[data-as-market]')){
+      // boletins.js atualiza o filtro no clique. Refletir essa seleção no Top 5.
+      queueMicrotask(syncMarketAndRender);
+    }else if(event.target.closest('[data-as-day]')||event.target.closest('[data-go="rank"]')){
       queueMicrotask(renderTopFive);
     }
-    if(event.target.closest('[data-go="rank"]'))queueMicrotask(renderTopFive);
   });
   document.addEventListener('change',event=>{
-    if(['as-min','as-fair','as-league','rank-filter','as-market','day-filter'].includes(event.target.id))
+    if(event.target.id==='as-market')queueMicrotask(syncMarketAndRender);
+    else if(['as-min','as-fair','as-league','rank-filter','day-filter'].includes(event.target.id))
       queueMicrotask(renderTopFive);
   });
   async function loadModelHistory(){
