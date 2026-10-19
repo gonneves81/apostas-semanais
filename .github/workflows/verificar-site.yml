@@ -200,11 +200,11 @@ jobs:
           from pathlib import Path
           import json, re
           html = Path("index.html").read_text(encoding="utf-8")
-          assert '<script src="./boletins.js?v=3" defer></script>' in html
+          assert '<script src="./boletins.js?v=4" defer></script>' in html
           assert '<script src="./qualidade.js?v=2" defer></script>' in html
           assert '<script src="./apostas-reais.js?v=1" defer></script>' in html
           assert '<link rel="stylesheet" href="./melhorias.css?v=1">' in html
-          assert '<link rel="stylesheet" href="./boletins.css?v=2">' in html
+          assert '<link rel="stylesheet" href="./boletins.css?v=3">' in html
           assert 'id="rank-list"' in html and 'id="view-games"' in html
           data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
           assert len(data["games"]) > 10 and len(data["leagues"]) == 12
