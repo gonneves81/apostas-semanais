@@ -35,6 +35,58 @@ jobs:
           assert 'Aposta 3' in s, "Terceiro boletim ausente"
           print("Site dinamico carregado: 3 boletins e filtros OK")
           PY
+      - name: Testar adicionar apostas, filtro e odd manual
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          page=Path("index.html").read_text(encoding="utf-8")
+          test_script="""<script>
+          document.addEventListener('DOMContentLoaded',()=>{
+            setTimeout(()=>{
+              try{
+                const root=document.querySelector('#as-smart-ranks');
+                if(!root) throw Error('Lista de escolhas nao existe');
+                const one=root.querySelector('[data-add-slip="1"]');
+                const two=root.querySelector('[data-add-slip="2"]');
+                const three=root.querySelector('[data-add-slip="3"]');
+                if(!one||!two||!three)throw Error('Faltam botoes para os tres boletins');
+                one.click(); two.click(); three.click();
+                const dock=document.querySelector('#as-ticket-dock');
+                if(!dock||!dock.classList.contains('is-open'))throw Error('Painel nao abriu');
+                if(!dock.querySelector('[data-slip-tab="1"] b')||dock.querySelector('[data-slip-tab="1"] b').textContent!=='1')throw Error('Aposta 1 sem item');
+                if(dock.querySelector('[data-slip-tab="2"] b').textContent!=='1')throw Error('Aposta 2 sem item');
+                if(dock.querySelector('[data-slip-tab="3"] b').textContent!=='1')throw Error('Aposta 3 sem item');
+                const odd=dock.querySelector('[data-slip-odd="3"]');
+                if(!odd)throw Error('Falta input odd');
+                odd.value='1,65';odd.dispatchEvent(new Event('change',{bubbles:true}));
+                const stake=dock.querySelector('[data-slip-stake="3"]');
+                if(!stake)throw Error('Falta valor do boletim');
+                stake.value='10';stake.dispatchEvent(new Event('change',{bubbles:true}));
+                const ret=document.querySelector('.as-slip-return strong').textContent;
+                if(!ret.includes('16,50')) throw Error('Retorno nao atualizado: '+ret);
+                const minimum=document.querySelector('#as-min');
+                minimum.value='65'; minimum.dispatchEvent(new Event('change',{bubbles:true}));
+                if(!document.querySelector('#as-smart-ranks .as-choice'))throw Error('Filtro 65% nao retornou escolhas');
+                document.body.dataset.smoke='PASS';
+              }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
+            },1000);
+          });
+          </script>"""
+          Path(".app-smoke.html").write_text(page.replace('</body>',test_script+'</body>'),encoding='utf-8')
+          PY
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=6500 --dump-dom "file://$PWD/.app-smoke.html#top20" > /tmp/app-interaction.html 2>/tmp/app-interaction-errors.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          from html import unescape
+          import re
+          dom=Path('/tmp/app-interaction.html').read_text(encoding='utf-8')
+          match=re.search(r'<body[^>]+data-smoke="([^"]+)"',dom)
+          result=unescape(match.group(1)) if match else 'NOT_RUN'
+          print('Resultado teste:',result)
+          assert result == 'PASS', result
+          PY
+          rm -f .app-smoke.html
       - name: Verificar arquivos e conteudo
         run: |
           python3 - <<'PY'
