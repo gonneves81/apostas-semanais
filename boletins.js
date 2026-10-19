@@ -26,7 +26,7 @@
     const storageKey = 'apostas_semanal_slips_' + (D.start || 'semana') + '_' + (D.end || '');
     const settingsKey = 'apostas_semanal_filtro_v2';
     let minimum = 70, fairMinimum = 0, active = 1, expanded = false, pageLimit = 30;
-    let persistAvailable = true, lastOpenGame = null, toastTimer = null;
+    let persistAvailable = true, lastOpenGame = null, lastOpenMarketScope = 'overview', toastTimer = null;
     let slips = {1:{stake:'',items:[]},2:{stake:'',items:[]},3:{stake:'',items:[]}};
 
     // Calendar state shared between Escolhas and Todos os jogos.
@@ -335,25 +335,50 @@
         btn.setAttribute('aria-label',(exists?'Já incluído na ':'Adicionar à ')+'Aposta '+n);
       });
     }
-    function actionButtons(g,k) {
+    function actionButtons(g,k,disabled=false) {
       return '<div class="as-add-actions">'+[1,2,3].map(n=>
-        '<button type="button" data-add-slip="'+n+'" data-game="'+g.id+'" data-market="'+esc(k)+'">+ Aposta '+n+'</button>'
+        '<button type="button" '+(disabled?'disabled ':'')+'data-add-slip="'+n+'" data-game="'+g.id+'" data-market="'+esc(k)+'">+ Aposta '+n+'</button>'
       ).join('')+'</div>';
     }
-    function selectHtml(g) {
+    // O campo "Escolher prognóstico" deve seguir o mercado em foco
+    // na vista atual, em vez de escolher automaticamente o evento
+    // com maior probabilidade (frequentemente +1,5 golos).
+    function focusedMarketFor(target,isModal=false) {
+      if(isModal || target.closest('#modal-content')) {
+        return lastOpenMarketScope==='games'?($('metric-filter')?.value||'BTTS'):
+          lastOpenMarketScope==='rank'?($('as-market')?.value||'ALL'):'ALL';
+      }
+      if(target.closest('#view-games'))return $('metric-filter')?.value||'BTTS';
+      if(target.closest('#view-rank'))return $('as-market')?.value||'ALL';
+      return 'ALL';
+    }
+    function selectHtml(g,target,isModal=false) {
       const options=allMarkets(g);
-      if (!options.length) return '<p class="as-inline-empty">Não há mercados deste jogo que cumpram '+minimum+'% e odd justa ≥ 1,20. Podes reduzir o mínimo na área “Escolhas”.</p>';
-      const first=options[0];
+      if(!options.length)return '<p class="as-inline-empty">Não existem previsões disponíveis para este encontro. Não é possível adicionar um mercado sem dados.</p>';
+      const preferred=focusedMarketFor(target,isModal);
+      // 1X2 contém três acontecimentos, não é um prognóstico único.
+      // Nesse caso seleciona a hipótese 1X2 mais provável e identifica-a.
+      const chosen=preferred==='ALL'?options[0]:
+        preferred==='1X2'?options.find(x=>['W1','X','W2'].includes(x.k)):
+        options.find(x=>x.k===preferred);
+      const label=marketName[preferred]||(preferred==='1X2'?'1X2':'mercado selecionado');
+      const description=chosen?
+        'Probabilidade '+fmtPct(chosen.p)+' · odd justa '+fmtOdd(fairOdd(chosen.p)):
+        'Sem previsão de '+esc(label)+' neste jogo. Podes escolher manualmente outro mercado.';
       return '<label class="as-inline-label">Escolher prognóstico para o boletim</label>'+
-        '<select aria-label="Prognóstico para '+esc(g.home)+' e '+esc(g.away)+'" data-pick-select="'+g.id+'">'+options.map(x=>'<option value="'+x.k+'">'+esc(marketName[x.k])+' · '+fmtPct(x.p)+' · '+fmtOdd(fairOdd(x.p))+'</option>').join('')+'</select>'+
-        '<div class="as-inline-metrics">Probabilidade '+fmtPct(first.p)+' · odd justa '+fmtOdd(fairOdd(first.p))+'</div>'+actionButtons(g,first.k);
+        '<select aria-label="Prognóstico para '+esc(g.home)+' e '+esc(g.away)+'" data-pick-select="'+g.id+'">'+
+        (chosen?'':'<option value="" selected>Sem previsão: '+esc(label)+'</option>')+
+        options.map(x=>'<option value="'+x.k+'"'+(chosen?.k===x.k?' selected':'')+'>'+
+          esc(marketName[x.k])+' · '+fmtPct(x.p)+' · '+fmtOdd(fairOdd(x.p))+'</option>').join('')+
+        '</select><div class="as-inline-metrics">'+description+'</div>'+
+        actionButtons(g,chosen?.k||'',!chosen);
     }
     function insertInline(g,target,isModal) {
       if (!target || !g || g.verified===false || target.querySelector('.as-inline')) return;
       const wrapper=document.createElement('div');
       wrapper.className=isModal?'as-inline as-modal-choice':'as-inline';
       wrapper.dataset.betGame=g.id;
-      wrapper.innerHTML=selectHtml(g);
+      wrapper.innerHTML=selectHtml(g,target,isModal);
       target.append(wrapper);
       paintButtons();
     }
@@ -440,16 +465,20 @@
       $('as-fair').addEventListener('change',e=>{
         fairMinimum=Math.max(0,Number(e.target.value)||0);pageLimit=30;save();renderChoices();
       });
-      $('as-market').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
+      $('as-market').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();refreshInline('rank');});
       $('as-league').addEventListener('change',()=>{pageLimit=30;renderChoices();drawDateBars();});
       rank.addEventListener('change',()=>{pageLimit=30;renderChoices();});
       more.addEventListener('click',()=>{pageLimit+=30;renderChoices();});
       renderChoices();
     }
-    function refreshInline() {
+    function refreshInline(scope='all') {
       document.querySelectorAll('.as-inline[data-bet-game]').forEach(x=>{
+        if(scope==='games'&&!x.closest('#view-games')&&
+          !(x.closest('#modal-content')&&lastOpenMarketScope==='games'))return;
+        if(scope==='rank'&&!x.closest('#view-rank')&&
+          !(x.closest('#modal-content')&&lastOpenMarketScope==='rank'))return;
         const g=byId.get(Number(x.dataset.betGame));
-        if (g) x.innerHTML=selectHtml(g);
+        if(g)x.innerHTML=selectHtml(g,x,x.classList.contains('as-modal-choice'));
       });
       paintButtons();
     }
@@ -532,7 +561,11 @@
         const focusBtn=e.target.closest('[data-as-focus]');
         if(focusBtn){const select=$('metric-filter');if(select){select.value=focusBtn.dataset.asFocus;select.dispatchEvent(new Event('change',{bubbles:true}));}drawDateBars();return;}
         const gameOpen=e.target.closest('[data-open]');
-        if (gameOpen) lastOpenGame=Number(gameOpen.dataset.open);
+        if (gameOpen) {
+          lastOpenGame=Number(gameOpen.dataset.open);
+          lastOpenMarketScope=gameOpen.closest('#view-games')?'games':
+            gameOpen.closest('#view-rank')?'rank':'overview';
+        }
         const btn=e.target.closest('[data-add-slip]');
         if (btn) {
           e.preventDefault();
@@ -561,14 +594,20 @@
           if(choiceDay!==next){choiceDay=next;pageLimit=30;renderChoices();}
           drawDateBars();return;
         }
-        if(e.target.id==='order-filter'||e.target.id==='metric-filter'){drawDateBars();return;}
+        if(e.target.id==='metric-filter'){drawDateBars();refreshInline('games');return;}
+        if(e.target.id==='order-filter'){drawDateBars();return;}
         const sel=e.target.closest('[data-pick-select]');
         if (sel){
           const wrap=sel.closest('.as-inline'),g=byId.get(Number(sel.dataset.pickSelect)),p=probability(g,sel.value);
           if (wrap) {
             const m=wrap.querySelector('.as-inline-metrics');
-            if(m)m.textContent='Probabilidade '+fmtPct(p)+' · odd justa '+fmtOdd(fairOdd(p));
-            wrap.querySelectorAll('[data-add-slip]').forEach(b=>b.dataset.market=sel.value);
+            if(m)m.textContent=Number.isFinite(p)?
+              'Probabilidade '+fmtPct(p)+' · odd justa '+fmtOdd(fairOdd(p)):
+              'Sem previsão para este mercado. Seleciona uma opção disponível.';
+            wrap.querySelectorAll('[data-add-slip]').forEach(b=>{
+              b.dataset.market=sel.value;
+              b.disabled=!sel.value||!Number.isFinite(p);
+            });
           }
           paintButtons();
           return;
