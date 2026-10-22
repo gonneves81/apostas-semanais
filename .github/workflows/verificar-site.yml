@@ -279,6 +279,27 @@ jobs:
                 const groups=()=>document.querySelectorAll('#tlg-tables details.tlg-league').length;
                 if(all()!==139)throw Error('Faltam jogos na tabela ('+all()+')');
                 if(groups()!==12)throw Error('Faltam competicoes ('+groups()+')');
+                if(document.querySelectorAll('#tlg-tables .tlg-mobile-card').length!==139)
+                  throw Error('Cartões não representam todos os 139 jogos');
+                if(document.querySelectorAll('#tlg-tables .tlg-league-stats').length!==12)
+                  throw Error('Faltam resumos estatísticos de campeonatos');
+                if(document.querySelectorAll('#tlg-league-tabs [data-tlg-league]').length!==13)
+                  throw Error('Navegação rápida das 12 ligas não aparece');
+                const presentation=document.querySelector('[data-tlg-display="cards"]');
+                presentation.click();
+                if(!document.querySelector('#tlg-tables').classList.contains('tlg-show-cards'))
+                  throw Error('Não foi possível selecionar cartões');
+                if(getComputedStyle(document.querySelector('.tlg-mobile-list')).display==='none')
+                  throw Error('Os cartões ficaram ocultos');
+                const card=document.querySelector('#tlg-tables .tlg-mobile-card');
+                if(!card.querySelectorAll('.tlg-compact-metric').length||
+                   !card.querySelector('.tlg-compact-goals')||
+                   !card.querySelector('.tlg-match-results')||
+                   !card.querySelector('[data-open]'))
+                  throw Error('Cartão não contém percentagens, golos, histórico e análise');
+                document.querySelector('[data-tlg-display="table"]').click();
+                if(!document.querySelector('#tlg-tables').classList.contains('tlg-show-table'))
+                  throw Error('Não foi possível regressar à tabela');
                 if(!document.querySelector('.tlg-pct-pill.tlg-prob-high'))throw Error('Escala de cores nao apresentada');
                 const results=Array.from(document.querySelectorAll('#tlg-tables .tlg-result'));
                 if(results.length<300)throw Error('Nao carregou sequencias VED dos ultimos sete');
@@ -289,6 +310,12 @@ jobs:
                 const lg=document.querySelector('#tlg-league');
                 lg.value='PT';lg.dispatchEvent(new Event('change',{bubbles:true}));
                 if(all()!==9||groups()!==1)throw Error('Filtro da Liga Portugal nao funciona');
+                if(!document.querySelector('#tlg-league-tabs [data-tlg-league="PT"].active'))
+                  throw Error('Liga Portugal não ficou selecionada nos separadores');
+                document.querySelector('#tlg-league-tabs [data-tlg-league="EN"]').click();
+                if(all()!==11||groups()!==1)throw Error('Separador da Premier League não funciona');
+                document.querySelector('#tlg-league-tabs [data-tlg-league="PT"]').click();
+                if(all()!==9||groups()!==1)throw Error('Regresso à Liga Portugal falhou');
                 const d=document.querySelector('#tlg-day');
                 const allDays=Array.from(document.querySelectorAll('#tlg-tables tr[data-day]'));
                 const search=document.querySelector('#tlg-search');
@@ -346,8 +373,8 @@ jobs:
           assert '<link rel="stylesheet" href="./boletins.css?v=3">' in html
           assert '<script src="./ultimos10.js?v=1" defer></script>' in html
           assert '<link rel="stylesheet" href="./ultimos10.css?v=1">' in html
-          assert '<script src="./tabelas-ligas.js?v=2" defer></script>' in html
-          assert '<link rel="stylesheet" href="./tabelas-ligas.css?v=2">' in html
+          assert '<script src="./tabelas-ligas.js?v=3" defer></script>' in html
+          assert '<link rel="stylesheet" href="./tabelas-ligas.css?v=3">' in html
           assert '<button class="nav-btn" data-go="tables">' in html
           assert 'id="view-tables"' in html and 'id="tlg-export"' in html
           history=json.loads(Path("dados/ultimos10-2026-10-19.json").read_text(encoding="utf-8"))
