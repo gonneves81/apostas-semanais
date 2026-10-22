@@ -1,0 +1,136 @@
+/* Classificações laterais da vista "Todos os jogos" — dados de 2026/27. */
+#view-games .as-table-with-standings{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(310px,365px);
+  gap:13px;align-items:start;min-width:0
+}
+#view-games .as-table-with-standings>.table-scroll{
+  min-width:0;width:100%;max-width:100%;overflow-x:auto;
+  overscroll-behavior-x:contain;scrollbar-width:thin
+}
+#view-games .as-table-with-standings .compact-table{min-width:1000px}
+#view-games .as-standings-intro{
+  font-size:12px;color:#5c7787;margin:5px 0 12px;line-height:1.55
+}
+#view-games .as-league-standings{
+  min-width:0;position:sticky;top:84px;overflow:hidden;
+  border:1px solid #dce7ed;border-radius:15px;background:#fff;
+  box-shadow:0 6px 25px rgba(12,30,45,.045)
+}
+#view-games .as-standing-top{
+  padding:14px 13px 11px;background:#183b51;color:#fff;
+  display:flex;flex-direction:column;gap:5px
+}
+#view-games .as-standing-eyebrow{
+  color:#8be4ce;font-size:10px;letter-spacing:1.05px;
+  font-weight:900;text-transform:uppercase
+}
+#view-games .as-standing-top h3{
+  font-size:18px;letter-spacing:-.4px;margin:0 0 4px;color:#fff
+}
+#view-games .as-standing-top label{font-size:10px;color:#c0d8e3;font-weight:850}
+#view-games .as-standing-top select{
+  width:100%;min-width:0;height:40px;border:1px solid #7390a1;
+  background:#f8fcfd;color:#183d52;border-radius:9px;
+  padding:7px 9px;font-size:12px;font-weight:800
+}
+#view-games .as-standings-meta{
+  font-size:10px;color:#bdd7df;line-height:1.5;margin:4px 0 0;
+  overflow-wrap:anywhere
+}
+#view-games .as-standings-highlight{
+  padding:10px 12px;background:#eaf8f3;border-bottom:1px solid #d3e9de
+}
+#view-games .as-standings-highlight[hidden]{display:none}
+#view-games .as-standings-highlight>b{
+  color:#166b58;font-size:10px;font-weight:900;text-transform:uppercase
+}
+#view-games .as-standings-focus-team{
+  margin-top:7px;padding-top:7px;border-top:1px solid #d5e8e0;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  gap:4px 7px;align-items:baseline
+}
+#view-games .as-standings-focus-team strong{font-size:11px;color:#193f54;overflow-wrap:anywhere}
+#view-games .as-standings-focus-team>span{color:#527b78;font-size:10px;font-weight:750;text-align:right}
+#view-games .as-standings-focus-team .as-standings-form{grid-column:1/-1}
+#view-games .as-standings-scroll{
+  overflow:auto;max-height:570px;overscroll-behavior:contain;
+  scrollbar-width:thin
+}
+#view-games .as-standings-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  color:#2b4c60;font-size:10px;font-variant-numeric:tabular-nums
+}
+#view-games .as-standings-table thead th{
+  position:sticky;top:0;background:#eaf1f5;color:#4d6d7f;
+  font-weight:900;font-size:9px;padding:10px 3px;border-bottom:1px solid #dce7eb;
+  text-align:center;white-space:nowrap;z-index:2
+}
+#view-games .as-standings-table thead th:nth-child(2){text-align:left}
+#view-games .as-standings-table tbody td,
+#view-games .as-standings-table tbody th{
+  padding:7px 3px;border-bottom:1px solid #edf2f4;
+  vertical-align:middle;text-align:center;white-space:nowrap;background:#fff
+}
+#view-games .as-standings-table tbody th{text-align:left;max-width:120px}
+#view-games .as-standings-table tbody tr:nth-child(even) td,
+#view-games .as-standings-table tbody tr:nth-child(even) th{background:#fafcfd}
+#view-games .as-standings-table tbody tr.as-standings-team-selected td,
+#view-games .as-standings-table tbody tr.as-standings-team-selected th{
+  background:#dff5ec!important
+}
+#view-games .as-standings-table tbody tr.as-standings-team-selected th{border-left:3px solid #0c9071}
+#view-games .as-st-rank{font-weight:800;color:#6c8694}
+#view-games .as-st-name{
+  border:0;background:transparent;box-shadow:none;color:#254b5c;
+  font-size:10px;font-weight:850;text-align:left;padding:4px 2px;
+  white-space:normal;line-height:1.25;overflow-wrap:anywhere
+}
+#view-games .as-st-name:hover{text-decoration:underline;color:#06826c}
+#view-games .as-standings-table .as-st-points{color:#063e52;font-weight:950;font-size:11px}
+#view-games .as-st-gf{font-weight:850;color:#157d57}
+#view-games .as-st-ga{font-weight:850;color:#bc5757}
+#view-games .as-standings-form{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+#view-games .as-form{
+  width:15px;height:18px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:4px;font-size:9px;font-weight:950;text-decoration:none;
+  cursor:help;border:1px solid transparent
+}
+#view-games .as-form-v,.as-form-v{background:#e0f4e9;color:#067746;border-color:#cdebd9}
+#view-games .as-form-e,.as-form-e{background:#e8eff7;color:#4c6981;border-color:#d7e3ed}
+#view-games .as-form-d,.as-form-d{background:#ffeded;color:#b7434d;border-color:#f9dce0}
+#view-games .as-st-small{display:block;color:#8b9ca5;font-size:8px}
+#view-games .as-standings-na{color:#92a1ad}
+#view-games .as-standings-empty{
+  padding:24px!important;text-align:center!important;font-size:11px;
+  color:#6c8292;line-height:1.5;white-space:normal!important
+}
+#view-games .as-standings-foot{
+  padding:11px 13px;border-top:1px solid #e4eef2;
+  background:#fbfdfe;font-size:10px;color:#617f8e;line-height:1.55
+}
+#view-games .as-standings-foot p{margin:8px 0}
+#view-games .as-standings-foot a{font-size:10px;font-weight:800;color:#117966}
+#view-games .as-standings-key{display:flex;flex-wrap:wrap;gap:8px}
+#view-games .as-standings-key span{display:inline-flex;align-items:center;gap:4px}
+#view-games .as-standings-key b{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:17px;height:18px;border-radius:4px;font-size:10px
+}
+#view-games .as-standings-game-selected>td{background:#f0faf5!important}
+#view-games .as-standings-game-selected>td:first-child{border-left:3px solid #18a17f}
+@media(max-width:1090px){
+  #view-games .as-table-with-standings{grid-template-columns:minmax(0,1fr)}
+  #view-games .as-league-standings{position:relative;top:auto}
+  #view-games .as-standings-scroll{max-height:400px}
+  #view-games .as-standings-table tbody th{max-width:none}
+}
+@media(max-width:720px){
+  #view-games .as-table-with-standings{gap:12px}
+  #view-games .as-standing-top{padding:12px}
+  #view-games .as-league-standings{border-radius:13px}
+  #view-games .as-standings-table tbody td,
+  #view-games .as-standings-table tbody th{padding:8px 5px}
+  #view-games .as-st-name{font-size:11px}
+  #view-games .as-standings-scroll{max-height:410px}
+  #view-games .as-form{width:18px;height:19px;font-size:10px}
+}
