@@ -1,0 +1,216 @@
+/* Apostas Semanais · tabelas exaustivas por liga, percentagens e últimos 7 jogos.
+   Liga-se ao calendário da semana e ao arquivo pré-jogo de resultados.
+   As percentagens são estimativas; as formas são resultados encontrados em fontes públicas. */
+(function(){
+'use strict';
+function start(){
+  const panel=document.getElementById('view-tables');
+  const jsonEl=document.getElementById('data-json');
+  if(!panel||!jsonEl)return;
+  let D;try{D=JSON.parse(jsonEl.textContent);}catch(e){return;}
+  const byId=new Map((D.games||[]).map(g=>[Number(g.id),g]));
+  const leagues=Array.isArray(D.leagues)?D.leagues:[];
+  const $=id=>document.getElementById(id);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pct=p=>typeof p==='number'&&Number.isFinite(p)&&p>=0&&p<=1?(p*100).toFixed(1).replace('.',',')+'%':'—';
+  const num=v=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('pt-PT'):'—';
+  const cols=[
+    {key:'W1',name:'1',title:'Vitória da equipa da casa',group:'1X2'},
+    {key:'X',name:'X',title:'Empate',group:'1X2'},
+    {key:'W2',name:'2',title:'Vitória da equipa visitante',group:'1X2'},
+    {key:'BTTS',name:'AM',title:'Ambas Marcam — Sim',group:'Golos'},
+    {key:'O25',name:'+2,5',title:'Mais de 2,5 golos',group:'Golos'},
+    {key:'AND',name:'AM E +2,5',title:'Ambas Marcam E Mais de 2,5',group:'Golos'},
+    {key:'OR',name:'AM OU +2,5',title:'Ambas Marcam OU Mais de 2,5',group:'Golos'},
+    {key:'O15',name:'+1,5',title:'Mais de 1,5 golos',group:'Golos',extra:true},
+    {key:'BTTS_NO',name:'AM Não',title:'Ambas Marcam — Não',group:'Golos',extra:true},
+    {key:'C85',name:'Cantos +8,5',title:'Mais de 8,5 cantos',group:'Cantos',extra:true},
+    {key:'C95',name:'Cantos +9,5',title:'Mais de 9,5 cantos',group:'Cantos',extra:true},
+    {key:'HT1',name:'1.ª C',title:'Vitória da casa na 1.ª parte',group:'1.ª parte',extra:true},
+    {key:'HTX',name:'1.ª X',title:'Empate na 1.ª parte',group:'1.ª parte',extra:true},
+    {key:'HT2',name:'1.ª F',title:'Vitória da equipa visitante na 1.ª parte',group:'1.ª parte',extra:true},
+    {key:'SH1',name:'2.ª C',title:'Vitória da casa na 2.ª parte',group:'2.ª parte',extra:true},
+    {key:'SHX',name:'2.ª X',title:'Empate na 2.ª parte',group:'2.ª parte',extra:true},
+    {key:'SH2',name:'2.ª F',title:'Vitória da equipa visitante na 2.ª parte',group:'2.ª parte',extra:true}
+  ];
+  const marketSelect=$('tlg-market');
+  if(marketSelect)marketSelect.innerHTML='<option value="date">Data e hora</option>'+cols.map(c=>
+    '<option value="'+c.key+'">Maior % · '+esc(c.title)+'</option>').join('');
+  const base=new Date(String(D.start)+'T12:00:00Z');
+  const weekdays=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date(base.getTime()+i*86400000);
+    return {date:d.toISOString().slice(0,10),label:weekdays[i]+' '+String(d.getUTCDate()).padStart(2,'0')};
+  });
+  const daySelect=$('tlg-day');
+  if(daySelect)daySelect.innerHTML='<option value="all">Toda a semana</option>'+
+     days.map(x=>'<option value="'+x.date+'">'+x.label+'</option>').join('');
+  const leagueSelect=$('tlg-league');
+  if(leagueSelect)leagueSelect.innerHTML='<option value="all">Todas as 12 competições</option>'+
+    leagues.map(l=>'<option value="'+esc(l.code)+'">'+esc(l.flag||'')+' '+esc(l.name)+'</option>').join('');
+  const leagueMap=new Map(leagues.map(l=>[l.code,l]));
+  let history=null,loading=true,historyError=false,mode='full',visible=[];
+  const dateKey=g=>{
+    if(typeof g.date==='string'&&/^\d{4}-\d\d-\d\d$/.test(g.date))return g.date;
+    const n=Number(g.day),d=days.find(x=>Number(x.date.slice(-2))===n);
+    return d?.date||D.start;
+  };
+  function probability(g,key){
+    if(!g||g.verified===false)return null;
+    const p=g.p||{},first=g.first||{},second=g.second||{};
+    const value={
+      W1:p.w1,X:p.draw,W2:p.w2,BTTS:p.btts,BTTS_NO:p.no,
+      O15:p.o15,O25:p.o25,AND:p.and,OR:p.or,C85:g.c85,C95:g.c95,
+      HT1:first.w1,HTX:first.draw,HT2:first.w2,
+      SH1:second.w1,SHX:second.draw,SH2:second.w2
+    }[key];
+    return typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=1?value:null;
+  }
+  function latest(g,side){
+    const input=history?.byGame?.[g.id]?.[side];
+    const source=Array.isArray(input?.results)?input.results:[];
+    // Não usar um jogo posterior ao encontro que está a ser analisado.
+    const date=dateKey(g);
+    const results=source.filter(r=>r&&/^\d{4}-\d\d-\d\d$/.test(r.date||'')&&r.date<date&&
+      Number.isInteger(r.gf)&&Number.isInteger(r.ga)&&['V','E','D'].includes(r.outcome))
+      .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
+    const gf=results.reduce((a,r)=>a+r.gf,0),ga=results.reduce((a,r)=>a+r.ga,0);
+    return {results,gf,ga,n:results.length};
+  }
+  function formCell(info,name){
+    if(!history)return '<td class="tlg-form-td" title="Histórico indisponível"><span class="tlg-na">—</span></td>';
+    const tokens=info.results.map(r=>
+      '<abbr class="tlg-result tlg-'+r.outcome.toLowerCase()+'" title="'+
+      esc(r.date+' · '+(r.venue==='C'?'Casa':'Fora')+' contra '+r.opponent+
+      ' · '+r.gf+'-'+r.ga)+'">'+r.outcome+'</abbr>').join('');
+    const explain=info.n<7?'<small class="tlg-coverage" title="Resultados que foi possível confirmar no arquivo">'+info.n+'/7 disponíveis</small>':'';
+    return '<td class="tlg-form-td"><div class="tlg-results" aria-label="Últimos '+info.n+
+      ' resultados de '+esc(name)+'; do mais recente para o mais antigo">'+
+      (tokens||'<span class="tlg-na">Sem dados</span>')+'</div>'+explain+'</td>';
+  }
+  function goalsCell(info){
+    if(!history)return '<td class="tlg-goals"><span class="tlg-na">—</span></td>';
+    if(!info.n)return '<td class="tlg-goals"><span class="tlg-na">S/dados</span></td>';
+    return '<td class="tlg-goals"><strong>'+info.gf+' / '+info.ga+'</strong><small>GM / GS · '+info.n+'/7</small></td>';
+  }
+  const tableHead=()=>'<thead><tr>'+
+    '<th class="tlg-team-th" scope="col">Data e jogo</th>'+
+    '<th scope="col" title="Golos marcados / sofridos nos últimos sete resultados disponíveis da equipa da casa">Casa<br>GM / GS</th>'+
+    '<th scope="col">Últimos 7<br>Casa (V E D)</th>'+
+    '<th scope="col" title="Golos marcados / sofridos nos últimos sete resultados disponíveis da equipa visitante">Fora<br>GM / GS</th>'+
+    '<th scope="col">Últimos 7<br>Fora (V E D)</th>'+
+    cols.map(c=>'<th scope="col"'+(c.extra?' class="tlg-extra"':'')+
+      ' title="'+esc(c.title)+'">'+esc(c.name)+'</th>').join('')+'</tr></thead>';
+  function gameRow(g){
+    const h=latest(g,'home'),a=latest(g,'away'),dt=dateKey(g),time=g.time||'';
+    const lg=leagueMap.get(g.league),exploratory=g.modelStatus==='exploratory_uefa';
+    const caution=exploratory?'<span class="tlg-warning" title="Modelo exploratório UEFA com amostra pequena, não calibrado">UEFA experimental</span>':
+        g.verified===false?'<span class="tlg-unavailable">Sem previsão</span>':'';
+    return '<tr><th scope="row" class="tlg-fixture"><div class="tlg-date">'+esc(dt.slice(8,10)+'/'+dt.slice(5,7))+
+      ' · '+esc(time)+' <span>PT</span></div>'+
+      '<strong>'+esc(g.home)+' <span class="tlg-vs">–</span> '+esc(g.away)+'</strong>'+
+      '<div class="tlg-fixture-actions">'+caution+
+      '<button type="button" data-open="'+Number(g.id)+'" class="tlg-detail">Analisar ↗</button></div></th>'+
+      goalsCell(h)+formCell(h,g.home)+goalsCell(a)+formCell(a,g.away)+
+      cols.map(c=>'<td class="tlg-prob'+(c.extra?' tlg-extra':'')+'" title="'+esc(c.title)+
+        ' · '+esc(g.home)+' - '+esc(g.away)+'">'+pct(probability(g,c.key))+'</td>').join('')+
+      '</tr>';
+  }
+  function cmpDate(a,b){return dateKey(a).localeCompare(dateKey(b))||
+    String(a.time||'').localeCompare(String(b.time||''))||Number(a.id)-Number(b.id);}
+  function candidates(){
+    const league=leagueSelect?.value||'all',day=daySelect?.value||'all';
+    const search=String($('tlg-search')?.value||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const selected=(D.games||[]).filter(g=>
+      (league==='all'||g.league===league)&&(day==='all'||dateKey(g)===day)&&
+      (!search||(g.home+' '+g.away+' '+(leagueMap.get(g.league)?.name||'')).normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(search)));
+    const market=marketSelect?.value||'date';
+    if(market==='date')selected.sort(cmpDate);
+    else selected.sort((a,b)=>(probability(b,market)??-1)-(probability(a,market)??-1)||cmpDate(a,b));
+    return selected;
+  }
+  function render(){
+    const all=candidates();
+    visible=all;
+    const extra=mode==='full'?'':' tlg-summary';
+    const out=$('tlg-tables');
+    if(!out)return;
+    out.className='tlg-tables'+extra;
+    const coverage=all.flatMap(g=>[latest(g,'home').n,latest(g,'away').n]);
+    const full=history?coverage.filter(x=>x>=7).length:0;
+    const status=loading?'A carregar os resultados anteriores…':
+      historyError?'O arquivo de resultados não está disponível. As probabilidades continuam visíveis; GM/GS e forma ficam por preencher.':
+      full+' de '+coverage.length+' equipas/jogos com 7 resultados no arquivo';
+    $('tlg-count').textContent=all.length+' de '+(D.games||[]).length+' jogos · '+status;
+    $('tlg-data-status').textContent=history?
+      'GM/GS e sequência V/E/D referem-se exclusivamente aos últimos 7 resultados encontrados ANTES do encontro, incluindo outras competições quando disponíveis. Menos de 7 não significa que a equipa não jogou.':
+      'Resultados anteriores: '+(loading?'a carregar…':'indisponíveis neste momento.');
+    if(!all.length){
+      out.innerHTML='<div class="tlg-empty">Não foram encontrados jogos com estes filtros. Altera a competição, o dia ou a pesquisa.</div>';
+      return;
+    }
+    const chunks=[];
+    for(const league of leagues){
+      const games=all.filter(g=>g.league===league.code);
+      if(!games.length)continue;
+      const measured=games.filter(g=>g.verified!==false).length;
+      const experimental=games.filter(g=>g.modelStatus==='exploratory_uefa').length;
+      const statement=measured+' com probabilidades'+(experimental?' · '+experimental+' estimativas UEFA exploratórias':'');
+      chunks.push('<details open class="tlg-league" data-tlg-code="'+esc(league.code)+'">'+
+        '<summary><span class="tlg-league-name">'+esc(league.flag||'⚽')+' '+esc(league.name)+'</span>'+
+        '<span class="tlg-league-count">'+games.length+' jogos · '+statement+'</span><span class="tlg-chevron" aria-hidden="true">⌄</span></summary>'+
+        '<div class="tlg-scroll" role="region" tabindex="0" aria-label="Tabela dos jogos da '+esc(league.name)+'; desliza na horizontal">'+
+        '<table class="tlg-table">'+tableHead()+'<tbody>'+games.map(gameRow).join('')+'</tbody></table></div>'+
+        '</details>');
+    }
+    out.innerHTML=chunks.join('');
+  }
+  function exportCsv(){
+    if(!visible.length)return;
+    const head=['Data','Hora PT','Liga','Casa','Fora','Casa GM 7','Casa GS 7','Casa jogos','Casa forma VED (recente primeiro)','Fora GM 7','Fora GS 7','Fora jogos','Fora forma VED (recente primeiro)',...cols.map(c=>c.title),'Modelo'];
+    const rows=visible.map(g=>{
+      const h=latest(g,'home'),a=latest(g,'away'),league=leagueMap.get(g.league)?.name||g.league;
+      return [dateKey(g),g.time,league,g.home,g.away,
+        history&&h.n?h.gf:'',history&&h.n?h.ga:'',history?h.n:'',
+        h.results.map(x=>x.outcome).join(''),history&&a.n?a.gf:'',history&&a.n?a.ga:'',history?a.n:'',
+        a.results.map(x=>x.outcome).join(''),
+        ...cols.map(c=>{const p=probability(g,c.key);return p===null?'':(p*100).toFixed(1).replace('.',',')+'%';}),
+        g.modelStatus|| (g.verified===false?'Sem previsão':'Modelo reportado')];
+    });
+    const escapeCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+    const output='\ufeff'+[head,...rows].map(row=>row.map(escapeCsv).join(';')).join('\r\n');
+    const blob=new Blob([output],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+    a.download='Apostas_Semanais_Tabelas_'+String(D.start||'semana')+'.csv';
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+  }
+  for(const id of ['tlg-search','tlg-day','tlg-league','tlg-market']){
+    const el=$(id);
+    if(el)el.addEventListener(id==='tlg-search'?'input':'change',render);
+  }
+  document.querySelectorAll('[data-tlg-mode]').forEach(button=>button.addEventListener('click',()=>{
+    mode=button.dataset.tlgMode==='summary'?'summary':'full';
+    document.querySelectorAll('[data-tlg-mode]').forEach(b=>{
+      const active=b.dataset.tlgMode===mode;b.classList.toggle('active',active);
+      b.setAttribute('aria-pressed',String(active));
+    });
+    render();
+  }));
+  $('tlg-export')?.addEventListener('click',exportCsv);
+  render();
+  // O ficheiro mantém a mesma convenção de nomes utilizada na ficha dos jogos.
+  fetch('./dados/ultimos10-'+D.start+'.json',{cache:'no-store'}).then(async response=>{
+    if(!response.ok)throw Error('Resultados indisponíveis (HTTP '+response.status+')');
+    return response.json();
+  }).then(input=>{
+    if(input?.period?.start!==D.start||!input.byGame)throw Error('O histórico não corresponde à semana');
+    history=input;loading=false;render();
+  }).catch(error=>{
+    historyError=true;loading=false;render();
+    console.warn('Tabelas por liga: histórico indisponível',error);
+  });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+else start();
+})();
