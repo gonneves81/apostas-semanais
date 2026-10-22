@@ -292,9 +292,9 @@ jobs:
                 const d=document.querySelector('#tlg-day');
                 const allDays=Array.from(document.querySelectorAll('#tlg-tables tr[data-day]'));
                 const search=document.querySelector('#tlg-search');
-                search.value='Benfica';search.dispatchEvent(new Event('input',{bubbles:true}));
+                search.value='Braga';search.dispatchEvent(new Event('input',{bubbles:true}));
                 const matches=Array.from(document.querySelectorAll('#tlg-tables .tlg-fixture'));
-                if(!matches.length||matches.some(x=>!x.textContent.includes('Benfica')))throw Error('Pesquisa de equipa nao funciona');
+                if(!matches.length||matches.some(x=>!x.textContent.includes('Braga')))throw Error('Pesquisa de equipa nao funciona');
                 search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));
                 if(all()!==9)throw Error('Pesquisa nao restaurou a lista');
                 document.querySelector('[data-tlg-mode="summary"]').click();
