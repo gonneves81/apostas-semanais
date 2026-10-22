@@ -9,6 +9,9 @@ on:
       - "qualidade.js"
       - "apostas-reais.js"
       - "melhorias.css"
+      - "ultimos10.js"
+      - "ultimos10.css"
+      - "dados/ultimos10-2026-10-19.json"
       - "scripts/avaliar_previsoes.py"
       - "scripts/test_avaliar_previsoes.py"
       - ".github/workflows/verificar-site.yml"
@@ -25,6 +28,7 @@ jobs:
           node --check boletins.js
           node --check qualidade.js
           node --check apostas-reais.js
+          node --check ultimos10.js
       - name: Testar métricas do modelo com casos sintéticos
         run: python3 scripts/test_avaliar_previsoes.py -v
       - name: Validar interface interativa no Chromium
@@ -34,7 +38,7 @@ jobs:
             echo "Chromium indisponivel no runner"
             exit 1
           fi
-          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=4500 --dump-dom "file://$PWD/index.html#top20" > /tmp/apostas-dom.html 2>/tmp/chrome-stderr.txt
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=7500 --dump-dom "file://$PWD/index.html#top20" > /tmp/apostas-dom.html 2>/tmp/chrome-stderr.txt
           python3 - <<'PY'
           from pathlib import Path
           s=Path('/tmp/apostas-dom.html').read_text(encoding='utf-8')
@@ -46,6 +50,7 @@ jobs:
           assert 'id="qa-real-history"' in s, "Historico de apostas reais em falta"
           assert 'id="qa-model-audit"' in s, "Monitor de evolucao do modelo em falta"
           assert 'qa-index' in s, "Qualidade de dados ausente"
+          assert 'lt10-card-mini' in s, "Resumo dos ultimos jogos e golos nao aparece nos cartoes"
           assert 'id="as-datebar-choices"' in s, "Filtro por dia em escolhas em falta"
           assert 'id="as-datebar-games"' in s, "Filtro por dia em jogos em falta"
           assert 'data-as-sort="date"' in s, "Ordenacao por data em falta"
@@ -207,6 +212,12 @@ jobs:
                 await new Promise(r=>setTimeout(r,160));
                 const modalSelect=document.querySelector('#modal-content [data-pick-select]');
                 if(!modalSelect||modalSelect.value!=='OR')throw Error('Detalhe do jogo não herdou AM OU +2,5');
+                await new Promise(r=>setTimeout(r,220));
+                const last10=document.querySelector('#modal-content .lt10-section');
+                if(!last10)throw Error('Lista de ultimos dez jogos nao carregada no detalhe');
+                if(last10.querySelectorAll('.lt10-team').length!==2)throw Error('Faltam os dois historicos de equipas');
+                if(!last10.textContent.includes('Golos marcados')||!last10.textContent.includes('Golos sofridos'))throw Error('Totais GM/GS nao apresentados');
+                if(!last10.querySelector('.lt10-match'))throw Error('Nenhum resultado historico apresentado');
                 document.querySelector('#modal-close').click();
                 const dayControl=document.querySelector('#day-filter');
                 dayControl.value='20';dayControl.dispatchEvent(new Event('change',{bubbles:true}));
@@ -230,7 +241,7 @@ jobs:
           Path(".app-smoke.html").write_text(page.replace('</body>',test_script+'</body>'),encoding='utf-8')
           PY
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=6500 --dump-dom "file://$PWD/.app-smoke.html#top20" > /tmp/app-interaction.html 2>/tmp/app-interaction-errors.txt
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=9000 --dump-dom "file://$PWD/.app-smoke.html#top20" > /tmp/app-interaction.html 2>/tmp/app-interaction-errors.txt
           python3 - <<'PY'
           from pathlib import Path
           from html import unescape
@@ -253,6 +264,18 @@ jobs:
           assert '<script src="./apostas-reais.js?v=1" defer></script>' in html
           assert '<link rel="stylesheet" href="./melhorias.css?v=1">' in html
           assert '<link rel="stylesheet" href="./boletins.css?v=3">' in html
+          assert '<script src="./ultimos10.js?v=1" defer></script>' in html
+          assert '<link rel="stylesheet" href="./ultimos10.css?v=1">' in html
+          history=json.loads(Path("dados/ultimos10-2026-10-19.json").read_text(encoding="utf-8"))
+          assert len(history["byGame"])==139
+          for g in json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))["games"]:
+              b=history["byGame"][str(g["id"])]
+              for which in ("home","away"):
+                  team=b[which]
+                  assert team["available"]==len(team["results"])<=10
+                  assert all(row["date"]<b["date"] for row in team["results"])
+                  assert team["stats"]["gf"]==sum(row["gf"] for row in team["results"])
+                  assert team["stats"]["ga"]==sum(row["ga"] for row in team["results"])
           assert 'id="rank-list"' in html and 'id="view-games"' in html
           data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
           assert len(data["games"]) > 10 and len(data["leagues"]) == 12
