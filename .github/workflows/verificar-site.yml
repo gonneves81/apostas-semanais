@@ -360,6 +360,85 @@ jobs:
           assert result=='PASS', result
           PY
           rm -f .tables-test.html
+      - name: Testar ordenação por probabilidade nas colunas
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text(encoding='utf-8')
+          js=r'''<script>
+          document.addEventListener('DOMContentLoaded',()=>{
+            setTimeout(()=>{
+              try{
+                document.querySelector('[data-go="games"]').click();
+                document.querySelector('#layout-table').click();
+                const lg=document.querySelector('#day-filter');
+                lg.value='all';lg.dispatchEvent(new Event('change',{bubbles:true}));
+                const table=document.querySelector('#table-list');
+                if(table.hidden)throw Error('Tabela de jogos nao esta visivel');
+                if(document.querySelectorAll('#game-rows tr').length!==139)throw Error('Faltam jogos');
+                function orderedValues(market){
+                  const col=['W1','X','W2','BTTS','O25','AND','C85'].indexOf(market)+4;
+                  return Array.from(document.querySelectorAll('#game-rows tr')).map(tr=>{
+                    const td=tr.querySelectorAll('td')[col-1];
+                    const text=td?.textContent?.trim();
+                    if(!text||text==='—')return null;
+                    return Number(text.replace('%','').replace(',','.'));
+                  });
+                }
+                function assertOrder(market,dir){
+                  const arr=orderedValues(market),valid=arr.filter(v=>v!==null);
+                  if(valid.length<30)throw Error('Amostra demasiado curta: '+market);
+                  if(valid.some((v,i)=>i>0&&(dir==='desc'?v>valid[i-1]+.01:v<valid[i-1]-.01)))
+                    throw Error('Ordenacao '+dir+' falhou: '+market);
+                  if(arr.slice(valid.length).some(v=>v!==null))
+                    throw Error('Valores ausentes nao ficaram no fim: '+market);
+                  const active=document.querySelector('#table-list [data-sort-header="'+market+'"]');
+                  if(active?.getAttribute('aria-sort')!==(dir==='desc'?'descending':'ascending'))
+                    throw Error('Estado acessivel da ordenacao incorreto: '+market);
+                }
+                document.querySelector('#table-list thead [data-table-sort="BTTS"]').click();
+                assertOrder('BTTS','desc');
+                if(document.querySelector('#metric-filter').value!=='BTTS')
+                  throw Error('Mercado AM nao sincronizou com filtro');
+                document.querySelector('#table-list thead [data-table-sort="BTTS"]').click();
+                assertOrder('BTTS','asc');
+                document.querySelector('#table-list thead [data-table-sort="C85"]').click();
+                assertOrder('C85','desc');
+                document.querySelector('#table-list thead [data-table-sort="X"]').click();
+                assertOrder('X','desc');
+                if(document.querySelector('#metric-filter').value!=='X')
+                  throw Error('Empate X nao sincronizou filtro');
+                const cell=document.querySelector('#game-rows td.table-percentage [data-table-sort="O25"]:not([disabled])');
+                if(!cell)throw Error('Nao ha percentagem +2,5 clicavel');
+                cell.click();
+                assertOrder('O25','desc');
+                const top=document.querySelector('#game-rows tr');
+                if(!top?.querySelector('td.as-td [data-add-slip]'))
+                  throw Error('Ordenacao perdeu botoes dos boletins');
+                document.querySelector('#order-filter').value='date';
+                document.querySelector('#order-filter').dispatchEvent(new Event('change',{bubbles:true}));
+                if(document.querySelector('#table-list [aria-sort="descending"]'))
+                  throw Error('Limpar ordenacao nao removeu destaque');
+                document.body.dataset.sortSmoke='PASS';
+              }catch(e){document.body.dataset.sortSmoke='FAIL: '+e.message}
+            },1200);
+          });
+          </script>'''
+          Path('.sort-test.html').write_text(html.replace('</body>',js+'</body>'),encoding='utf-8')
+          PY
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=10000 --dump-dom "file://$PWD/.sort-test.html#jogos" >/tmp/sort-test-dom.html 2>/tmp/sort-test-chrome-errors.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          from html import unescape
+          import re
+          html=Path('/tmp/sort-test-dom.html').read_text(encoding='utf-8')
+          m=re.search(r'<body[^>]+data-sort-smoke="([^"]+)"',html)
+          status=unescape(m.group(1)) if m else 'NOT_RUN'
+          print('Ordenacao:',status)
+          assert status=='PASS',status
+          PY
+          rm -f .sort-test.html
       - name: Verificar arquivos e conteudo
         run: |
           python3 - <<'PY'
