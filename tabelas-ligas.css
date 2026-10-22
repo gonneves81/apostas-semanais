@@ -70,3 +70,63 @@
   .bottomnav button{min-width:0;flex:1;padding:5px 1px;font-size:9px}
 }
 @media(max-width:395px){#view-tables .tlg-controls{grid-template-columns:1fr 1fr}#view-tables .tlg-field:nth-child(2){grid-column:1/-1}}
+
+/* Leitura imediata: badges de percentagens, quadro de golos e categorias. */
+#view-tables .tlg-header-groups th{
+  background:#e8f0f5!important;color:#3e6176!important;
+  border-bottom:1px solid #d6e3ea!important;font-size:10px!important;
+  letter-spacing:.65px!important;text-transform:uppercase!important;
+  font-weight:900!important;padding:8px 12px!important;text-align:center!important;
+  position:static!important;left:auto!important;min-width:auto!important
+}
+#view-tables .tlg-tables.tlg-summary .tlg-header-groups{display:none}
+#view-tables .tlg-table tbody .tlg-fixture>strong{
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;gap:6px;font-size:12px;min-height:26px
+}
+#view-tables .tlg-home{color:#163f55;text-align:right}
+#view-tables .tlg-away{color:#163f55;text-align:left}
+#view-tables .tlg-vs{font-size:12px;color:#9babb5}
+#view-tables .tlg-score-duo{
+  display:inline-flex;justify-content:center;align-items:center;gap:4px;
+  font-variant-numeric:tabular-nums
+}
+#view-tables .tlg-gf,#view-tables .tlg-ga{
+  min-width:27px;padding:5px 6px;border-radius:6px;font-size:12px;font-weight:900
+}
+#view-tables .tlg-gf{color:#16704e;background:#e2f5e9}
+#view-tables .tlg-ga{color:#a44747;background:#ffeded}
+#view-tables .tlg-sep{color:#7f99a8;font-weight:750}
+#view-tables .tlg-pct-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:59px;min-height:28px;padding:4px 7px;border-radius:8px;
+  font-size:11px;font-weight:900;line-height:1.15;
+  font-variant-numeric:tabular-nums;letter-spacing:0
+}
+#view-tables .tlg-prob-strong{background:#ccebdd;color:#075d41;border:1px solid #b7dec9}
+#view-tables .tlg-prob-high{background:#e4f4eb;color:#1c7450;border:1px solid #d0e9db}
+#view-tables .tlg-prob-medium{background:#fff1d4;color:#855b17;border:1px solid #f5e2b1}
+#view-tables .tlg-prob-low{background:#f0f4f7;color:#687c8c;border:1px solid #e1e9ef}
+#view-tables .tlg-prob-none{background:#f6f7f9;color:#9aa9b4;border:1px solid #e8edf0}
+#view-tables .tlg-table tbody tr:nth-child(even)>td,
+#view-tables .tlg-table tbody tr:nth-child(even)>th{background:#fbfdfe}
+#view-tables .tlg-table tbody tr:hover>td,
+#view-tables .tlg-table tbody tr:hover>th{background:#f0f8f6}
+#view-tables .tlg-legend{
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px 13px;
+  font-size:11px;color:#607f8f;margin:11px 0 15px
+}
+#view-tables .tlg-legend .tlg-pct-pill{
+  min-width:45px;min-height:25px;font-size:10px;padding:3px 5px
+}
+#view-tables .tlg-legend-key{display:flex;align-items:center;gap:5px}
+#view-tables .tlg-legend-note{width:100%;font-size:10px;color:#718594}
+@media(max-width:720px){
+  #view-tables .tlg-table tbody .tlg-fixture>strong{
+    grid-template-columns:minmax(0,1fr);gap:1px;text-align:left
+  }
+  #view-tables .tlg-home,#view-tables .tlg-away{text-align:left}
+  #view-tables .tlg-vs{display:none}
+  #view-tables .tlg-pct-pill{min-width:54px;min-height:27px;font-size:10px}
+  #view-tables .tlg-gf,#view-tables .tlg-ga{min-width:24px;padding:4px;font-size:11px}
+}
