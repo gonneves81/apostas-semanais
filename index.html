@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="./boletins.css?v=3">
 <link rel="stylesheet" href="./melhorias.css?v=1">
 <link rel="stylesheet" href="./ultimos10.css?v=1">
-<link rel="stylesheet" href="./tabelas-ligas.css?v=1">
+<link rel="stylesheet" href="./tabelas-ligas.css?v=2">
 </head>
 <body>
 <header class="topbar"><div class="wrap topbar-inner">
@@ -82,6 +82,13 @@
 <button type="button" data-tlg-mode="summary" aria-pressed="false">Resumo</button></div>
 <button type="button" id="tlg-export">Exportar tabela CSV ↓</button></div>
 <p class="tlg-hint">Desliza as tabelas <strong>para os lados</strong> no telemóvel. A primeira coluna com o jogo mantém-se visível. A sequência <strong>V / E / D</strong> está ordenada do jogo mais recente para o mais antigo; toca numa letra para veres adversário, data e resultado. GM/GS são os golos marcados e sofridos nos <strong>últimos 7 resultados disponíveis</strong>, não uma projeção. Carrega em <strong>Analisar</strong> para ver a ficha e os últimos 10 jogos quando existirem.</p>
+<div class="tlg-legend" aria-label="Legenda de percentagens">
+<span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-strong">≥75%</span> Mais provável</span>
+<span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-high">60–74%</span> Elevada</span>
+<span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-medium">45–59%</span> Intermédia</span>
+<span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-low">&lt;45%</span> Menor</span>
+<span class="tlg-legend-note">As cores mostram apenas a magnitude da percentagem estimada, não confiança calibrada ou valor de aposta. V = vitória · E = empate · D = derrota.</span>
+</div>
 <strong id="tlg-count" role="status" aria-live="polite">A carregar jogos…</strong>
 <p id="tlg-data-status">A preparar os resultados históricos…</p>
 <div id="tlg-tables" class="tlg-tables"></div>
@@ -233,6 +240,6 @@ renderAll();const hash=location.hash.replace('#','');if(hash==='jogos')go('games
 <script src="./qualidade.js?v=2" defer></script>
 <script src="./apostas-reais.js?v=1" defer></script>
 <script src="./ultimos10.js?v=1" defer></script>
-<script src="./tabelas-ligas.js?v=1" defer></script>
+<script src="./tabelas-ligas.js?v=2" defer></script>
 </body>
 </html>
