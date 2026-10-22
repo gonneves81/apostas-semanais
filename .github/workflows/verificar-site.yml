@@ -11,6 +11,8 @@ on:
       - "melhorias.css"
       - "ultimos10.js"
       - "ultimos10.css"
+      - "tabelas-ligas.js"
+      - "tabelas-ligas.css"
       - "dados/ultimos10-2026-10-19.json"
       - "scripts/avaliar_previsoes.py"
       - "scripts/test_avaliar_previsoes.py"
@@ -29,6 +31,7 @@ jobs:
           node --check qualidade.js
           node --check apostas-reais.js
           node --check ultimos10.js
+          node --check tabelas-ligas.js
       - name: Testar métricas do modelo com casos sintéticos
         run: python3 scripts/test_avaliar_previsoes.py -v
       - name: Validar interface interativa no Chromium
@@ -51,6 +54,11 @@ jobs:
           assert 'id="qa-model-audit"' in s, "Monitor de evolucao do modelo em falta"
           assert 'qa-index' in s, "Qualidade de dados ausente"
           assert 'lt10-card-mini' in s, "Resumo dos ultimos jogos e golos nao aparece nos cartoes"
+          assert 'id="view-tables"' in s, "Separador de tabelas ausente"
+          assert s.count('class="tlg-fixture"')==139, "Tabela nao contem os 139 jogos"
+          assert s.count('class="tlg-league"')==12, "Nao ha 12 grupos de competicoes"
+          assert 'tlg-pct-pill tlg-prob-' in s, "Percentagens por cores nao carregadas"
+          assert 'tlg-result tlg-' in s, "Forma VED em cores nao carregada"
           assert 'id="as-datebar-choices"' in s, "Filtro por dia em escolhas em falta"
           assert 'id="as-datebar-games"' in s, "Filtro por dia em jogos em falta"
           assert 'data-as-sort="date"' in s, "Ordenacao por data em falta"
@@ -253,6 +261,78 @@ jobs:
           assert result == 'PASS', result
           PY
           rm -f .app-smoke.html
+      - name: Testar navegacao e filtros das Tabelas por Liga no Chromium
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          content=Path('index.html').read_text(encoding='utf-8')
+          test=r'''<script>
+          document.addEventListener('DOMContentLoaded',()=>{
+            setTimeout(()=>{
+              try{
+                const main=document.querySelector('[data-go="tables"]');
+                if(!main)throw Error('Botao para tabelas nao existe');
+                main.click();
+                if(document.querySelector('#view-tables').hidden)throw Error('Vista de tabelas nao abriu');
+                if(location.hash!=='#tabelas')throw Error('Navegacao nao tem hash de tabelas');
+                const all=()=>document.querySelectorAll('#tlg-tables tbody tr').length;
+                const groups=()=>document.querySelectorAll('#tlg-tables details.tlg-league').length;
+                if(all()!==139)throw Error('Faltam jogos na tabela ('+all()+')');
+                if(groups()!==12)throw Error('Faltam competicoes ('+groups()+')');
+                if(!document.querySelector('.tlg-pct-pill.tlg-prob-high'))throw Error('Escala de cores nao apresentada');
+                const results=Array.from(document.querySelectorAll('#tlg-tables .tlg-result'));
+                if(results.length<300)throw Error('Nao carregou sequencias VED dos ultimos sete');
+                if(results.some(x=>!['V','E','D'].includes(x.textContent.trim())))throw Error('Forma invalida');
+                const first=document.querySelector('#tlg-tables tbody tr');
+                if(!first.querySelector('.tlg-gf')||!first.querySelector('.tlg-ga'))throw Error('Golos marcados/sofridos nao exibidos');
+                if(first.querySelectorAll('.tlg-prob').length!==17)throw Error('Faltam os 17 mercados');
+                const lg=document.querySelector('#tlg-league');
+                lg.value='PT';lg.dispatchEvent(new Event('change',{bubbles:true}));
+                if(all()!==9||groups()!==1)throw Error('Filtro da Liga Portugal nao funciona');
+                const d=document.querySelector('#tlg-day');
+                const allDays=Array.from(document.querySelectorAll('#tlg-tables tr[data-day]'));
+                const search=document.querySelector('#tlg-search');
+                search.value='Benfica';search.dispatchEvent(new Event('input',{bubbles:true}));
+                const matches=Array.from(document.querySelectorAll('#tlg-tables .tlg-fixture'));
+                if(!matches.length||matches.some(x=>!x.textContent.includes('Benfica')))throw Error('Pesquisa de equipa nao funciona');
+                search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));
+                if(all()!==9)throw Error('Pesquisa nao restaurou a lista');
+                document.querySelector('[data-tlg-mode="summary"]').click();
+                if(!document.querySelector('#tlg-tables').classList.contains('tlg-summary'))throw Error('Modo resumo nao selecionado');
+                const extra=document.querySelector('#tlg-tables .tlg-extra');
+                if(extra&&getComputedStyle(extra).display!=='none')throw Error('Colunas extras nao ocultadas no resumo');
+                document.querySelector('[data-tlg-mode="full"]').click();
+                if(document.querySelector('#tlg-tables').classList.contains('tlg-summary'))throw Error('Modo completo nao restaurado');
+                lg.value='all';lg.dispatchEvent(new Event('change',{bubbles:true}));
+                d.value='2026-10-20';d.dispatchEvent(new Event('change',{bubbles:true}));
+                if(all()!==9)throw Error('Filtro de terça feira nao mostra 9 jogos');
+                const tableCells=document.querySelectorAll('#tlg-tables .tlg-prob');
+                if(Array.from(tableCells).some(x=>x.textContent.includes('NaN')))throw Error('Percentagem NaN apresentada');
+                d.value='all';d.dispatchEvent(new Event('change',{bubbles:true}));
+                const open=document.querySelector('#tlg-tables [data-open]');
+                if(!open)throw Error('Faltou botao de detalhe');
+                open.click();
+                if(document.querySelector('#match-modal').hidden)throw Error('Botao Analisar nao abre detalhe');
+                document.body.dataset.tablesSmoke='PASS';
+              }catch(e){document.body.dataset.tablesSmoke='FAIL: '+e.message}
+            },1500);
+          });
+          </script>'''
+          Path('.tables-test.html').write_text(content.replace('</body>',test+'</body>'),encoding='utf-8')
+          PY
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=10000 --dump-dom "file://$PWD/.tables-test.html#tabelas" > /tmp/tables-test-dom.html 2>/tmp/tables-test-chrome-errors.txt
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          from html import unescape
+          dom=Path('/tmp/tables-test-dom.html').read_text(encoding='utf-8')
+          m=re.search(r'<body[^>]+data-tables-smoke="([^"]+)"',dom)
+          result=unescape(m.group(1)) if m else 'NOT_RUN'
+          print('Tabelas por Liga:',result)
+          assert result=='PASS', result
+          PY
+          rm -f .tables-test.html
       - name: Verificar arquivos e conteudo
         run: |
           python3 - <<'PY'
@@ -266,6 +346,10 @@ jobs:
           assert '<link rel="stylesheet" href="./boletins.css?v=3">' in html
           assert '<script src="./ultimos10.js?v=1" defer></script>' in html
           assert '<link rel="stylesheet" href="./ultimos10.css?v=1">' in html
+          assert '<script src="./tabelas-ligas.js?v=2" defer></script>' in html
+          assert '<link rel="stylesheet" href="./tabelas-ligas.css?v=2">' in html
+          assert '<button class="nav-btn" data-go="tables">' in html
+          assert 'id="view-tables"' in html and 'id="tlg-export"' in html
           history=json.loads(Path("dados/ultimos10-2026-10-19.json").read_text(encoding="utf-8"))
           assert len(history["byGame"])==139
           for g in json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))["games"]:
