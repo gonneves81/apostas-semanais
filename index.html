@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="./boletins.css?v=3">
 <link rel="stylesheet" href="./melhorias.css?v=1">
 <link rel="stylesheet" href="./ultimos10.css?v=1">
-<link rel="stylesheet" href="./tabelas-ligas.css?v=2">
+<link rel="stylesheet" href="./tabelas-ligas.css?v=3">
 </head>
 <body>
 <header class="topbar"><div class="wrap topbar-inner">
@@ -69,19 +69,21 @@
 <div class="game-grid" id="game-list"></div><div id="table-list" hidden><p class="table-hint">Desliza a tabela para os lados para veres todas as colunas &rarr;</p><div class="table-scroll"><table class="compact-table"><thead><tr><th>Data</th><th>Liga</th><th>Jogo</th><th>1</th><th>X</th><th>2</th><th>AM</th><th>+2,5</th><th>AM E +2,5</th><th>Cantos +8,5</th></tr></thead><tbody id="game-rows"></tbody></table></div></div>
 </section>
 <section class="view" id="view-tables" hidden>
-<div class="body-header"><span class="eyebrow">Resumo estatístico · 12 competições</span><h1>Tabelas por Liga</h1>
-<p>Todos os jogos da semana organizados por campeonato, com <strong>17 probabilidades por encontro</strong>, golos marcados e sofridos e a sequência dos últimos 7 resultados de cada equipa (<strong>V</strong> vitória, <strong>E</strong> empate, <strong>D</strong> derrota).</p></div>
+<div class="body-header"><span class="eyebrow">Resumo estatístico · 12 competições</span><h1>Painel por Liga</h1>
+<p>Todos os jogos separados por campeonato, com <strong>17 previsões por encontro</strong>, golos marcados e sofridos e a sequência dos últimos 7 resultados de cada equipa (<strong>V</strong> vitória, <strong>E</strong> empate, <strong>D</strong> derrota).</p></div>
 <div class="tlg-controls" aria-label="Filtros das tabelas">
 <div class="tlg-field"><label for="tlg-league">Competição</label><select id="tlg-league"><option>12 competições</option></select></div>
 <div class="tlg-field"><label for="tlg-search">Pesquisar equipa / jogo</label><input type="search" id="tlg-search" autocomplete="off" placeholder="Benfica, Inter, Barcelona..." /></div>
 <div class="tlg-field"><label for="tlg-day">Dia</label><select id="tlg-day"><option>Toda a semana</option></select></div>
 <div class="tlg-field"><label for="tlg-market">Ordenar por</label><select id="tlg-market"><option>Data e hora</option></select></div>
 </div>
+<div id="tlg-league-tabs" class="tlg-league-tabs" role="group" aria-label="Escolher campeonato"></div>
 <div class="tlg-toolbar"><div class="tlg-layout" role="group" aria-label="Visibilidade das previsões">
-<button type="button" data-tlg-mode="full" class="active" aria-pressed="true">Todas as previsões</button>
-<button type="button" data-tlg-mode="summary" aria-pressed="false">Resumo</button></div>
-<button type="button" id="tlg-export">Exportar tabela CSV ↓</button></div>
-<p class="tlg-hint">Desliza as tabelas <strong>para os lados</strong> no telemóvel. A primeira coluna com o jogo mantém-se visível. A sequência <strong>V / E / D</strong> está ordenada do jogo mais recente para o mais antigo; toca numa letra para veres adversário, data e resultado. GM/GS são os golos marcados e sofridos nos <strong>últimos 7 resultados disponíveis</strong>, não uma projeção. Carrega em <strong>Analisar</strong> para ver a ficha e os últimos 10 jogos quando existirem.</p>
+<button type="button" data-tlg-mode="summary" class="active" aria-pressed="true">Essencial</button>
+<button type="button" data-tlg-mode="full" aria-pressed="false">Todos os mercados</button></div>
+<div class="tlg-presentation" role="group" aria-label="Modo de visualização"><button type="button" data-tlg-display="cards" aria-pressed="false">Cartões</button><button type="button" data-tlg-display="table" aria-pressed="false">Tabela</button></div>
+<button type="button" id="tlg-export">Exportar CSV ↓</button></div>
+<p class="tlg-hint">Seleciona uma <strong>liga</strong> acima. Em <strong>Cartões</strong>, vês os jogos, as sequências V/E/D e os mercados principais de forma compacta; podes expandir os restantes mercados e consultar os resultados anteriores. Em <strong>Tabela</strong>, comparas todos os encontros lado a lado — no telemóvel, desliza horizontalmente. <strong>GM/GS</strong> são golos marcados e sofridos apenas nos resultados disponíveis dos últimos 7, não previsões.</p>
 <div class="tlg-legend" aria-label="Legenda de percentagens">
 <span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-strong">≥75%</span> Mais provável</span>
 <span class="tlg-legend-key"><span class="tlg-pct-pill tlg-prob-high">60–74%</span> Elevada</span>
@@ -240,6 +242,6 @@ renderAll();const hash=location.hash.replace('#','');if(hash==='jogos')go('games
 <script src="./qualidade.js?v=2" defer></script>
 <script src="./apostas-reais.js?v=1" defer></script>
 <script src="./ultimos10.js?v=1" defer></script>
-<script src="./tabelas-ligas.js?v=2" defer></script>
+<script src="./tabelas-ligas.js?v=3" defer></script>
 </body>
 </html>
