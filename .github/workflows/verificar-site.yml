@@ -13,6 +13,9 @@ on:
       - "ultimos10.css"
       - "tabelas-ligas.js"
       - "tabelas-ligas.css"
+      - "classificacoes.js"
+      - "classificacoes.css"
+      - "dados/classificacoes-2026-10-22.json"
       - "dados/ultimos10-2026-10-19.json"
       - "scripts/avaliar_previsoes.py"
       - "scripts/test_avaliar_previsoes.py"
@@ -32,6 +35,7 @@ jobs:
           node --check apostas-reais.js
           node --check ultimos10.js
           node --check tabelas-ligas.js
+          node --check classificacoes.js
       - name: Testar métricas do modelo com casos sintéticos
         run: python3 scripts/test_avaliar_previsoes.py -v
       - name: Validar interface interativa no Chromium
@@ -440,6 +444,72 @@ jobs:
           assert status=='PASS',status
           PY
           rm -f .sort-test.html
+      - name: Testar classificação lateral e destaque das equipas no Chromium
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text(encoding='utf-8')
+          test=r'''<script>
+          document.addEventListener('DOMContentLoaded',()=>{
+            setTimeout(()=>{
+              try{
+                document.querySelector('[data-go="games"]').click();
+                document.querySelector('#layout-table').click();
+                const panel=document.querySelector('#as-league-standings');
+                if(!panel)throw Error('Painel de classificação não foi criado');
+                const league=document.querySelector('#as-standings-league');
+                if(!league||league.options.length!==12)throw Error('Seletor com 12 ligas inexistente');
+                if(document.querySelectorAll('#as-standings-body tr').length!==18)
+                  throw Error('Liga Portugal não apresenta 18 equipas');
+                if(!panel.textContent.includes('Classificação calculada'))
+                  throw Error('Falta informação de classificação não oficial');
+                league.value='EN';league.dispatchEvent(new Event('change',{bubbles:true}));
+                if(document.querySelectorAll('#as-standings-body tr').length!==20)
+                  throw Error('Premier League não apresenta 20 equipas');
+                const rows=Array.from(document.querySelectorAll('#as-standings-body tr'));
+                const first=rows[0];
+                if(!first.querySelector('.as-st-points')||!first.querySelector('.as-st-gf')||
+                   !first.querySelector('.as-st-ga')||!first.querySelector('.as-standings-form'))
+                  throw Error('Pontos, GM/GS e forma não apresentados');
+                if(!rows.some(row=>row.querySelectorAll('.as-form').length===7))
+                  throw Error('Últimos 7 resultados não aparecem na classificação');
+                if(document.querySelectorAll('#game-rows tr').length!==11)
+                  throw Error('Filtrar classificação não filtrou a Premier League');
+                const game=document.querySelector('#game-rows tr');
+                game.dispatchEvent(new PointerEvent('pointerover',{bubbles:true}));
+                if(document.querySelectorAll('#as-standings-body .as-standings-team-selected').length!==2)
+                  throw Error('Não destacou as duas equipas do jogo');
+                if(document.querySelector('#as-standings-highlight').hidden)
+                  throw Error('Resumo das equipas não aparece');
+                const choice=first.querySelector('[data-stand-team]');
+                choice.click();
+                if(!document.querySelectorAll('#as-standings-body .as-standings-team-selected').length)
+                  throw Error('Selecionar equipa na classificação falhou');
+                const uefa='UCL';league.value=uefa;league.dispatchEvent(new Event('change',{bubbles:true}));
+                if(document.querySelectorAll('#as-standings-body tr').length!==36)
+                  throw Error('Tabela de 36 equipas da Champions não carregou');
+                if(!Array.from(document.querySelectorAll('#as-standings-body tr')).some(r=>r.textContent.includes('/7')))
+                  throw Error('Forma UEFA com menos de 7 jogos não identificada');
+                document.body.dataset.standingsSmoke='PASS';
+              }catch(e){document.body.dataset.standingsSmoke='FAIL: '+e.message}
+            },1800);
+          });
+          </script>'''
+          Path('.standings-test.html').write_text(html.replace('</body>',test+'</body>'),encoding='utf-8')
+          PY
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=12000 --dump-dom "file://$PWD/.standings-test.html#jogos" > /tmp/standings-test-dom.html 2>/tmp/standings-test-chrome-errors.txt
+          python3 - <<'PY'
+          import re
+          from html import unescape
+          from pathlib import Path
+          html=Path('/tmp/standings-test-dom.html').read_text(encoding='utf-8')
+          m=re.search(r'<body[^>]*data-standings-smoke="([^"]+)"',html)
+          result=unescape(m.group(1)) if m else 'NOT_RUN'
+          print('Classificacoes:',result)
+          assert result=='PASS',result
+          PY
+          rm -f .standings-test.html
       - name: Verificar arquivos e conteudo
         run: |
           python3 - <<'PY'
@@ -455,6 +525,8 @@ jobs:
           assert '<link rel="stylesheet" href="./ultimos10.css?v=1">' in html
           assert '<script src="./tabelas-ligas.js?v=3" defer></script>' in html
           assert '<link rel="stylesheet" href="./tabelas-ligas.css?v=3">' in html
+          assert '<script src="./classificacoes.js?v=1" defer></script>' in html
+          assert '<link rel="stylesheet" href="./classificacoes.css?v=1">' in html
           assert '<button class="nav-btn" data-go="tables">' in html
           assert 'id="view-tables"' in html and 'id="tlg-export"' in html
           history=json.loads(Path("dados/ultimos10-2026-10-19.json").read_text(encoding="utf-8"))
@@ -470,5 +542,27 @@ jobs:
           assert 'id="rank-list"' in html and 'id="view-games"' in html
           data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
           assert len(data["games"]) > 10 and len(data["leagues"]) == 12
+          st=json.loads(Path("dados/classificacoes-2026-10-22.json").read_text(encoding="utf-8"))
+          assert len(st["leagues"]) == 12
+          for code, league in st["leagues"].items():
+              teams=league["standings"]
+              assert len(teams)==league["teams"]
+              assert len(teams)>=12
+              assert sum(row["p"] for row in teams)==2*league["fixturesUsed"], code
+              for row in teams:
+                  assert row["pts"]==3*row["w"]+row["d"], code
+                  assert row["p"]==row["w"]+row["d"]+row["l"], code
+                  assert row["gf"]>=0 and row["ga"]>=0
+                  assert row["gd"]==row["gf"]-row["ga"]
+                  assert len(row["recent"])<=7
+                  assert all(x["date"]<st["cutoffExclusive"] and x["result"] in ("V","E","D") for x in row["recent"])
+          for game in data["games"]:
+              league=st["leagues"][game["league"]]
+              bykey={row["key"] for row in league["standings"]}
+              aliases=league["fixtureAliases"]
+              for name in (game["home"],game["away"]):
+                  normalized=''.join(c for c in __import__('unicodedata').normalize('NFKD', name).lower() if c.isalnum() and ord(c)<128)
+                  assert aliases.get(name,normalized) in bykey,(game["league"],name)
+          print("Classificacoes: 12 competicoes, pontos, GM/GS e ultimos 7: OK")
           print("Estrutura e dados: OK")
           PY
