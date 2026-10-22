@@ -91,9 +91,28 @@ function start(){
   function goalsCell(info){
     if(!history)return '<td class="tlg-goals"><span class="tlg-na">—</span></td>';
     if(!info.n)return '<td class="tlg-goals"><span class="tlg-na">S/dados</span></td>';
-    return '<td class="tlg-goals"><strong>'+info.gf+' / '+info.ga+'</strong><small>GM / GS · '+info.n+'/7</small></td>';
+    return '<td class="tlg-goals"><div class="tlg-score-duo">'+
+      '<b class="tlg-gf" title="Golos marcados">'+num(info.gf)+'</b>'+
+      '<span class="tlg-sep">/</span>'+
+      '<b class="tlg-ga" title="Golos sofridos">'+num(info.ga)+'</b></div>'+
+      '<small>GM / GS · '+info.n+'/7</small></td>';
   }
-  const tableHead=()=>'<thead><tr>'+
+  function probCell(g,c){
+    const p=probability(g,c.key);
+    const cls=p===null?'tlg-prob-none':p>=.75?'tlg-prob-strong':
+      p>=.60?'tlg-prob-high':p>=.45?'tlg-prob-medium':'tlg-prob-low';
+    const label=p===null?'Sem previsão':pct(p);
+    return '<td class="tlg-prob'+(c.extra?' tlg-extra':'')+'" title="'+esc(c.title)+
+      ' · '+esc(g.home)+' - '+esc(g.away)+' · '+esc(label)+'">'+
+      '<span class="tlg-pct-pill '+cls+'">'+esc(label==='Sem previsão'?'—':label)+'</span></td>';
+  }
+  const tableHead=()=>'<thead><tr class="tlg-header-groups">'+
+    '<th colspan="5" scope="colgroup">Jogo e forma recente</th>'+
+    '<th colspan="3" scope="colgroup">Resultado 1X2</th>'+
+    '<th colspan="6" scope="colgroup">Golos</th>'+
+    '<th colspan="2" scope="colgroup">Cantos</th>'+
+    '<th colspan="3" scope="colgroup">1.ª parte</th>'+
+    '<th colspan="3" scope="colgroup">2.ª parte</th></tr><tr>'+
     '<th class="tlg-team-th" scope="col">Data e jogo</th>'+
     '<th scope="col" title="Golos marcados / sofridos nos últimos sete resultados disponíveis da equipa da casa">Casa<br>GM / GS</th>'+
     '<th scope="col">Últimos 7<br>Casa (V E D)</th>'+
@@ -108,12 +127,13 @@ function start(){
         g.verified===false?'<span class="tlg-unavailable">Sem previsão</span>':'';
     return '<tr><th scope="row" class="tlg-fixture"><div class="tlg-date">'+esc(dt.slice(8,10)+'/'+dt.slice(5,7))+
       ' · '+esc(time)+' <span>PT</span></div>'+
-      '<strong>'+esc(g.home)+' <span class="tlg-vs">–</span> '+esc(g.away)+'</strong>'+
+      '<strong><span class="tlg-home">'+esc(g.home)+'</span>'+
+      '<span class="tlg-vs" aria-hidden="true">×</span>'+
+      '<span class="tlg-away">'+esc(g.away)+'</span></strong>'+
       '<div class="tlg-fixture-actions">'+caution+
       '<button type="button" data-open="'+Number(g.id)+'" class="tlg-detail">Analisar ↗</button></div></th>'+
       goalsCell(h)+formCell(h,g.home)+goalsCell(a)+formCell(a,g.away)+
-      cols.map(c=>'<td class="tlg-prob'+(c.extra?' tlg-extra':'')+'" title="'+esc(c.title)+
-        ' · '+esc(g.home)+' - '+esc(g.away)+'">'+pct(probability(g,c.key))+'</td>').join('')+
+      cols.map(c=>probCell(g,c)).join('')+
       '</tr>';
   }
   function cmpDate(a,b){return dateKey(a).localeCompare(dateKey(b))||
