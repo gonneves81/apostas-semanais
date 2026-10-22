@@ -49,7 +49,8 @@ function start(){
   if(leagueSelect)leagueSelect.innerHTML='<option value="all">Todas as 12 competições</option>'+
     leagues.map(l=>'<option value="'+esc(l.code)+'">'+esc(l.flag||'')+' '+esc(l.name)+'</option>').join('');
   const leagueMap=new Map(leagues.map(l=>[l.code,l]));
-  let history=null,loading=true,historyError=false,mode='full',visible=[];
+  let history=null,loading=true,historyError=false,mode='summary',visible=[];
+  let displayMode=(window.matchMedia&&window.matchMedia('(max-width:720px)').matches)?'cards':'table';
   const dateKey=g=>{
     if(typeof g.date==='string'&&/^\d{4}-\d\d-\d\d$/.test(g.date))return g.date;
     const n=Number(g.day),d=days.find(x=>Number(x.date.slice(-2))===n);
@@ -136,6 +137,106 @@ function start(){
       cols.map(c=>probCell(g,c)).join('')+
       '</tr>';
   }
+
+  function colorFor(p){
+    return p===null?'tlg-prob-none':p>=.75?'tlg-prob-strong':
+      p>=.60?'tlg-prob-high':p>=.45?'tlg-prob-medium':'tlg-prob-low';
+  }
+  const primaryMarkets=cols.filter(c=>!c.extra);
+  const moreMarkets=cols.filter(c=>c.extra);
+  function pill(p){
+    return '<span class="tlg-pct-pill '+colorFor(p)+'">'+pct(p)+'</span>';
+  }
+  function recentForms(x,name){
+    if(!history)return '<span class="tlg-na">Histórico a carregar</span>';
+    const results=x.results.map(r=>'<abbr class="tlg-result tlg-'+r.outcome.toLowerCase()+
+      '" title="'+esc(r.date+' · '+r.opponent+' · '+r.gf+'–'+r.ga)+'">'+r.outcome+'</abbr>').join('');
+    return '<div class="tlg-results" aria-label="Forma recente de '+esc(name)+'">'+
+      (results||'<span class="tlg-na">Sem dados</span>')+'</div>'+
+      (x.n<7?'<small class="tlg-coverage">Apenas '+x.n+'/7 no arquivo</small>':'');
+  }
+  function compactTeam(name,record,venue){
+    return '<div class="tlg-compact-team"><div class="tlg-compact-team-title"><span class="tlg-venue">'+
+      esc(venue)+'</span><strong>'+esc(name)+'</strong></div>'+
+      recentForms(record,name)+
+      '<div class="tlg-compact-goals"><span>GM <b class="tlg-gf">'+(record.n?num(record.gf):'—')+'</b></span>'+
+      '<span>GS <b class="tlg-ga">'+(record.n?num(record.ga):'—')+'</b></span>'+
+      '<small>'+(history?record.n+'/7 jogos':'A carregar')+'</small></div></div>';
+  }
+  function historicalLines(team){
+    if(!history||!team.results.length)return '<span class="tlg-na">Resultados não disponíveis</span>';
+    return '<ol class="tlg-recent-list">'+team.results.map(r=>
+      '<li><span>'+esc(r.date.slice(8,10)+'/'+r.date.slice(5,7))+'</span>'+
+      '<abbr class="tlg-result tlg-'+r.outcome.toLowerCase()+'" title="'+
+      esc(r.outcome==='V'?'Vitória':r.outcome==='E'?'Empate':'Derrota')+'">'+r.outcome+'</abbr>'+
+      '<span class="tlg-opponent">'+esc(r.opponent)+'</span>'+
+      '<strong>'+r.gf+'–'+r.ga+'</strong></li>').join('')+'</ol>';
+  }
+  function cardMetric(g,c){
+    return '<div class="tlg-compact-metric"><span title="'+esc(c.title)+'">'+esc(c.name)+'</span>'+
+      pill(probability(g,c.key))+'</div>';
+  }
+  function mobileCard(g){
+    const home=latest(g,'home'),away=latest(g,'away'),date=dateKey(g),
+      experimental=g.modelStatus==='exploratory_uefa';
+    const status=experimental?'<span class="tlg-warning">Modelo UEFA experimental</span>':
+      g.verified===false?'<span class="tlg-unavailable">Sem previsão</span>':'';
+    const count=moreMarkets.length;
+    return '<article class="tlg-mobile-card" data-tlg-mobile-game="'+Number(g.id)+'">'+
+      '<div class="tlg-mobile-heading"><span>'+esc(date.slice(8,10)+'/'+date.slice(5,7))+
+      ' · '+esc(g.time||'')+' PT</span>'+status+'</div>'+
+      '<div class="tlg-compact-teams">'+
+      compactTeam(g.home,home,'CASA')+compactTeam(g.away,away,'FORA')+'</div>'+
+      '<div class="tlg-compact-market-title">Previsões do jogo <small>Estimativas do modelo</small></div>'+
+      '<div class="tlg-compact-markets">'+primaryMarkets.map(c=>cardMetric(g,c)).join('')+'</div>'+
+      '<details class="tlg-more"'+(mode==='full'?' open':'')+'><summary>Outros '+count+
+      ' mercados <span>Cantos, partes, +1,5 e AM Não</span></summary>'+
+      '<div class="tlg-compact-markets tlg-compact-other">'+
+      moreMarkets.map(c=>cardMetric(g,c)).join('')+'</div></details>'+
+      '<details class="tlg-match-results"><summary>Ver resultados anteriores (até 7 por equipa)</summary>'+
+      '<div class="tlg-recent-two"><section><h4>'+esc(g.home)+'</h4>'+historicalLines(home)+'</section>'+
+      '<section><h4>'+esc(g.away)+'</h4>'+historicalLines(away)+'</section></div></details>'+
+      '<button type="button" class="tlg-mobile-analysis" data-open="'+Number(g.id)+'">'+
+      'Analisar jogo e adicionar ao boletim ↗</button></article>';
+  }
+  function leagueSummary(games){
+    const samples=games.flatMap(g=>[latest(g,'home'),latest(g,'away')]).filter(x=>x.n>0);
+    const all=games.flatMap(g=>[latest(g,'home'),latest(g,'away')]);
+    const totalGames=samples.reduce((a,x)=>a+x.n,0),
+      goalsFor=samples.reduce((a,x)=>a+x.gf,0),
+      goalsAgainst=samples.reduce((a,x)=>a+x.ga,0);
+    const btts=games.map(g=>probability(g,'BTTS')).filter(x=>x!==null);
+    const avg=pct(btts.length?btts.reduce((a,b)=>a+b,0)/btts.length:null);
+    const rate=(n,d)=>d>0?(n/d).toFixed(2).replace('.',','):'—';
+    const cell=(label,value,desc)=>'<div class="tlg-league-stat"><span>'+label+'</span><b>'+value+
+      '</b><small>'+desc+'</small></div>';
+    return '<div class="tlg-league-stats">'+
+      cell('Jogos',num(games.length),'Na seleção atual')+
+      cell('Forma últimos 7',history?all.filter(x=>x.n>=7).length+'/'+all.length:'—','Equipas com 7/7 resultados')+
+      cell('Golos por jogo',history&&totalGames?rate(goalsFor,totalGames)+' / '+rate(goalsAgainst,totalGames):'—','GM / GS · amostra disponível')+
+      cell('AM médio previsto',avg,'Média das estimativas disponíveis')+
+      '</div>';
+  }
+  function drawLeagueTabs(){
+    const container=$('tlg-league-tabs');
+    if(!container)return;
+    const current=leagueSelect?.value||'all',selectedDay=daySelect?.value||'all';
+    const filtered=(D.games||[]).filter(g=>selectedDay==='all'||dateKey(g)===selectedDay);
+    const counts=new Map(leagues.map(l=>[l.code,filtered.filter(g=>g.league===l.code).length]));
+    const button=(id,label,n)=>'<button type="button" data-tlg-league="'+esc(id)+
+      '" class="'+(current===id?'active':'')+'" aria-pressed="'+(current===id)+'">'+
+      '<span>'+esc(label)+'</span><b>'+n+'</b></button>';
+    container.innerHTML=button('all','Todas as ligas',filtered.length)+
+      leagues.map(l=>button(l.code,(l.flag||'⚽')+' '+l.name,counts.get(l.code)||0)).join('');
+  }
+  function drawDisplayButtons(){
+    document.querySelectorAll('[data-tlg-display]').forEach(b=>{
+      const selected=b.dataset.tlgDisplay===displayMode;
+      b.classList.toggle('active',selected);
+      b.setAttribute('aria-pressed',String(selected));
+    });
+  }
+
   function cmpDate(a,b){return dateKey(a).localeCompare(dateKey(b))||
     String(a.time||'').localeCompare(String(b.time||''))||Number(a.id)-Number(b.id);}
   function candidates(){
@@ -156,7 +257,9 @@ function start(){
     const extra=mode==='full'?'':' tlg-summary';
     const out=$('tlg-tables');
     if(!out)return;
-    out.className='tlg-tables'+extra;
+    out.className='tlg-tables'+extra+(displayMode==='cards'?' tlg-show-cards':' tlg-show-table');
+    drawLeagueTabs();
+    drawDisplayButtons();
     const coverage=all.flatMap(g=>[latest(g,'home').n,latest(g,'away').n]);
     const full=history?coverage.filter(x=>x>=7).length:0;
     const status=loading?'A carregar os resultados anteriores…':
@@ -180,8 +283,10 @@ function start(){
       chunks.push('<details open class="tlg-league" data-tlg-code="'+esc(league.code)+'">'+
         '<summary><span class="tlg-league-name">'+esc(league.flag||'⚽')+' '+esc(league.name)+'</span>'+
         '<span class="tlg-league-count">'+games.length+' jogos · '+statement+'</span><span class="tlg-chevron" aria-hidden="true">⌄</span></summary>'+
+        leagueSummary(games)+
         '<div class="tlg-scroll" role="region" tabindex="0" aria-label="Tabela dos jogos da '+esc(league.name)+'; desliza na horizontal">'+
         '<table class="tlg-table">'+tableHead()+'<tbody>'+games.map(gameRow).join('')+'</tbody></table></div>'+
+        '<div class="tlg-mobile-list">'+games.map(mobileCard).join('')+'</div>'+
         '</details>');
     }
     out.innerHTML=chunks.join('');
@@ -215,6 +320,17 @@ function start(){
       const active=b.dataset.tlgMode===mode;b.classList.toggle('active',active);
       b.setAttribute('aria-pressed',String(active));
     });
+    render();
+  }));
+  $('tlg-league-tabs')?.addEventListener('click',e=>{
+    const button=e.target.closest('[data-tlg-league]');
+    if(!button||!leagueSelect)return;
+    leagueSelect.value=button.dataset.tlgLeague;
+    render();
+    // Não deslocar automaticamente para o topo durante a seleção.
+  });
+  document.querySelectorAll('[data-tlg-display]').forEach(button=>button.addEventListener('click',()=>{
+    displayMode=button.dataset.tlgDisplay==='cards'?'cards':'table';
     render();
   }));
   $('tlg-export')?.addEventListener('click',exportCsv);
