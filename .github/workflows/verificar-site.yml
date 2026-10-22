@@ -367,7 +367,7 @@ jobs:
           html=Path('index.html').read_text(encoding='utf-8')
           js=r'''<script>
           document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(()=>{
+            setTimeout(async()=>{
               try{
                 document.querySelector('[data-go="games"]').click();
                 document.querySelector('#layout-table').click();
@@ -412,6 +412,7 @@ jobs:
                 if(!cell)throw Error('Nao ha percentagem +2,5 clicavel');
                 cell.click();
                 assertOrder('O25','desc');
+                await new Promise(r=>setTimeout(r,150));
                 const top=document.querySelector('#game-rows tr');
                 if(!top?.querySelector('td.as-td [data-add-slip]'))
                   throw Error('Ordenacao perdeu botoes dos boletins');
