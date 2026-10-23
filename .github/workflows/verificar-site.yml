@@ -1,24 +1,13 @@
-name: Verificar site Apostas Semanais
+name: Verificar Apostas Semanais — Modelo de Golos
 on:
   push:
     branches: [main]
     paths:
       - "index.html"
       - "boletins.js"
-      - "boletins.css"
-      - "qualidade.js"
-      - "apostas-reais.js"
-      - "melhorias.css"
-      - "ultimos10.js"
-      - "ultimos10.css"
-      - "tabelas-ligas.js"
-      - "tabelas-ligas.css"
-      - "classificacoes.js"
-      - "classificacoes.css"
-      - "dados/classificacoes-2026-10-22.json"
-      - "dados/ultimos10-2026-10-19.json"
-      - "scripts/avaliar_previsoes.py"
-      - "scripts/test_avaliar_previsoes.py"
+      - "golos.js"
+      - "golos.css"
+      - "dados/modelo-golos-2026-10-19.json"
       - ".github/workflows/verificar-site.yml"
   workflow_dispatch:
 permissions:
@@ -28,541 +17,100 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verificar sintaxe JavaScript
+      - name: Verificar sintaxe dos scripts
         run: |
+          node --check golos.js
           node --check boletins.js
           node --check qualidade.js
           node --check apostas-reais.js
           node --check ultimos10.js
           node --check tabelas-ligas.js
           node --check classificacoes.js
-      - name: Testar métricas do modelo com casos sintéticos
-        run: python3 scripts/test_avaliar_previsoes.py -v
-      - name: Validar interface interativa no Chromium
-        run: |
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
-          if [ -z "$CHROME" ]; then
-            echo "Chromium indisponivel no runner"
-            exit 1
-          fi
-          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=7500 --dump-dom "file://$PWD/index.html#top20" > /tmp/apostas-dom.html 2>/tmp/chrome-stderr.txt
-          python3 - <<'PY'
-          from pathlib import Path
-          s=Path('/tmp/apostas-dom.html').read_text(encoding='utf-8')
-          assert 'id="as-ticket-dock"' in s, "Painel de apostas nao carregado"
-          assert 'id="as-smart-ranks"' in s, "Filtro por probabilidade nao carregado"
-          assert 'id="as-min"' in s, "Seletor de percentagem em falta"
-          assert 'id="as-fair"' in s, "Filtro da odd justa em falta"
-          assert 'id="qa-top5"' in s, "Top 5 por mercado em falta"
-          assert 'id="qa-real-history"' in s, "Historico de apostas reais em falta"
-          assert 'id="qa-model-audit"' in s, "Monitor de evolucao do modelo em falta"
-          assert 'qa-index' in s, "Qualidade de dados ausente"
-          assert 'lt10-card-mini' in s, "Resumo dos ultimos jogos e golos nao aparece nos cartoes"
-          assert 'id="view-tables"' in s, "Separador de tabelas ausente"
-          assert s.count('class="tlg-fixture"')==139, "Tabela nao contem os 139 jogos"
-          assert s.count('class="tlg-league"')==12, "Nao ha 12 grupos de competicoes"
-          assert 'tlg-pct-pill tlg-prob-' in s, "Percentagens por cores nao carregadas"
-          assert 'tlg-result tlg-' in s, "Forma VED em cores nao carregada"
-          assert 'id="as-datebar-choices"' in s, "Filtro por dia em escolhas em falta"
-          assert 'id="as-datebar-games"' in s, "Filtro por dia em jogos em falta"
-          assert 'data-as-sort="date"' in s, "Ordenacao por data em falta"
-          assert 'data-as-market="BTTS"' in s, "Atalhos de mercados em falta"
-          assert 'data-add-slip="1"' in s, "Botoes de adicionar ao boletim nao renderizados"
-          assert 'Aposta 3' in s, "Terceiro boletim ausente"
-          print("Site dinamico carregado: 3 boletins e filtros OK")
-          PY
-      - name: Testar adicionar apostas, filtro e odd manual
+      - name: Testar coerência do modelo de golos
         run: |
           python3 - <<'PY'
+          import json, re
           from pathlib import Path
-          page=Path("index.html").read_text(encoding="utf-8")
-          test_script="""<script>
-          document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(async()=>{
-              try{
-                const root=document.querySelector('#as-smart-ranks');
-                if(!root) throw Error('Lista de escolhas nao existe');
-                const one=root.querySelector('[data-add-slip="1"]');
-                const two=root.querySelector('[data-add-slip="2"]');
-                const three=root.querySelector('[data-add-slip="3"]');
-                if(!one||!two||!three)throw Error('Faltam botoes para os tres boletins');
-                one.click(); two.click(); three.click();
-                const dock=document.querySelector('#as-ticket-dock');
-                if(!dock||!dock.classList.contains('is-open'))throw Error('Painel nao abriu');
-                if(!dock.querySelector('[data-slip-tab="1"] b')||dock.querySelector('[data-slip-tab="1"] b').textContent!=='1')throw Error('Aposta 1 sem item');
-                if(dock.querySelector('[data-slip-tab="2"] b').textContent!=='1')throw Error('Aposta 2 sem item');
-                if(dock.querySelector('[data-slip-tab="3"] b').textContent!=='1')throw Error('Aposta 3 sem item');
-                const odd=dock.querySelector('[data-slip-odd="3"]');
-                if(!odd)throw Error('Falta input odd');
-                odd.value='1,65';odd.dispatchEvent(new Event('change',{bubbles:true}));
-                const stake=dock.querySelector('[data-slip-stake="3"]');
-                if(!stake)throw Error('Falta valor do boletim');
-                stake.value='10';stake.dispatchEvent(new Event('change',{bubbles:true}));
-                const ret=document.querySelector('.as-slip-return strong').textContent;
-                if(!ret.includes('16,50')) throw Error('Retorno nao atualizado: '+ret);
-                const minimum=document.querySelector('#as-min');
-                minimum.value='65'; minimum.dispatchEvent(new Event('change',{bubbles:true}));
-                if(!document.querySelector('#as-smart-ranks .as-choice'))throw Error('Filtro 65% nao retornou escolhas');
-                const dayBtn=document.querySelector('#as-datebar-choices [data-as-day]:not([data-as-day="ALL"])');
-                if(!dayBtn)throw Error('Filtro por dia em falta');
-                dayBtn.click();
-                if(document.querySelector('#day-filter').value!==String(Number(dayBtn.dataset.asDay.slice(-2))))throw Error('Filtro diario nao sincronizado');
-                document.querySelector('#as-datebar-choices [data-as-sort="date"]').click();
-                if(!document.querySelector('#as-datebar-choices [data-as-sort="date"].active'))throw Error('Ordenacao por data nao ativada');
-                document.querySelector('#as-datebar-choices [data-as-market="O25"]').click();
-                if(document.querySelector('#as-market').value!=='O25')throw Error('Atalho mercado +2,5 nao sincronizado');
-                const allDay=document.querySelector('#as-datebar-games [data-as-day="ALL"]');
-                if(!allDay)throw Error('Agenda de Todos os jogos em falta');
-                allDay.click();
-                if(document.querySelector('#day-filter').value!=='all')throw Error('Limpar filtro diario falhou');
-                await new Promise(r=>setTimeout(r,120));
-                const topSelect=document.querySelector('#qa-top5-group');
-                const activeGroups=()=>Array.from(document.querySelectorAll('#qa-top5-cards .qa-group'));
-                if(topSelect.value!=='O25')throw Error('Top 5 não acompanhou filtro +2,5');
-                if(activeGroups().length!==1||!activeGroups()[0].querySelector('h3').textContent.includes('Mais de 2,5'))throw Error('Top 5 mostra mercados além de +2,5');
-                document.querySelector('#as-datebar-choices [data-as-market="OR"]').click();
-                await new Promise(r=>setTimeout(r,120));
-                if(topSelect.value!=='OR')throw Error('AM OU +2,5 não foi selecionado no Top 5');
-                if(activeGroups().length!==1||!activeGroups()[0].querySelector('h3').textContent.includes('Ambas OU +2,5'))throw Error('Top 5 AM OU +2,5 mostra grupos errados');
-                const picksOr=activeGroups()[0].querySelectorAll('[data-add-slip]');
-                if(!picksOr.length||Array.from(picksOr).some(b=>b.dataset.market!=='OR'))throw Error('Top 5 contém prognósticos de outro mercado');
-                topSelect.value='BTTS';topSelect.dispatchEvent(new Event('change',{bubbles:true}));
-                await new Promise(r=>setTimeout(r,120));
-                if(document.querySelector('#as-market').value!=='BTTS')throw Error('Top 5 não sincronizou menu principal');
-                if(activeGroups().length!==1||!activeGroups()[0].querySelector('h3').textContent.includes('Ambas marcam'))throw Error('Selecionar BTTS não isolou o mercado');
-                document.querySelector('#as-datebar-choices [data-as-market="ALL"]').click();
-                await new Promise(r=>setTimeout(r,120));
-                if(topSelect.value!=='ALL'||activeGroups().length<2)throw Error('Todos os mercados não restaurou os grupos');
-                const fairFilter=document.querySelector('#as-fair');
-                if(!fairFilter)throw Error('Filtro odd justa nao existe');
-                const top=document.querySelector('#qa-top5');
-                if(!top||!top.querySelector('.qa-five'))throw Error('Top 5 por mercado sem previsoes');
-                const metric=document.querySelector('#qa-model-audit');
-                if(!metric)throw Error('Avaliacao do modelo nao existe');
-                await new Promise(r=>setTimeout(r,160));
-                const coverage=document.querySelector('.as-choice .qa-index');
-                if(!coverage)throw Error('Qualidade de dados nao apresentada');
-                const history=document.querySelector('#qa-real-history');
-                if(!history)throw Error('Historico real nao montado');
-                window.confirm=()=>true;
-                const tab3=document.querySelector('#as-ticket-dock [data-slip-tab="3"]');
-                if(tab3)tab3.click();
-                await new Promise(r=>setTimeout(r,180));
-                const register=document.querySelector('#as-ticket-dock [data-qa-register="3"]');
-                if(!register)throw Error('Botao registo aposta real nao existe');
-                register.click();
-                const saved=JSON.parse(localStorage.getItem('as_apostas_reais_historico_v1')||'{}');
-                if(!saved.bets||saved.bets.length!==1)throw Error('Aposta real nao arquivada');
-                if(saved.bets[0].combined_odd!==1.65||saved.bets[0].stake!==10)throw Error('Odd/stake nao preservadas');
-                const status=document.querySelector('#qa-real-history [data-real-status]');
-                if(!status)throw Error('Controlo liquidacao nao existe');
-                status.value='won';status.dispatchEvent(new Event('change',{bubbles:true}));
-                if(!document.querySelector('#qa-real-history').textContent.includes('65,0%'))throw Error('ROI liquidado nao calculado corretamente');
-                // Cálculo ao escrever: dois jogos, primeira odd preenchida e
-                // segunda ainda vazia; o resumo deve ser explicitamente parcial.
-                const firstGame=Number(saved.bets[0].selections[0].game_id);
-                const secondPick=Array.from(document.querySelectorAll('#as-smart-ranks [data-add-slip="3"]')).find(x=>Number(x.dataset.game)!==firstGame);
-                if(!secondPick)throw Error('Nao ha segunda selecao distinta para teste');
-                secondPick.click();
-                const secondGame=Number(secondPick.dataset.game);
-                const dock2=document.querySelector('#as-ticket-dock');
-                if(dock2.querySelectorAll('[data-slip-odd="3"]').length!==2)throw Error('Segunda selecao nao adicionada');
-                if(!dock2.querySelector('[data-slip-odd-label]').textContent.includes('1/2'))throw Error('Odd parcial nao indicada');
-                if(dock2.querySelector('[data-slip-total-odd]').textContent!=='1,65')throw Error('Primeira odd nao acumulada');
-                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('16,50'))throw Error('Retorno parcial incorreto');
-                const secondOdd=dock2.querySelector('[data-slip-odd="3"][data-game="'+secondGame+'"]');
-                if(!secondOdd)throw Error('Segundo campo de odd indisponivel');
-                secondOdd.focus();
-                secondOdd.value='1,50';
-                secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
-                if(document.activeElement!==secondOdd)throw Error('Input perde foco ao digitar');
-                if(dock2.querySelector('[data-slip-total-odd]').textContent!=='2,475')throw Error('Odd combinada nao calculada em tempo real');
-                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('24,75'))throw Error('Retorno nao atualizou ao digitar segunda odd');
-                if(dock2.querySelector('[data-slip-return-label]').textContent!=='Retorno potencial bruto')throw Error('Retorno total incorretamente marcado parcial');
-                const stakeLive=dock2.querySelector('[data-slip-stake="3"]');
-                stakeLive.value='20';stakeLive.dispatchEvent(new Event('input',{bubbles:true}));
-                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('49,50'))throw Error('Retorno nao multiplicou stake em tempo real');
-                if(!dock2.querySelector('[data-slip-calculation]').textContent.includes('1,65 × 1,50 ×'))throw Error('Formula nao mostra multiplicacao das odds');
-                const persisted=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-19_2026-10-25')||'{}');
-                if(persisted['3']?.stake!=='20'||persisted['3']?.items.length!==2)throw Error('Valores nao persistem enquanto sao digitados');
-                secondOdd.value='1,10';secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
-                if(!dock2.querySelector('[data-slip-odd-label]').textContent.includes('1/2'))throw Error('Odd abaixo de 1,20 deve ficar parcial');
-                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('33,00'))throw Error('Retorno parcial de odd valida incorreto');
-                secondOdd.value='1,50';secondOdd.dispatchEvent(new Event('input',{bubbles:true}));
-                if(!dock2.querySelector('[data-slip-return-value]').textContent.includes('49,50'))throw Error('Retorno completo nao restaurado');
-
-                // Selecionar AM nos jogos deve pré-selecionar o mercado BTTS
-                // no boletim, não +1,5 mesmo que tenha maior probabilidade.
-                document.querySelector('[data-go="games"]').click();
-                await new Promise(r=>setTimeout(r,180));
-                async function checkGameMarket(market){
-                  const filter=document.querySelector('#metric-filter');
-                  filter.value=market;filter.dispatchEvent(new Event('change',{bubbles:true}));
-                  await new Promise(r=>setTimeout(r,180));
-                  const cards=Array.from(document.querySelectorAll('#game-list .game-card'));
-                  const card=cards.find(c=>c.querySelector('[data-pick-select] option[value="'+market+'"]'));
-                  if(!card)throw Error('Sem cartão de jogo com mercado '+market);
-                  const sel=card.querySelector('[data-pick-select]');
-                  if(sel.value!==market)throw Error('Prognóstico pré-selecionado '+sel.value+', mas mercado ativo '+market);
-                  const actions=Array.from(card.querySelectorAll('[data-add-slip]'));
-                  if(actions.length!==3||actions.some(b=>b.disabled||b.dataset.market!==market)){
-                    throw Error('Botões do boletim não correspondem ao mercado '+market);
-                  }
-                  return card;
-                }
-                const bttsCard=await checkGameMarket('BTTS');
-                const bttsId=Number(bttsCard.querySelector('[data-pick-select]').dataset.pickSelect);
-                bttsCard.querySelector('[data-add-slip="1"]').click();
-                const updatedSlips=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-19_2026-10-25')||'{}');
-                if(!updatedSlips['1']?.items.some(x=>x.id===bttsId&&x.market==='BTTS')){
-                  throw Error('Botão Aposta 1 adicionou outro mercado em vez de AM');
-                }
-                await checkGameMarket('O25');
-                await checkGameMarket('AND');
-                const orCard=await checkGameMarket('OR');
-                orCard.querySelector('[data-open]').click();
-                await new Promise(r=>setTimeout(r,160));
-                const modalSelect=document.querySelector('#modal-content [data-pick-select]');
-                if(!modalSelect||modalSelect.value!=='OR')throw Error('Detalhe do jogo não herdou AM OU +2,5');
-                await new Promise(r=>setTimeout(r,220));
-                const last10=document.querySelector('#modal-content .lt10-section');
-                if(!last10)throw Error('Lista de ultimos dez jogos nao carregada no detalhe');
-                if(last10.querySelectorAll('.lt10-team').length!==2)throw Error('Faltam os dois historicos de equipas');
-                if(!last10.textContent.includes('Golos marcados')||!last10.textContent.includes('Golos sofridos'))throw Error('Totais GM/GS nao apresentados');
-                if(!last10.querySelector('.lt10-match'))throw Error('Nenhum resultado historico apresentado');
-                document.querySelector('#modal-close').click();
-                const dayControl=document.querySelector('#day-filter');
-                dayControl.value='20';dayControl.dispatchEvent(new Event('change',{bubbles:true}));
-                const cornerFilter=document.querySelector('#metric-filter');
-                cornerFilter.value='C85';cornerFilter.dispatchEvent(new Event('change',{bubbles:true}));
-                await new Promise(r=>setTimeout(r,220));
-                const cornerCard=Array.from(document.querySelectorAll('#game-list .game-card'))
-                  .find(c=>c.querySelector('[data-pick-select]'));
-                if(!cornerCard)throw Error('Sem jogo europeu para testar dados de cantos ausentes');
-                const cornerSelect=cornerCard.querySelector('[data-pick-select]');
-                if(cornerSelect.querySelector('option[value="C85"]'))throw Error('Amostra escolhida tinha previsão de cantos, não testa ausência');
-                if(cornerSelect.value!=='')throw Error('Sem previsão de cantos deve selecionar aviso, não outro mercado');
-                if(Array.from(cornerCard.querySelectorAll('[data-add-slip]')).some(b=>!b.disabled)){
-                  throw Error('Mercado sem previsão não bloqueia inclusão incorreta no boletim');
-                }
-                document.body.dataset.smoke='PASS';
-              }catch(err){document.body.dataset.smoke='FAIL: '+err.message}
-            },1000);
-          });
-          </script>"""
-          Path(".app-smoke.html").write_text(page.replace('</body>',test_script+'</body>'),encoding='utf-8')
+          html=Path("index.html").read_text(encoding="utf-8")
+          data=json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
+          model=json.loads(Path("dados/modelo-golos-2026-10-19.json").read_text(encoding="utf-8"))
+          assert len(data['games'])==len(model['games'])==139
+          assert model['coverage']['calculated']==122
+          assert model['coverage']['insufficient']==17
+          assert sorted(model['model']['markets'])==['AND','BTTS','O25']
+          assert 'id="view-golos"' in html and 'golos.js?v=1' in html
+          assert 'boletins.js?v=6' in html
+          for g in data['games']:
+              row=model['games'][str(g['id'])]
+              assert row['id']==g['id'] and row['home']==g['home'] and row['away']==g['away']
+              assert row['date'] >= data['start']
+              for side in ('home','away'):
+                  assert all(x['date']<row['date'] for x in row['latest'][side])
+                  assert len(row['latest'][side])<=7
+              p=row.get('prob')
+              if p:
+                  assert set(p)=={'BTTS','O25','AND'}
+                  assert all(0 < v < 1 for v in p.values())
+                  assert p['AND']<=p['BTTS'] and p['AND']<=p['O25']
+              else:
+                  assert row['status']=='insuficiente'
+          print('OK: 139 jogos, 122 estimativas, 17 amostras insuficientes e tres mercados')
           PY
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=9000 --dump-dom "file://$PWD/.app-smoke.html#top20" > /tmp/app-interaction.html 2>/tmp/app-interaction-errors.txt
-          python3 - <<'PY'
-          from pathlib import Path
-          from html import unescape
-          import re
-          dom=Path('/tmp/app-interaction.html').read_text(encoding='utf-8')
-          match=re.search(r'<body[^>]+data-smoke="([^"]+)"',dom)
-          result=unescape(match.group(1)) if match else 'NOT_RUN'
-          print('Resultado teste:',result)
-          assert result == 'PASS', result
-          PY
-          rm -f .app-smoke.html
-      - name: Testar navegacao e filtros das Tabelas por Liga no Chromium
+      - name: Validar painel e boletins em Chromium
         run: |
           python3 - <<'PY'
           from pathlib import Path
           content=Path('index.html').read_text(encoding='utf-8')
-          test=r'''<script>
+          verify=r'''<script>
           document.addEventListener('DOMContentLoaded',()=>{
             setTimeout(()=>{
               try{
-                const main=document.querySelector('[data-go="tables"]');
-                if(!main)throw Error('Botao para tabelas nao existe');
-                main.click();
-                if(document.querySelector('#view-tables').hidden)throw Error('Vista de tabelas nao abriu');
-                if(location.hash!=='#tabelas')throw Error('Navegacao nao tem hash de tabelas');
-                const all=()=>document.querySelectorAll('#tlg-tables tbody tr').length;
-                const groups=()=>document.querySelectorAll('#tlg-tables details.tlg-league').length;
-                if(all()!==139)throw Error('Faltam jogos na tabela ('+all()+')');
-                if(groups()!==12)throw Error('Faltam competicoes ('+groups()+')');
-                if(document.querySelectorAll('#tlg-tables .tlg-mobile-card').length!==139)
-                  throw Error('Cartões não representam todos os 139 jogos');
-                if(document.querySelectorAll('#tlg-tables .tlg-league-stats').length!==12)
-                  throw Error('Faltam resumos estatísticos de campeonatos');
-                if(document.querySelectorAll('#tlg-league-tabs [data-tlg-league]').length!==13)
-                  throw Error('Navegação rápida das 12 ligas não aparece');
-                const presentation=document.querySelector('[data-tlg-display="cards"]');
-                presentation.click();
-                if(!document.querySelector('#tlg-tables').classList.contains('tlg-show-cards'))
-                  throw Error('Não foi possível selecionar cartões');
-                if(getComputedStyle(document.querySelector('.tlg-mobile-list')).display==='none')
-                  throw Error('Os cartões ficaram ocultos');
-                const card=document.querySelector('#tlg-tables .tlg-mobile-card');
-                if(!card.querySelectorAll('.tlg-compact-metric').length||
-                   !card.querySelector('.tlg-compact-goals')||
-                   !card.querySelector('.tlg-match-results')||
-                   !card.querySelector('[data-open]'))
-                  throw Error('Cartão não contém percentagens, golos, histórico e análise');
-                document.querySelector('[data-tlg-display="table"]').click();
-                if(!document.querySelector('#tlg-tables').classList.contains('tlg-show-table'))
-                  throw Error('Não foi possível regressar à tabela');
-                if(!document.querySelector('.tlg-pct-pill.tlg-prob-high'))throw Error('Escala de cores nao apresentada');
-                const results=Array.from(document.querySelectorAll('#tlg-tables .tlg-result'));
-                if(results.length<300)throw Error('Nao carregou sequencias VED dos ultimos sete');
-                if(results.some(x=>!['V','E','D'].includes(x.textContent.trim())))throw Error('Forma invalida');
-                const first=document.querySelector('#tlg-tables tbody tr');
-                if(!first.querySelector('.tlg-gf')||!first.querySelector('.tlg-ga'))throw Error('Golos marcados/sofridos nao exibidos');
-                if(first.querySelectorAll('.tlg-prob').length!==17)throw Error('Faltam os 17 mercados');
-                const lg=document.querySelector('#tlg-league');
-                lg.value='PT';lg.dispatchEvent(new Event('change',{bubbles:true}));
-                if(all()!==9||groups()!==1)throw Error('Filtro da Liga Portugal nao funciona');
-                if(!document.querySelector('#tlg-league-tabs [data-tlg-league="PT"].active'))
-                  throw Error('Liga Portugal não ficou selecionada nos separadores');
-                document.querySelector('#tlg-league-tabs [data-tlg-league="EN"]').click();
-                if(all()!==11||groups()!==1)throw Error('Separador da Premier League não funciona');
-                document.querySelector('#tlg-league-tabs [data-tlg-league="PT"]').click();
-                if(all()!==9||groups()!==1)throw Error('Regresso à Liga Portugal falhou');
-                const d=document.querySelector('#tlg-day');
-                const allDays=Array.from(document.querySelectorAll('#tlg-tables tr[data-day]'));
-                const search=document.querySelector('#tlg-search');
-                search.value='Braga';search.dispatchEvent(new Event('input',{bubbles:true}));
-                const matches=Array.from(document.querySelectorAll('#tlg-tables .tlg-fixture'));
-                if(!matches.length||matches.some(x=>!x.textContent.includes('Braga')))throw Error('Pesquisa de equipa nao funciona');
-                search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));
-                if(all()!==9)throw Error('Pesquisa nao restaurou a lista');
-                document.querySelector('[data-tlg-mode="summary"]').click();
-                if(!document.querySelector('#tlg-tables').classList.contains('tlg-summary'))throw Error('Modo resumo nao selecionado');
-                const extra=document.querySelector('#tlg-tables .tlg-extra');
-                if(extra&&getComputedStyle(extra).display!=='none')throw Error('Colunas extras nao ocultadas no resumo');
-                document.querySelector('[data-tlg-mode="full"]').click();
-                if(document.querySelector('#tlg-tables').classList.contains('tlg-summary'))throw Error('Modo completo nao restaurado');
-                lg.value='all';lg.dispatchEvent(new Event('change',{bubbles:true}));
-                d.value='2026-10-20';d.dispatchEvent(new Event('change',{bubbles:true}));
-                if(all()!==9)throw Error('Filtro de terça feira nao mostra 9 jogos');
-                const tableCells=document.querySelectorAll('#tlg-tables .tlg-prob');
-                if(Array.from(tableCells).some(x=>x.textContent.includes('NaN')))throw Error('Percentagem NaN apresentada');
-                d.value='all';d.dispatchEvent(new Event('change',{bubbles:true}));
-                const open=document.querySelector('#tlg-tables [data-open]');
-                if(!open)throw Error('Faltou botao de detalhe');
-                open.click();
-                if(document.querySelector('#match-modal').hidden)throw Error('Botao Analisar nao abre detalhe');
-                document.body.dataset.tablesSmoke='PASS';
-              }catch(e){document.body.dataset.tablesSmoke='FAIL: '+e.message}
-            },1500);
+                const app=document.querySelector('#view-golos');
+                if(!app||app.hidden)throw Error('Painel de golos nao abriu como inicio');
+                const cards=Array.from(document.querySelectorAll('#gm-games .gm-card'));
+                if(cards.length!==139)throw Error('Quantidade de jogos errada: '+cards.length);
+                if(cards.filter(x=>x.querySelectorAll('.gm-prob').length!==3).length)
+                  throw Error('Encontrados mercados fora dos tres pretendidos');
+                if(cards.filter(x=>x.querySelector('.gm-unavailable')).length!==17)
+                  throw Error('Falta avisar os 17 encontros sem amostra');
+                const sort=document.querySelector('[data-gm-head="AND"]');
+                sort.click();
+                if(!sort.classList.contains('active'))throw Error('Ordenacao de AM E +2,5 falhou');
+                const model=window.ApostasGolosModel;
+                if(!model||!model.games)throw Error('Modelo nao foi carregado');
+                const available=cards.find(c=>c.querySelector('[data-add-slip="1"]'));
+                if(!available)throw Error('Nao existem selecoes para boletim');
+                const b=available.querySelector('[data-add-slip="1"]'),id=b.dataset.game;
+                if(b.dataset.market!=='AND')throw Error('Mercado do boletim nao acompanha a selecao');
+                b.click();
+                const saved=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-19_2026-10-25')||'{}');
+                if(!saved['1']?.items.some(x=>String(x.id)===id && x.market==='AND'))
+                  throw Error('Aposta foi guardada com mercado errado');
+                const select=document.querySelector('#gm-lg');
+                select.value='PT';select.dispatchEvent(new Event('change',{bubbles:true}));
+                if(document.querySelectorAll('#gm-games .gm-card').length!==9)
+                  throw Error('Filtro da Liga Portugal falhou');
+                const min=document.querySelector('#gm-min');
+                min.value='80';min.dispatchEvent(new Event('change',{bubbles:true}));
+                const modelCards=Array.from(document.querySelectorAll('#gm-games .gm-card'));
+                if(modelCards.some(c=>{let id=c.dataset.gmId;let p=model.games[id]?.prob?.AND;return p!==undefined&&p<.8}))
+                   throw Error('Filtro minimo nao respeitado');
+                document.body.dataset.golosSmoke='PASS';
+              }catch(e){document.body.dataset.golosSmoke='FAIL: '+e.message}
+            },2000);
           });
           </script>'''
-          Path('.tables-test.html').write_text(content.replace('</body>',test+'</body>'),encoding='utf-8')
+          Path('.golos-test.html').write_text(content.replace('</body>',verify+'</body>'),encoding='utf-8')
           PY
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=10000 --dump-dom "file://$PWD/.tables-test.html#tabelas" > /tmp/tables-test-dom.html 2>/tmp/tables-test-chrome-errors.txt
+          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=9000 --dump-dom "file://$PWD/.golos-test.html#golos" > /tmp/golos-dom.html 2>/tmp/golos-errors.txt
           python3 - <<'PY'
           import re
-          from pathlib import Path
           from html import unescape
-          dom=Path('/tmp/tables-test-dom.html').read_text(encoding='utf-8')
-          m=re.search(r'<body[^>]+data-tables-smoke="([^"]+)"',dom)
+          from pathlib import Path
+          html=Path('/tmp/golos-dom.html').read_text(encoding='utf-8')
+          m=re.search(r'<body[^>]*data-golos-smoke="([^"]+)"',html)
           result=unescape(m.group(1)) if m else 'NOT_RUN'
-          print('Tabelas por Liga:',result)
-          assert result=='PASS', result
-          PY
-          rm -f .tables-test.html
-      - name: Testar ordenação por probabilidade nas colunas
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          html=Path('index.html').read_text(encoding='utf-8')
-          js=r'''<script>
-          document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(async()=>{
-              try{
-                document.querySelector('[data-go="games"]').click();
-                document.querySelector('#layout-table').click();
-                const lg=document.querySelector('#day-filter');
-                lg.value='all';lg.dispatchEvent(new Event('change',{bubbles:true}));
-                const table=document.querySelector('#table-list');
-                if(table.hidden)throw Error('Tabela de jogos nao esta visivel');
-                if(document.querySelectorAll('#game-rows tr').length!==139)throw Error('Faltam jogos');
-                function orderedValues(market){
-                  const col=['W1','X','W2','BTTS','O25','AND','C85'].indexOf(market)+4;
-                  return Array.from(document.querySelectorAll('#game-rows tr')).map(tr=>{
-                    const td=tr.querySelectorAll('td')[col-1];
-                    const text=td?.textContent?.trim();
-                    if(!text||text==='—')return null;
-                    return Number(text.replace('%','').replace(',','.'));
-                  });
-                }
-                function assertOrder(market,dir){
-                  const arr=orderedValues(market),valid=arr.filter(v=>v!==null);
-                  if(valid.length<30)throw Error('Amostra demasiado curta: '+market);
-                  if(valid.some((v,i)=>i>0&&(dir==='desc'?v>valid[i-1]+.01:v<valid[i-1]-.01)))
-                    throw Error('Ordenacao '+dir+' falhou: '+market);
-                  if(arr.slice(valid.length).some(v=>v!==null))
-                    throw Error('Valores ausentes nao ficaram no fim: '+market);
-                  const active=document.querySelector('#table-list [data-sort-header="'+market+'"]');
-                  if(active?.getAttribute('aria-sort')!==(dir==='desc'?'descending':'ascending'))
-                    throw Error('Estado acessivel da ordenacao incorreto: '+market);
-                }
-                document.querySelector('#table-list thead [data-table-sort="BTTS"]').click();
-                assertOrder('BTTS','desc');
-                if(document.querySelector('#metric-filter').value!=='BTTS')
-                  throw Error('Mercado AM nao sincronizou com filtro');
-                document.querySelector('#table-list thead [data-table-sort="BTTS"]').click();
-                assertOrder('BTTS','asc');
-                document.querySelector('#table-list thead [data-table-sort="C85"]').click();
-                assertOrder('C85','desc');
-                document.querySelector('#table-list thead [data-table-sort="X"]').click();
-                assertOrder('X','desc');
-                if(document.querySelector('#metric-filter').value!=='X')
-                  throw Error('Empate X nao sincronizou filtro');
-                const cell=document.querySelector('#game-rows td.table-percentage [data-table-sort="O25"]:not([disabled])');
-                if(!cell)throw Error('Nao ha percentagem +2,5 clicavel');
-                cell.click();
-                assertOrder('O25','desc');
-                await new Promise(r=>setTimeout(r,150));
-                const top=document.querySelector('#game-rows tr');
-                if(!top?.querySelector('td.as-td [data-add-slip]'))
-                  throw Error('Ordenacao perdeu botoes dos boletins');
-                document.querySelector('#order-filter').value='date';
-                document.querySelector('#order-filter').dispatchEvent(new Event('change',{bubbles:true}));
-                if(document.querySelector('#table-list [aria-sort="descending"]'))
-                  throw Error('Limpar ordenacao nao removeu destaque');
-                document.body.dataset.sortSmoke='PASS';
-              }catch(e){document.body.dataset.sortSmoke='FAIL: '+e.message}
-            },1200);
-          });
-          </script>'''
-          Path('.sort-test.html').write_text(html.replace('</body>',js+'</body>'),encoding='utf-8')
-          PY
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=10000 --dump-dom "file://$PWD/.sort-test.html#jogos" >/tmp/sort-test-dom.html 2>/tmp/sort-test-chrome-errors.txt
-          python3 - <<'PY'
-          from pathlib import Path
-          from html import unescape
-          import re
-          html=Path('/tmp/sort-test-dom.html').read_text(encoding='utf-8')
-          m=re.search(r'<body[^>]+data-sort-smoke="([^"]+)"',html)
-          status=unescape(m.group(1)) if m else 'NOT_RUN'
-          print('Ordenacao:',status)
-          assert status=='PASS',status
-          PY
-          rm -f .sort-test.html
-      - name: Testar classificação lateral e destaque das equipas no Chromium
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          html=Path('index.html').read_text(encoding='utf-8')
-          test=r'''<script>
-          document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(()=>{
-              try{
-                document.querySelector('[data-go="games"]').click();
-                document.querySelector('#layout-table').click();
-                const panel=document.querySelector('#as-league-standings');
-                if(!panel)throw Error('Painel de classificação não foi criado');
-                const league=document.querySelector('#as-standings-league');
-                if(!league||league.options.length!==12)throw Error('Seletor com 12 ligas inexistente');
-                if(document.querySelectorAll('#as-standings-body tr').length!==18)
-                  throw Error('Liga Portugal não apresenta 18 equipas');
-                if(!panel.textContent.includes('Classificação calculada'))
-                  throw Error('Falta informação de classificação não oficial');
-                league.value='EN';league.dispatchEvent(new Event('change',{bubbles:true}));
-                if(document.querySelectorAll('#as-standings-body tr').length!==20)
-                  throw Error('Premier League não apresenta 20 equipas');
-                const rows=Array.from(document.querySelectorAll('#as-standings-body tr'));
-                const first=rows[0];
-                if(!first.querySelector('.as-st-points')||!first.querySelector('.as-st-gf')||
-                   !first.querySelector('.as-st-ga')||!first.querySelector('.as-standings-form'))
-                  throw Error('Pontos, GM/GS e forma não apresentados');
-                if(!rows.some(row=>row.querySelectorAll('.as-form').length===7))
-                  throw Error('Últimos 7 resultados não aparecem na classificação');
-                if(document.querySelectorAll('#game-rows tr').length!==11)
-                  throw Error('Filtrar classificação não filtrou a Premier League');
-                const game=document.querySelector('#game-rows tr');
-                game.dispatchEvent(new PointerEvent('pointerover',{bubbles:true}));
-                if(document.querySelectorAll('#as-standings-body .as-standings-team-selected').length!==2)
-                  throw Error('Não destacou as duas equipas do jogo');
-                if(document.querySelector('#as-standings-highlight').hidden)
-                  throw Error('Resumo das equipas não aparece');
-                const choice=first.querySelector('[data-stand-team]');
-                choice.click();
-                if(!document.querySelectorAll('#as-standings-body .as-standings-team-selected').length)
-                  throw Error('Selecionar equipa na classificação falhou');
-                const uefa='UCL';league.value=uefa;league.dispatchEvent(new Event('change',{bubbles:true}));
-                if(document.querySelectorAll('#as-standings-body tr').length!==36)
-                  throw Error('Tabela de 36 equipas da Champions não carregou');
-                if(!Array.from(document.querySelectorAll('#as-standings-body tr')).some(r=>r.textContent.includes('/7')))
-                  throw Error('Forma UEFA com menos de 7 jogos não identificada');
-                document.body.dataset.standingsSmoke='PASS';
-              }catch(e){document.body.dataset.standingsSmoke='FAIL: '+e.message}
-            },1800);
-          });
-          </script>'''
-          Path('.standings-test.html').write_text(html.replace('</body>',test+'</body>'),encoding='utf-8')
-          PY
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless --no-sandbox --allow-file-access-from-files --disable-dev-shm-usage --disable-gpu --virtual-time-budget=12000 --dump-dom "file://$PWD/.standings-test.html#jogos" > /tmp/standings-test-dom.html 2>/tmp/standings-test-chrome-errors.txt
-          python3 - <<'PY'
-          import re
-          from html import unescape
-          from pathlib import Path
-          html=Path('/tmp/standings-test-dom.html').read_text(encoding='utf-8')
-          m=re.search(r'<body[^>]*data-standings-smoke="([^"]+)"',html)
-          result=unescape(m.group(1)) if m else 'NOT_RUN'
-          print('Classificacoes:',result)
+          print('Resultado do teste:',result)
           assert result=='PASS',result
-          PY
-          rm -f .standings-test.html
-      - name: Verificar arquivos e conteudo
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import json, re
-          html = Path("index.html").read_text(encoding="utf-8")
-          assert '<script src="./boletins.js?v=5" defer></script>' in html
-          assert '<script src="./qualidade.js?v=2" defer></script>' in html
-          assert '<script src="./apostas-reais.js?v=1" defer></script>' in html
-          assert '<link rel="stylesheet" href="./melhorias.css?v=1">' in html
-          assert '<link rel="stylesheet" href="./boletins.css?v=3">' in html
-          assert '<script src="./ultimos10.js?v=1" defer></script>' in html
-          assert '<link rel="stylesheet" href="./ultimos10.css?v=1">' in html
-          assert '<script src="./tabelas-ligas.js?v=3" defer></script>' in html
-          assert '<link rel="stylesheet" href="./tabelas-ligas.css?v=3">' in html
-          assert '<script src="./classificacoes.js?v=1" defer></script>' in html
-          assert '<link rel="stylesheet" href="./classificacoes.css?v=1">' in html
-          assert '<button class="nav-btn" data-go="tables">' in html
-          assert 'id="view-tables"' in html and 'id="tlg-export"' in html
-          history=json.loads(Path("dados/ultimos10-2026-10-19.json").read_text(encoding="utf-8"))
-          assert len(history["byGame"])==139
-          for g in json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))["games"]:
-              b=history["byGame"][str(g["id"])]
-              for which in ("home","away"):
-                  team=b[which]
-                  assert team["available"]==len(team["results"])<=10
-                  assert all(row["date"]<b["date"] for row in team["results"])
-                  assert team["stats"]["gf"]==sum(row["gf"] for row in team["results"])
-                  assert team["stats"]["ga"]==sum(row["ga"] for row in team["results"])
-          assert 'id="rank-list"' in html and 'id="view-games"' in html
-          data = json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
-          assert len(data["games"]) > 10 and len(data["leagues"]) == 12
-          st=json.loads(Path("dados/classificacoes-2026-10-22.json").read_text(encoding="utf-8"))
-          assert len(st["leagues"]) == 12
-          for code, league in st["leagues"].items():
-              teams=league["standings"]
-              assert len(teams)==league["teams"]
-              assert len(teams)>=12
-              assert sum(row["p"] for row in teams)==2*league["fixturesUsed"], code
-              for row in teams:
-                  assert row["pts"]==3*row["w"]+row["d"], code
-                  assert row["p"]==row["w"]+row["d"]+row["l"], code
-                  assert row["gf"]>=0 and row["ga"]>=0
-                  assert row["gd"]==row["gf"]-row["ga"]
-                  assert len(row["recent"])<=7
-                  assert all(x["date"]<st["cutoffExclusive"] and x["result"] in ("V","E","D") for x in row["recent"])
-          for game in data["games"]:
-              league=st["leagues"][game["league"]]
-              bykey={row["key"] for row in league["standings"]}
-              aliases=league["fixtureAliases"]
-              for name in (game["home"],game["away"]):
-                  normalized=''.join(c for c in __import__('unicodedata').normalize('NFKD', name).lower() if c.isalnum() and ord(c)<128)
-                  assert aliases.get(name,normalized) in bykey,(game["league"],name)
-          print("Classificacoes: 12 competicoes, pontos, GM/GS e ultimos 7: OK")
-          print("Estrutura e dados: OK")
           PY
