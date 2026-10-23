@@ -13,15 +13,7 @@
     const ALL = D.games;
     const byId = new Map(ALL.map(g => [Number(g.id), g]));
     const byLeague = new Map(D.leagues.map(l => [l.code, l]));
-    const MARKETS = [
-      ['W1','Vitória casa'], ['X','Empate'], ['W2','Vitória fora'],
-      ['BTTS','Ambas marcam · Sim'], ['BTTS_NO','Ambas marcam · Não'],
-      ['O15','Mais de 1,5 golos'], ['O25','Mais de 2,5 golos'],
-      ['AND','Ambas marcam E +2,5'], ['OR','Ambas marcam OU +2,5'],
-      ['C85','Mais de 8,5 cantos'], ['C95','Mais de 9,5 cantos'],
-      ['HT1','Casa vence 1.ª parte'], ['HTX','Empate 1.ª parte'], ['HT2','Fora vence 1.ª parte'],
-      ['SH1','Casa vence 2.ª parte'], ['SHX','Empate 2.ª parte'], ['SH2','Fora vence 2.ª parte']
-    ];
+    const MARKETS = [['BTTS','Ambas marcam'],['O25','Mais de 2,5 golos'],['AND','Ambas marcam E +2,5']    ];
     const marketName = Object.fromEntries(MARKETS);
     const storageKey = 'apostas_semanal_slips_' + (D.start || 'semana') + '_' + (D.end || '');
     const settingsKey = 'apostas_semanal_filtro_v2';
@@ -119,7 +111,13 @@
     }
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const probability = (g, k) => {
-      if (!g || g.verified === false) return NaN;
+      if (!g) return NaN;
+      // Apenas três mercados no novo modelo de golos. Nunca utilizar odds/probabilidades antigas.
+      if (!['BTTS','O25','AND'].includes(k)) return NaN;
+      const model=window.ApostasGolosModel;
+      const v=model?.games?.[g.id]?.prob?.[k];
+      return typeof v==='number' && Number.isFinite(v) && v>0 && v<=1 ? v : NaN;
+      /*
       const p = g.p || {}, a = g.first || {}, b = g.second || {};
       const values = {
         W1:p.w1, X:p.draw, W2:p.w2, BTTS:p.btts, BTTS_NO:p.no,
@@ -130,6 +128,7 @@
       if (values[k] === null || values[k] === undefined) return NaN;
       const v = Number(values[k]);
       return Number.isFinite(v) && v > 0 && v <= 1 ? v : NaN;
+      */
     };
     const fairOdd = p => Number.isFinite(p) && p > 0 ? Number((1/p).toFixed(2)) : NaN;
     const fairEligible = p => Number.isFinite(p) && p > 0 && (fairMinimum <= 0 || 1/p + 1e-10 >= fairMinimum);
@@ -623,6 +622,7 @@
       const body=$('modal-content');
       if (body){new MutationObserver(enhanceModal).observe(body,{childList:true});}
     }
+    window.addEventListener('apostas-golos-ready',()=>{refreshInline();renderChoices();renderDock();});
     restore();
     setupChoices();
     renderDock();
