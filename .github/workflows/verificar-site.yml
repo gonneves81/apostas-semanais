@@ -78,7 +78,7 @@ jobs:
                 if(!sort.classList.contains('active'))throw Error('Ordenacao de AM E +2,5 falhou');
                 const model=window.ApostasGolosModel;
                 if(!model||!model.games)throw Error('Modelo nao foi carregado');
-                const available=cards.find(c=>c.querySelector('[data-add-slip="1"]'));
+                const available=Array.from(document.querySelectorAll('#gm-games .gm-card')).find(c=>c.querySelector('[data-add-slip="1"]'));
                 if(!available)throw Error('Nao existem selecoes para boletim');
                 const b=available.querySelector('[data-add-slip="1"]'),id=b.dataset.game;
                 if(b.dataset.market!=='AND')throw Error('Mercado do boletim nao acompanha a selecao');
