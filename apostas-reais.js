@@ -61,7 +61,7 @@ function start(){
        message('Existe um prognóstico inválido ou repetido no boletim.');return;
      }
      seen.add(g.id);
-     const pct=window.ApostasQualidade?.probability(g,i.market);
+     const pct=window.ApostasGolosModel?.games?.[g.id]?.prob?.[i.market];
      picks.push({game_id:g.id,league:g.league,home:g.home,away:g.away,market:i.market,
       odd:Number(odd(i.odd).toFixed(3)),probability:Number.isFinite(pct)?pct:null,
       scheduled:typeof g.date==='string'?g.date:String(D.start||'')+':dia '+g.day,
