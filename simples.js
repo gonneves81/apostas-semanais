@@ -17,6 +17,7 @@ const x={W1:p.w1,X:p.draw,W2:p.w2,BTTS:p.btts,O25:p.o25,AND:p.and,OR:p.or,O15:p.
 return typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=1?x:null;};
 const date=g=>typeof g.date==='string'&&/^\d{4}-\d\d-\d\d$/.test(g.date)?g.date:D.start.slice(0,8)+String(g.day).padStart(2,'0');
 const fmtDate=g=>date(g).slice(8,10)+'/'+date(g).slice(5,7)+' '+(g.time||'');
+let standings=null,standingsError=false;
 let hist=null,hasFailed=false,selectedLeague='ALL',selectedDay='ALL',selectedMarket='BTTS',sort='date',selectedGame=null,tab='preview',formScope='all',formLength=10;
 const loadStamp=new Date().toISOString();
 function lg(g){return leagues.find(l=>l.code===g.league)||{name:g.league,flag:'⚽'}}
@@ -106,7 +107,13 @@ if(tab==='venue')body='<div class="fs-two">'+statPanel(home,g.home,'home')+statP
 if(tab==='h2h'){const h=h2h(g);body='<h3>Confrontos diretos disponíveis</h3>'+
 (h.length?h.map(line).join(''):'<p class="fs-no">O arquivo recente não contém confrontos suficientes entre as duas equipas. Não são inventados resultados H2H.</p>')+
 '<p class="fs-note">Só são identificados confrontos presentes nos históricos recentes das duas equipas; não representa necessariamente todos os H2H históricos.</p>';}
-if(tab==='standings')body='<p class="fs-no">Classificação atual (total, casa, fora e últimos 5): ainda não disponível nesta edição. Os resultados anteriores são apresentados no separador Forma e golos. Não serão calculados pontos de uma tabela incompleta.</p>';
+if(tab==='standings'){
+ const lg=standings?.leagues?.[g.league];
+ body=lg?.standings?.length?'<p class="fs-note">Classificação reconstruída dos resultados presentes no arquivo até '+esc(standings.calculatedUntil)+'. Não é uma tabela oficial ou em direto.</p>'+
+ '<div class="fs-scroll"><table class="fs-table fs-standing-table"><thead><tr><th>#</th><th>Equipa</th><th>J</th><th>V/E/D</th><th>GM</th><th>GS</th><th>Pts</th><th>Últimos 7</th></tr></thead><tbody>'+
+ lg.standings.map(x=>'<tr><td>'+x.rank+'</td><th>'+esc(x.name)+'</th><td>'+x.p+'</td><td>'+x.w+'/'+x.d+'/'+x.l+'</td><td>'+x.gf+'</td><td>'+x.ga+'</td><td>'+x.pts+'</td><td><div class="fs-form-row">'+(x.recent||[]).slice(0,7).map(a=>'<span class="fs-form fs-'+esc(a.result.toLowerCase())+'">'+esc(a.result)+'</span>').join('')+'</div></td></tr>').join('')+'</tbody></table></div>':
+ '<p class="fs-no">Não há classificação reconstruída verificável para esta competição neste arquivo.</p>';
+}
 if(tab==='popular')body='<p class="fs-no">Apostas mais efetuadas: sem percentagens públicas verificáveis para este encontro. Para mostrar escolhas populares é necessária uma fonte que divulgue o número ou percentagem de apostas, o mercado, a casa e a data de recolha.</p><p class="fs-note">Não confundir prognósticos populares publicados online com a distribuição real das apostas feitas pelos utilizadores.</p>';
 $('fs-detail').innerHTML='<div class="fs-match-header"><span>'+esc(lg(g).flag||'⚽')+' '+esc(lg(g).name)+' · '+fmtDate(g)+' (Portugal)</span><h2>'+esc(g.home)+' <span>×</span> '+esc(g.away)+'</h2><small>'+(g.modelStatus==='exploratory_uefa'?'⚠️ Estimativa exploratória UEFA, sem calibração':g.verified===false?'Prognóstico pendente':'Previsão arquivada')+'</small></div>'+
 '<nav class="fs-detail-tabs">'+tabs.map(([id,label])=>'<button type="button" data-fs-tab="'+id+'" class="'+(tab===id?'active':'')+'">'+label+'</button>').join('')+'</nav>'+
@@ -117,7 +124,16 @@ try{const response=await fetch('./dados/ultimos10-'+D.start+'.json',{cache:'no-s
 const data=await response.json();if(!data.byGame||data.period?.start!==D.start)throw Error('Edição diferente');hist=data;hasFailed=false;}catch(e){hist=null;hasFailed=true;}
 renderList();if(selectedGame)drawDetail();
 }
-host.innerHTML=menu();renderList();loadHistory();
+async function loadStandings(){try{
+ const res=await fetch('./dados/classificacoes-2026-10-22.json',{cache:'no-store'});
+ if(!res.ok)throw Error('Classificação indisponível');
+ const d=await res.json();
+ if(d.season!=='2026/27'||!d.leagues)throw Error('Formato de classificação inesperado');
+ standings=d;standingsError=false;
+ }catch(e){standings=null;standingsError=true}
+ if(selectedGame&&tab==='standings')drawDetail();
+}
+host.innerHTML=menu();renderList();loadHistory();loadStandings();
 host.addEventListener('click',e=>{
 const group=e.target.closest('[data-fs-league]');if(group){selectedLeague=group.dataset.fsLeague;$('fs-league').value=selectedLeague;host.querySelectorAll('[data-fs-league]').forEach(b=>b.classList.toggle('active',b===group));renderList();return;}
 const sorting=e.target.closest('[data-fs-sort]');if(sorting){const k=sorting.dataset.fsSort;sort=sort==='prob'&&selectedMarket===k?'date':'prob';selectedMarket=k;$('fs-market').value=k;$('fs-order').value=sort;renderList();return;}
