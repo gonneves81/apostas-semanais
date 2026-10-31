@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "simples.js"
+      - "simples.css"
       - "boletins.js"
       - "golos.js"
       - "golos.css"
@@ -26,6 +28,7 @@ jobs:
           node --check ultimos10.js
           node --check tabelas-ligas.js
           node --check classificacoes.js
+          node --check simples.js
       - name: Testar coerência do modelo de golos
         run: |
           python3 - <<'PY'
@@ -39,6 +42,9 @@ jobs:
           assert model['coverage']['insufficient']==17
           assert sorted(model['model']['markets'])==['AND','BTTS','O25']
           assert 'id="view-golos"' in html and 'golos.js?v=1' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=1' in html
+          assert 'simples.css?v=1' in html
+          assert "else if(hash==='simples'||!hash)go('simple')" in html
           assert 'boletins.js?v=6' in html
           for g in data['games']:
               row=model['games'][str(g['id'])]
