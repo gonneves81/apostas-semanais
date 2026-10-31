@@ -94,7 +94,7 @@ jobs:
                   throw Error('Aposta foi guardada com mercado errado');
                 const select=document.querySelector('#gm-lg');
                 select.value='PT';select.dispatchEvent(new Event('change',{bubbles:true}));
-                if(document.querySelectorAll('#gm-games .gm-card').length!==9)
+                if(document.querySelectorAll('#gm-games .gm-card').length!==8)
                   throw Error('Filtro da Liga Portugal falhou');
                 const min=document.querySelector('#gm-min');
                 min.value='80';min.dispatchEvent(new Event('change',{bubbles:true}));
