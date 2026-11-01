@@ -1,160 +1,56 @@
-/* Navegação simples, inspirada na organização de apps de resultados.
-   Não usa marcas, API não autorizada ou dados "ao vivo" inventados. */
-(function(){
-'use strict';
+/* Painel unificado: dados publicados, mercados explícitos e seleções identificadas. */
+(function(){'use strict';
 function init(){
-const input=document.getElementById('data-json'),host=document.getElementById('flash-simple');if(!input||!host)return;
-let D;try{D=JSON.parse(input.textContent)}catch(e){return}
-const leagues=D.leagues||[],games=D.games||[],gamesById=new Map(games.map(g=>[Number(g.id),g]));
+const host=document.getElementById('flash-simple');if(!host)return;
+const D=JSON.parse(document.getElementById('data-json').textContent),M=window.ApostasMercados,keys=Object.keys(M.labels);
 const $=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pct=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=1?(x*100).toFixed(1).replace('.',',')+'%':'—';
-const refs={PT:'Portugal',EN:'Inglaterra',ES:'Espanha',IT:'Itália',FR:'França',DE:'Alemanha',DE2:'Alemanha',NL:'Países Baixos',SC:'Escócia',UCL:'Europa',UEL:'Europa',UECL:'Europa'};
-const cols=[['W1','1'],['X','X'],['W2','2'],['BTTS','AM'],['O25','+2,5'],['AND','AM E +2,5'],['OR','AM OU +2,5'],['O15','+1,5'],['C85','Cantos +8,5'],['C95','Cantos +9,5'],['HT1','1.ª Casa'],['HT2','1.ª Fora'],['SH1','2.ª Casa'],['SH2','2.ª Fora']];
-const markets=(g,k)=>{
-if(!g||g.verified===false)return null;
-const p=g.p||{},a=g.first||{},b=g.second||{};
-const x={W1:p.w1,X:p.draw,W2:p.w2,BTTS:p.btts,O25:p.o25,AND:p.and,OR:p.or,O15:p.o15,C85:g.c85,C95:g.c95,HT1:a.w1,HT2:a.w2,SH1:b.w1,SH2:b.w2}[k];
-return typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=1?x:null;};
-const date=g=>typeof g.date==='string'&&/^\d{4}-\d\d-\d\d$/.test(g.date)?g.date:D.start.slice(0,8)+String(g.day).padStart(2,'0');
-const fmtDate=g=>date(g).slice(8,10)+'/'+date(g).slice(5,7)+' '+(g.time||'');
-let standings=null,standingsError=false;
-let hist=null,hasFailed=false,selectedLeague='ALL',selectedDay='ALL',selectedMarket='BTTS',sort='date',selectedGame=null,tab='preview',formScope='all',formLength=10;
-const loadStamp=new Date().toISOString();
-function lg(g){return leagues.find(l=>l.code===g.league)||{name:g.league,flag:'⚽'}}
-function results(g,side){
-const r=hist?.byGame?.[g.id]?.[side]?.results||[];
-return Array.isArray(r)?r.filter(x=>x.date<date(g)&&Number.isInteger(x.gf)&&Number.isInteger(x.ga)).slice(0,10):[];
-}
-function aggregate(arr){
-const gf=arr.reduce((a,r)=>a+r.gf,0),ga=arr.reduce((a,r)=>a+r.ga,0),n=arr.length;
-return {n,gf,ga,v:arr.filter(r=>r.outcome==='V').length,e:arr.filter(r=>r.outcome==='E').length,d:arr.filter(r=>r.outcome==='D').length,
- avgF:n?(gf/n).toFixed(2).replace('.',','):'—',avgA:n?(ga/n).toFixed(2).replace('.',','):'—'};
-}
-function subset(rows,scope){return rows.filter(r=>scope==='all'||(scope==='home'&&r.venue==='C')||(scope==='away'&&r.venue==='F')).slice(0,formLength)}
-function line(x){return '<div class="fs-result"><span>'+esc(x.date.slice(8,10)+'/'+x.date.slice(5,7))+'</span><span class="fs-form fs-'+esc(x.outcome.toLowerCase())+'">'+esc(x.outcome)+'</span><span>'+esc(x.venue==='C'?'C':'F')+'</span><span class="fs-opp">'+esc(x.opponent)+'</span><b>'+x.gf+'–'+x.ga+'</b></div>'}
-function statPanel(rows,name,sc){
-const picks=subset(rows,sc),a=aggregate(picks);
-return '<section class="fs-team-stat"><h3>'+esc(name)+'</h3><div class="fs-numbers">'+
-[['Jogos',a.n],['V / E / D',a.v+' / '+a.e+' / '+a.d],['GM',a.gf],['GS',a.ga],['GM/jogo',a.avgF],['GS/jogo',a.avgA]].map(([k,v])=>'<div><small>'+k+'</small><b>'+v+'</b></div>').join('')+'</div>'+
-'<div class="fs-result-head">Data · Forma · C/F · Adversário · Golos</div>'+
-(picks.length?picks.map(line).join(''):'<p class="fs-no">Sem resultados suficientes no arquivo.</p>')+
-'<small>Resultados disponíveis anteriores a este jogo: '+picks.length+' (máximo '+formLength+').</small></section>';}
-function h2h(g){
-const home=results(g,'home'),away=results(g,'away');const homeName=g.home,awayName=g.away;
-const merged=[...home.map(r=>({...r,forTeam:'home'})),...away.map(r=>({...r,forTeam:'away'}))];
-const seen=new Set(),out=[];
-for(const r of merged.sort((a,b)=>b.date.localeCompare(a.date))){
-if(r.forTeam==='home'&&r.opponent!==awayName)continue;
-if(r.forTeam==='away'&&r.opponent!==homeName)continue;
-const k=r.date+'|'+r.gf+'|'+r.ga;if(seen.has(k))continue;seen.add(k);out.push(r);
-}
-return out.slice(0,10);
-}
-function tableForm(g,side){const r=results(g,side).slice(0,7);return r.length?r.map(x=>'<span class="fs-form fs-'+esc(x.outcome.toLowerCase())+'" title="'+esc(x.date+' · '+x.opponent+' · '+x.gf+'-'+x.ga)+'">'+x.outcome+'</span>').join(''):'<span class="fs-none">—</span>';}
-function rankRows(){
-return games.filter(g=>(selectedLeague==='ALL'||selectedLeague===g.league)&&(selectedDay==='ALL'||date(g)===selectedDay))
-.sort((a,b)=>sort==='prob'?(markets(b,selectedMarket)??-1)-(markets(a,selectedMarket)??-1)||date(a).localeCompare(date(b)):date(a).localeCompare(date(b))||String(a.time).localeCompare(String(b.time)));
-}
-function menu(){
-return '<header class="fs-top"><div><span>⚽ APOSTAS SEMANAIS</span><h1>Futebol · Análise</h1><small>Dados concretos, previsões separadas e fontes identificadas</small></div>'+
-'<button type="button" id="fs-refresh" title="Recarregar os dados publicados"><span>↻</span> Atualizar</button></header>'+
-'<div class="fs-stamp"><span>Semana arquivada: '+esc(D.start)+' a '+esc(D.end)+'</span><b>Não é um placar em direto</b></div>'+
-'<nav class="fs-top-tabs" aria-label="Navegação simples"><button type="button" class="active" data-fs-nav="fixtures">Jogos e previsões</button>'+
-'<button type="button" data-fs-nav="legacy">Outras ferramentas</button></nav>'+
-'<div class="fs-layout"><aside class="fs-leagues"><h2>COMPETIÇÕES</h2>'+
-'<button type="button" data-fs-league="ALL" class="active">Todas as ligas <b>'+games.length+'</b></button>'+
-leagues.map(l=>'<button type="button" data-fs-league="'+esc(l.code)+'">'+esc(l.flag||'⚽')+' '+esc(l.name)+' <b>'+games.filter(g=>g.league===l.code).length+'</b></button>').join('')+
-'</aside><main class="fs-main"><div class="fs-filters"><label>Liga<select id="fs-league"><option value="ALL">Todas as ligas</option>'+
-leagues.map(l=>'<option value="'+esc(l.code)+'">'+esc(l.name)+'</option>').join('')+'</select></label>'+
-'<label>Dia<select id="fs-day"><option value="ALL">Toda a semana</option>'+
-Array.from({length:7},(_,i)=>{const dt=new Date(D.start+'T12:00:00Z');dt.setUTCDate(dt.getUTCDate()+i);const d=dt.toISOString().slice(0,10);return '<option value="'+d+'">'+d.slice(8,10)+'/'+d.slice(5,7)+'</option>';}).join('')+'</select></label>'+
-'<label>Mercado<select id="fs-market">'+cols.map(([k,n])=>'<option value="'+k+'"'+(k===selectedMarket?' selected':'')+'>'+n+'</option>').join('')+'</select></label>'+
-'<label>Ordenar<select id="fs-order"><option value="date">Por data</option><option value="prob">Maior probabilidade</option></select></label></div>'+
-'<div class="fs-warning">As percentagens são <b>estimativas do modelo</b>, não taxas de sucesso nem odds comerciais. As previsões UEFA exploratórias têm amostras muito reduzidas. Mercados sem dados ficam vazios.</div>'+
-'<div id="fs-fixtures"></div></main></div><div id="fs-modal" hidden class="fs-modal" role="dialog" aria-modal="true" aria-label="Análise do encontro">'+
-'<div class="fs-dialog"><div class="fs-dialog-bar"><button type="button" data-fs-close>← Voltar</button><span>Análise por encontro</span></div><div id="fs-detail"></div></div></div>';
-}
-function renderList(){
-const rows=rankRows(),root=$('fs-fixtures');if(!root)return;
-const groupByLeague=selectedLeague==='ALL'&&sort==='date';
-const groups=groupByLeague?leagues.map(l=>({l,rows:rows.filter(g=>g.league===l.code)})).filter(x=>x.rows.length):
-[{l:null,rows}];
-root.innerHTML='<div class="fs-list-title"><b>'+rows.length+' encontros</b><span>Clica numa percentagem para ordenar pelo mercado</span></div>'+
-groups.map(group=>'<section class="fs-competition">'+
-'<h2>'+(group.l?esc(group.l.flag||'⚽')+' '+esc(group.l.name):'Jogos e percentagens')+'</h2>'+
-'<div class="fs-scroll"><table class="fs-table"><thead><tr><th>Dia / jogo</th><th>Forma casa / fora</th>'+
-cols.map(([k,n])=>'<th><button class="fs-sort'+(sort==='prob'&&selectedMarket===k?' active':'')+'" data-fs-sort="'+k+'" title="Ordenar por '+esc(n)+'">'+esc(n)+(sort==='prob'&&selectedMarket===k?' ↓':'')+'</button></th>').join('')+
-'<th>Ações</th></tr></thead><tbody>'+
-group.rows.map(g=>'<tr><th><button type="button" class="fs-match" data-fs-open="'+g.id+'"><small>'+fmtDate(g)+' · '+esc(lg(g).name)+'</small><strong>'+esc(g.home)+' – '+esc(g.away)+'</strong>'+
-(g.modelStatus==='exploratory_uefa'?'<em>UEFA · previsão exploratória</em>':'')+'</button></th>'+
-'<td><div class="fs-form-row">'+tableForm(g,'home')+'</div><div class="fs-form-row">'+tableForm(g,'away')+'</div></td>'+
-cols.map(([k,n])=>{const p=markets(g,k);return '<td><button type="button" class="fs-percentage'+(sort==='prob'&&selectedMarket===k?' selected':'')+'" data-fs-sort="'+k+'" title="Ordenar todos os jogos por '+esc(n)+'">'+pct(p)+'</button></td>';}).join('')+
-'<td><button type="button" class="fs-open" data-fs-open="'+g.id+'">Analisar</button></td></tr>').join('')+
-'</tbody></table></div></section>').join('')+
-'<p class="fs-source-note">Fonte de resultados anteriores: <a href="https://github.com/oladeeayo/open-matchday" target="_blank" rel="noopener">open-matchday</a> e <a href="https://github.com/openfootball/football.json" target="_blank" rel="noopener">openfootball</a>. Não verificados individualmente. As apostas mais efetuadas pelo público não são apresentadas porque não foi encontrada uma amostra comprovável e comparável por jogo.</p>';
-}
-function drawDetail(){
-const g=gamesById.get(selectedGame);if(!g)return;const home=results(g,'home'),away=results(g,'away');
-const tabs=[['preview','Previsões'],['form','Forma e golos'],['venue','Casa / Fora'],['h2h','H2H'],['standings','Classificação'],['popular','Apostas populares']];
-let body='';
-if(tab==='preview')body='<div class="fs-metrics">'+cols.map(([k,n])=>'<div><small>'+esc(n)+'</small><strong>'+pct(markets(g,k))+'</strong></div>').join('')+'</div>'+
-'<p class="fs-note">Estes valores pertencem à previsão arquivada. Não são recalculados automaticamente ao carregar no botão Atualizar.</p>'+
-'<button type="button" class="fs-action" data-fs-original="'+g.id+'">Ver análise original e acrescentar ao boletim</button>';
-if(tab==='form')body='<div class="fs-subtabs"><button data-fs-form="5" class="'+(formLength===5?'active':'')+'">Últimos 5</button><button data-fs-form="10" class="'+(formLength===10?'active':'')+'">Últimos 10</button></div>'+
-'<div class="fs-two">'+statPanel(home,g.home,'all')+statPanel(away,g.away,'all')+'</div>';
-if(tab==='venue')body='<div class="fs-two">'+statPanel(home,g.home,'home')+statPanel(away,g.away,'away')+'</div>'+
-'<p class="fs-note">Casa: apenas resultados em casa da equipa anfitriã. Fora: apenas resultados fora da equipa visitante, dentro dos 10 jogos anteriores arquivados. Esta amostra pode ser menor do que 10.</p>';
-if(tab==='h2h'){const h=h2h(g);body='<h3>Confrontos diretos disponíveis</h3>'+
-(h.length?h.map(line).join(''):'<p class="fs-no">O arquivo recente não contém confrontos suficientes entre as duas equipas. Não são inventados resultados H2H.</p>')+
-'<p class="fs-note">Só são identificados confrontos presentes nos históricos recentes das duas equipas; não representa necessariamente todos os H2H históricos.</p>';}
-if(tab==='standings'){
- const lg=standings?.leagues?.[g.league];
- body=lg?.standings?.length?'<p class="fs-note">Classificação reconstruída dos resultados presentes no arquivo até '+esc(standings.calculatedUntil)+'. Não é uma tabela oficial ou em direto.</p>'+
- '<div class="fs-scroll"><table class="fs-table fs-standing-table"><thead><tr><th>#</th><th>Equipa</th><th>J</th><th>V/E/D</th><th>GM</th><th>GS</th><th>Pts</th><th>Últimos 7</th></tr></thead><tbody>'+
- lg.standings.map(x=>'<tr><td>'+x.rank+'</td><th>'+esc(x.name)+'</th><td>'+x.p+'</td><td>'+x.w+'/'+x.d+'/'+x.l+'</td><td>'+x.gf+'</td><td>'+x.ga+'</td><td>'+x.pts+'</td><td><div class="fs-form-row">'+(x.recent||[]).slice(0,7).map(a=>'<span class="fs-form fs-'+esc(a.result.toLowerCase())+'">'+esc(a.result)+'</span>').join('')+'</div></td></tr>').join('')+'</tbody></table></div>':
- '<p class="fs-no">Não há classificação reconstruída verificável para esta competição neste arquivo.</p>';
-}
-if(tab==='popular')body='<p class="fs-no">Apostas mais efetuadas: sem percentagens públicas verificáveis para este encontro. Para mostrar escolhas populares é necessária uma fonte que divulgue o número ou percentagem de apostas, o mercado, a casa e a data de recolha.</p><p class="fs-note">Não confundir prognósticos populares publicados online com a distribuição real das apostas feitas pelos utilizadores.</p>';
-$('fs-detail').innerHTML='<div class="fs-match-header"><span>'+esc(lg(g).flag||'⚽')+' '+esc(lg(g).name)+' · '+fmtDate(g)+' (Portugal)</span><h2>'+esc(g.home)+' <span>×</span> '+esc(g.away)+'</h2><small>'+(g.modelStatus==='exploratory_uefa'?'⚠️ Estimativa exploratória UEFA, sem calibração':g.verified===false?'Prognóstico pendente':'Previsão arquivada')+'</small></div>'+
-'<nav class="fs-detail-tabs">'+tabs.map(([id,label])=>'<button type="button" data-fs-tab="'+id+'" class="'+(tab===id?'active':'')+'">'+label+'</button>').join('')+'</nav>'+
-'<div class="fs-tab-content">'+body+'</div>';
-}
-async function loadHistory(){
-try{const response=await fetch('./dados/ultimos10-'+D.start+'.json',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
-const data=await response.json();if(!data.byGame||data.period?.start!==D.start)throw Error('Edição diferente');hist=data;hasFailed=false;}catch(e){hist=null;hasFailed=true;}
-renderList();if(selectedGame)drawDetail();
-}
-async function loadStandings(){try{
- const res=await fetch('./dados/classificacoes-2026-10-22.json',{cache:'no-store'});
- if(!res.ok)throw Error('Classificação indisponível');
- const d=await res.json();
- if(d.season!=='2026/27'||!d.leagues)throw Error('Formato de classificação inesperado');
- standings=d;standingsError=false;
- }catch(e){standings=null;standingsError=true}
- if(selectedGame&&tab==='standings')drawDetail();
-}
-host.innerHTML=menu();renderList();loadHistory();loadStandings();
-host.addEventListener('click',e=>{
-const group=e.target.closest('[data-fs-league]');if(group){selectedLeague=group.dataset.fsLeague;$('fs-league').value=selectedLeague;host.querySelectorAll('[data-fs-league]').forEach(b=>b.classList.toggle('active',b===group));renderList();return;}
-const sorting=e.target.closest('[data-fs-sort]');if(sorting){const k=sorting.dataset.fsSort;sort=sort==='prob'&&selectedMarket===k?'date':'prob';selectedMarket=k;$('fs-market').value=k;$('fs-order').value=sort;renderList();return;}
-const open=e.target.closest('[data-fs-open]');if(open){selectedGame=Number(open.dataset.fsOpen);tab='preview';formScope='all';formLength=10;drawDetail();$('fs-modal').hidden=false;document.body.classList.add('fs-modal-open');return;}
-const close=e.target.closest('[data-fs-close]');if(close){$('fs-modal').hidden=true;document.body.classList.remove('fs-modal-open');selectedGame=null;return;}
-const select=e.target.closest('[data-fs-tab]');if(select){tab=select.dataset.fsTab;drawDetail();return;}
-const length=e.target.closest('[data-fs-form]');if(length){formLength=Number(length.dataset.fsForm);drawDetail();return;}
-const orig=e.target.closest('[data-fs-original]');if(orig){$('fs-modal').hidden=true;document.body.classList.remove('fs-modal-open');const id=Number(orig.dataset.fsOriginal);const lgButton=document.querySelector('[data-go="games"]');lgButton?.click();setTimeout(()=>document.querySelector('#game-list [data-open="'+id+'"]')?.click(),150);return;}
-const nav=e.target.closest('[data-fs-nav]');if(nav){if(nav.dataset.fsNav==='legacy'){document.querySelector('[data-go="tables"]')?.click();}else{host.scrollIntoView({behavior:'smooth'});}return;}
-if(e.target.closest('#fs-refresh')){const b=$('fs-refresh');b.disabled=true;b.textContent='A consultar…';loadHistory().finally(()=>{b.disabled=false;b.innerHTML='<span>↻</span> Atualizar';const t=$('fs-refresh-result');if(t)t.textContent='Verificados os dados publicados agora. '+(hasFailed?'Histórico indisponível.':'Sem ligação a resultados em direto.');});return;}
-});
-for(const [id,key] of [['fs-league','league'],['fs-day','day'],['fs-market','market'],['fs-order','order']]){
-$(id).addEventListener('change',e=>{if(key==='league'){selectedLeague=e.target.value;host.querySelectorAll('[data-fs-league]').forEach(b=>b.classList.toggle('active',b.dataset.fsLeague===selectedLeague));}
-if(key==='day')selectedDay=e.target.value;
-if(key==='market')selectedMarket=e.target.value;
-if(key==='order')sort=e.target.value;
-renderList();});
-}
-const info=document.createElement('p');info.id='fs-refresh-result';info.className='fs-refresh-note';info.textContent='O botão Atualizar consulta o último arquivo publicado; não obtém resultados ao vivo.';
-host.querySelector('.fs-stamp')?.after(info);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&selectedGame){$('fs-modal').hidden=true;document.body.classList.remove('fs-modal-open');selectedGame=null;}});
+const pct=x=>Number.isFinite(x)?(100*x).toFixed(1).replace('.',',')+'%':'—',num=x=>Number.isFinite(x)?x.toFixed(2).replace('.',','):'—';
+const day=g=>g.date||D.start.slice(0,8)+String(g.day).padStart(2,'0');
+const label=c=>D.leagues.find(l=>l.code===c)?.name||c;
+const prob=(g,k)=>M.probability(g.id,k),row=g=>window.ApostasGolosModel?.games?.[g.id];
+let hist=null,standings=null,loading=true,detail=null,lastFocus=null;
+const state={league:'ALL',day:'ALL',market:'ALL',min:0,quality:0,odd:0,search:'',sort:'date',dir:-1,scope:'all'};
+const oddsKey='apostas_odds_'+D.start;let quotes={};try{quotes=JSON.parse(localStorage.getItem(oddsKey)||'{}')}catch{}
+function quote(g,k){const v=Number(String(quotes[g.id+'_'+k]??'').replace(',','.'));return Number.isFinite(v)&&v>=1.19&&v<=1000?v:null;}
+function results(g,side){return (hist?.byGame?.[g.id]?.[side]?.results||row(g)?.latest?.[side]||[]).filter(r=>r.date<day(g)&&Number.isInteger(r.gf)&&Number.isInteger(r.ga)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);}
+function quality(g){const r=row(g),n=r?.counts;if(!r?.prob||!n)return 0;return Math.round(50*Math.min(n.home||0,n.away||0,10)/10+50*Math.min(n.homeAtHome||0,n.awayAtAway||0,5)/5);}
+function form(rs){return rs.slice(0,7).map(r=>'<abbr class="fs-form fs-'+esc((r.outcome||r.result||'').toLowerCase())+'" title="'+esc(r.date+' · '+(r.opponent||r.opp)+' · '+(r.gf!==undefined?r.gf+'–'+r.ga:r.score))+'">'+esc(r.outcome||r.result)+'</abbr>').join('')||'—';}
+const displayed=()=>state.market==='ALL'?keys:state.market==='1X2'?['W1','X','W2']:[state.market];
+function selected(){const q=state.search.toLocaleLowerCase('pt');const kk=displayed();return D.games.filter(g=>(state.league==='ALL'||g.league===state.league)&&(state.day==='ALL'||day(g)===state.day)&&(!q||(g.home+' '+g.away).toLocaleLowerCase('pt').includes(q))&&quality(g)>=state.quality&&(!state.min||kk.some(k=>prob(g,k)!==null&&prob(g,k)*100>=state.min))&&(!state.odd||kk.some(k=>quote(g,k)!==null&&quote(g,k)>=state.odd))).sort((a,b)=>{if(state.sort!=='date'){let x=prob(a,state.sort),y=prob(b,state.sort);if(x===null)return y===null?0:1;if(y===null)return -1;return state.dir*(x-y);}return day(a).localeCompare(day(b))||String(a.time).localeCompare(String(b.time));});}
+const opts=(arr,current)=>arr.map(([k,n])=>'<option value="'+esc(k)+'"'+(String(k)===String(current)?' selected':'')+'>'+esc(n)+'</option>').join('');
+host.innerHTML='<header class="fs-top"><div><span>APOSTAS SEMANAIS</span><h1>Todos os jogos. Os teus mercados.</h1><small>1/X/2 · Ambas Marcam · +2,5 · AM e +2,5</small></div><button id="fs-print">Exportar PDF / imprimir</button></header><p class="fs-stamp">Edição '+esc(D.start)+' a '+esc(D.end)+' · <span id="fs-data-stamp">A carregar dados…</span></p><div class="fs-filters">'+
+'<label>Pesquisar equipa<input id="fs-search" type="search" placeholder="Nome da equipa"></label>'+
+'<label>Liga<select id="fs-league">'+opts([['ALL','Todas as ligas'],...D.leagues.map(l=>[l.code,l.name])],'ALL')+'</select></label>'+
+'<label>Dia<select id="fs-day">'+opts([['ALL','Toda a semana'],...[...new Set(D.games.map(day))].sort().map(d=>[d,d.slice(8)+'/'+d.slice(5,7)])],'ALL')+'</select></label>'+
+'<label>Mercado<select id="fs-market">'+opts([['ALL','Todos'],['1X2','1/X/2'],...Object.entries(M.labels)],'ALL')+'</select></label>'+
+'<label>Probabilidade mínima<input id="fs-min" type="number" min="0" max="100" value="0" step="5"></label>'+
+'<label>Cobertura mínima<select id="fs-quality">'+opts([[0,'Todas'],[50,'Pelo menos 50/100'],[70,'Pelo menos 70/100']],'0')+'</select></label>'+
+'<label>Odd introduzida mínima<input id="fs-odd" type="number" min="0" max="1000" step="0.01" value="0"></label></div>'+
+'<div class="fs-warning"><b>Probabilidade ≠ confiança ≠ valor.</b> Percentagens estimadas por Poisson, sem calibração histórica. A cobertura mede apenas a dimensão da amostra. Odds comerciais são introduzidas por ti. Dados em falta ficam assinalados.</div>'+
+'<section id="fs-top5"></section><div id="fs-fixtures"></div><details class="fs-method"><summary>Método, fontes e limites</summary><p>Os quatro mercados usam o mesmo modelo publicado de golos. 1/X/2 é calculado nesta versão a partir das intensidades publicadas; não conta como previsão arquivada antes do jogo para avaliar acertos. É a soma dos resultados possíveis de duas distribuições de Poisson independentes. AM e +2,5 é a probabilidade conjunta publicada pelo modelo, não o produto das duas probabilidades.</p><p>A cobertura (0–100) atribui 50 pontos à menor amostra geral das equipas (máximo 10 jogos) e 50 à menor amostra casa/fora (máximo 5). Não inclui validação de lesões, onzes ou xG. A odd justa é 1/p. O valor esperado estimado é p × odd − 1 e depende da validade do modelo.</p><p>As classificações são reconstruídas a partir dos resultados disponíveis; a data aparece em cada tabela. Não são classificações oficiais em direto. Os últimos 10 jogos podem ter uma amostra inferior a 10.</p><button data-go="history">Consultar histórico de acertos e calibração</button></details>'+
+'<div id="fs-modal" hidden class="fs-modal" role="dialog" aria-modal="true" aria-labelledby="fs-detail-title"><div class="fs-dialog"><div class="fs-dialog-bar"><button data-fs-close>← Fechar</button><button id="fs-print-detail">PDF deste jogo</button></div><div id="fs-detail"></div></div></div>';
+function standingsTable(code){const data=standings?.leagues?.[code];if(!data)return '<aside class="fs-team-stat">'+(loading?'A carregar classificação…':'Classificação indisponível para esta competição.')+'</aside>';
+let entries=data.standings||[];let partial=state.scope!=='all';if(partial){entries=entries.map(t=>{const rs=(t.recent||[]).filter(r=>r.home===(state.scope==='home'));let gf=0,ga=0;for(const r of rs){const v=r.score.match(/(\d+)\D+(\d+)/);if(v){gf+=+v[1];ga+=+v[2];}}return {...t,p:rs.length,pts:rs.reduce((n,r)=>n+(r.result==='V'?3:r.result==='E'?1:0),0),gf,ga,recent:rs};}).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);}
+return '<aside class="fs-team-stat fs-side-standing"><h3>'+esc(label(code))+' · Classificação</h3><label>Âmbito <select data-fs-scope>'+opts([['all','Geral'],['home','Casa · amostra recente'],['away','Fora · amostra recente']],state.scope)+'</select></label><p class="fs-note">Até '+esc(standings.calculatedUntil)+(partial?' · Tabela apenas da amostra recente disponível, não da época completa.':' · Reconstruída, não oficial.')+'</p><div class="fs-scroll"><table class="fs-table fs-standing-table"><thead><tr><th>#</th><th>Equipa</th><th>J</th><th>Pts</th><th>GM</th><th>GS</th><th>Últ. 7</th></tr></thead><tbody>'+entries.map((t,i)=>'<tr><td>'+(i+1)+'</td><th>'+esc(t.name)+'</th><td>'+t.p+'</td><td>'+t.pts+'</td><td>'+t.gf+'</td><td>'+t.ga+'</td><td><div class="fs-form-row">'+form(t.recent||[])+'</div></td></tr>').join('')+'</tbody></table></div></aside>';}
+function render(){const games=selected(),cols=displayed();$('fs-fixtures').innerHTML='<div class="fs-list-title"><b>'+games.length+' encontros</b><span>Cabeçalho: ordenar ↑↓ · Percentagem: escolher mercado</span></div>'+(!games.length?'<p class="fs-no">Nenhum jogo corresponde aos filtros. Reduz os mínimos ou escolhe outra liga.</p>':'')+D.leagues.filter(l=>games.some(g=>g.league===l.code)).map(l=>'<section class="fs-competition"><h2>'+esc(l.flag)+' '+esc(l.name)+'</h2><div class="fs-league-grid"><div class="fs-scroll"><table class="fs-table"><thead><tr><th>Data / jogo</th><th>Últimos 7 · casa / fora</th>'+cols.map(k=>'<th aria-sort="'+(state.sort===k?(state.dir===-1?'descending':'ascending'):'none')+'"><button data-fs-sort="'+k+'">'+esc(M.labels[k])+(state.sort===k?(state.dir===-1?' ↓':' ↑'):' ↕')+'</button></th>').join('')+'<th>Cobertura</th></tr></thead><tbody>'+games.filter(g=>g.league===l.code).map(g=>'<tr><th><button class="fs-match" data-fs-open="'+g.id+'"><small>'+esc(day(g)+' '+g.time)+'</small><strong>'+esc(g.home)+' – '+esc(g.away)+'</strong></button></th><td><div class="fs-form-row">'+form(results(g,'home'))+'</div><div class="fs-form-row">'+form(results(g,'away'))+'</div></td>'+cols.map(k=>'<td><button class="fs-percentage" data-fs-pick="'+g.id+'" data-key="'+k+'" '+(prob(g,k)===null?'disabled':'')+'>'+pct(prob(g,k))+'</button></td>').join('')+'<td>'+quality(g)+'/100</td></tr>').join('')+'</tbody></table></div>'+standingsTable(l.code)+'</div></section>').join('');renderTop(games);}
+function renderTop(games){let picks=[];const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());for(const g of games){if(day(g)<=today||quality(g)<70)continue;for(const k of displayed()){let p=prob(g,k),o=quote(g,k);if(p!==null&&p>=Math.max(.65,state.min/100)&&o!==null&&p*o>1&&(!state.odd||o>=state.odd))picks.push({g,k,p,o});}}picks.sort((a,b)=>b.p*b.o-a.p*a.o);const seen=new Set();picks=picks.filter(x=>{if(seen.has(x.g.id))return false;seen.add(x.g.id);return true;}).slice(0,5);$('fs-top5').innerHTML='<h2>Até 5 oportunidades a analisar</h2><p class="fs-note">Jogos de dias futuros, cobertura ≥70, probabilidade ≥65% e odd introduzida com valor estimado positivo. Um jogo por escolha. Excluem-se jogos de hoje por falta de hora fiável.</p>'+(picks.length?'<div class="fs-top-cards">'+picks.map(x=>'<button data-fs-pick="'+x.g.id+'" data-key="'+x.k+'"><strong>'+esc(x.g.home)+' – '+esc(x.g.away)+'</strong><span>'+M.labels[x.k]+' · '+pct(x.p)+' · odd '+num(x.o)+'</span><small>Limite: modelo não calibrado · cobertura '+quality(x.g)+'/100</small></button>').join('')+'</div>':'<p class="fs-no">Sem escolhas que cumpram os critérios. Introduz odds na análise de cada jogo; não se completam cinco escolhas artificialmente.</p>');}
+function teamPanel(g,side,venue){const all=results(g,side),rs=venue?all.filter(r=>r.venue===venue):all;const gf=rs.reduce((n,r)=>n+r.gf,0),ga=rs.reduce((n,r)=>n+r.ga,0);return '<section class="fs-team-stat"><h3>'+esc(g[side])+(venue?' · '+(venue==='C'?'Em casa':'Fora'):' · últimos '+rs.length)+'</h3><p><b>'+gf+' GM / '+ga+' GS</b> · '+rs.length+' jogos · médias '+(rs.length?num(gf/rs.length)+' / '+num(ga/rs.length):'—')+'</p>'+rs.map(r=>'<div class="fs-result"><span>'+esc(r.date)+'</span><b class="fs-form fs-'+esc(r.outcome.toLowerCase())+'">'+esc(r.outcome)+'</b><span>'+esc(r.venue)+'</span><span class="fs-opp">'+esc(r.opponent)+'</span><b>'+r.gf+'–'+r.ga+'</b></div>').join('')+(!rs.length?'<p>Sem resultados disponíveis.</p>':'')+'</section>';}
+function drawDetail(g,k){detail={g,k};const p=prob(g,k),r=row(g),n=r?.counts||{};const h=results(g,'home').filter(x=>x.opponent===g.away);const a=results(g,'away').filter(x=>x.opponent===g.home).map(x=>({...x,gf:x.ga,ga:x.gf,opponent:g.away}));const h2h=[...new Map([...h,...a].map(x=>[x.date,x])).values()].sort((a,b)=>b.date.localeCompare(a.date));
+$('fs-detail').innerHTML='<div class="fs-match-header"><span>'+esc(label(g.league)+' · '+day(g))+'</span><h2 id="fs-detail-title">'+esc(g.home)+' – '+esc(g.away)+'</h2><small>Cobertura '+quality(g)+'/100 · modelo não calibrado</small></div><div class="fs-tab-content"><div class="fs-metrics">'+keys.map(key=>'<button data-fs-pick="'+g.id+'" data-key="'+key+'" class="'+(key===k?'active':'')+'"><small>'+M.labels[key]+'</small><strong>'+pct(prob(g,key))+'</strong></button>').join('')+'</div><section class="fs-team-stat"><h3>'+esc(M.labels[k])+'</h3><p>Probabilidade: <b>'+pct(p)+'</b> · Odd justa: <b>'+num(p>0?1/p:null)+'</b></p><label>Odd Betano / casa (introdução manual)<input id="fs-quote" inputmode="decimal" placeholder="Ex.: 1,85" value="'+esc(quotes[g.id+'_'+k]||'')+'"></label><p id="fs-value"></p><div class="as-add-actions">'+[1,2,3].map(i=>'<button data-add-slip="'+i+'" data-game="'+g.id+'" data-market="'+k+'" '+(p===null?'disabled':'')+'>+ Boletim '+i+'</button>').join('')+'</div><small>A odd introduzida acompanha a seleção e pode ser editada no boletim. Apenas uma seleção por jogo em cada boletim.</small></section><h3>Fundamento e fatores de incerteza</h3><p>'+(p===null?'Sem estimativa publicada com dados suficientes.':('Intensidade estimada: '+num(r.lambdaHome)+' golos da casa e '+num(r.lambdaAway)+' do visitante. Amostra do modelo: '+(n.home||0)+' / '+(n.away||0)+' jogos; casa/fora: '+(n.homeAtHome||0)+' / '+(n.awayAtAway||0)+'.'))+'</p><p>As médias e os resultados abaixo permitem avaliar o suporte da previsão. Lesões, onzes e xG não estão validados. Frequências passadas não são probabilidades futuras.</p><h3>Últimos 10 jogos disponíveis</h3><div class="fs-two">'+teamPanel(g,'home')+teamPanel(g,'away')+'</div><h3>Desempenho casa / fora</h3><p>Apenas jogos com esse local dentro dos últimos 10 disponíveis.</p><div class="fs-two">'+teamPanel(g,'home','C')+teamPanel(g,'away','F')+'</div><h3>Confrontos diretos disponíveis</h3>'+(h2h.length?h2h.map(x=>'<p>'+esc(x.date)+' · '+esc(g.home)+' '+x.gf+'–'+x.ga+' '+esc(g.away)+'</p>').join(''):'<p>Sem confrontos diretos no arquivo recente. Não significa que nunca se tenham defrontado.</p>')+standingsTable(g.league)+'<p class="fs-note">Fontes dos resultados: '+[...new Set([...results(g,'home'),...results(g,'away')].map(x=>x.sourceUrl).filter(x=>/^https:\/\//.test(x)))].map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">Consultar fonte ↗</a>').join(' · ')+'</p></div>';updateValue();}
+function updateValue(){if(!detail)return;const {g,k}=detail,p=prob(g,k),o=quote(g,k);$('fs-value').textContent=o!==null&&p!==null?'Valor esperado estimado: '+((p*o-1)*100).toFixed(1).replace('.',',')+'% · probabilidade implícita da odd: '+pct(1/o)+'. Estimativa sem calibração.':'Introduz uma odd válida entre 1,19 e 1000 para comparar.';}
+function open(g,k){lastFocus=document.activeElement;drawDetail(g,k);$('fs-modal').hidden=false;document.body.classList.add('fs-modal-open');host.querySelector('[data-fs-close]').focus();}
+function close(){ $('fs-modal').hidden=true;document.body.classList.remove('fs-modal-open');detail=null;lastFocus?.focus();}
+function print(detailOnly){document.body.classList.toggle('fs-print-detail',detailOnly);window.print();}
+window.addEventListener('afterprint',()=>document.body.classList.remove('fs-print-detail'));
+host.addEventListener('click',e=>{let b=e.target.closest('[data-fs-sort]');if(b){const k=b.dataset.fsSort;state.dir=state.sort===k?-state.dir:-1;state.sort=k;render();return;}b=e.target.closest('[data-fs-pick],[data-fs-open]');if(b){const g=D.games.find(g=>g.id===Number(b.dataset.fsPick??b.dataset.fsOpen));if(g)open(g,b.dataset.key||displayed()[0]);return;}if(e.target.closest('[data-fs-close]'))close();if(e.target.closest('[data-add-slip]')&&detail)close();if(e.target.closest('#fs-print'))print(false);if(e.target.closest('#fs-print-detail'))print(true);});
+host.addEventListener('input',e=>{if(e.target.id==='fs-quote'&&detail){quotes[detail.g.id+'_'+detail.k]=e.target.value;try{localStorage.setItem(oddsKey,JSON.stringify(quotes))}catch{}updateValue();renderTop(selected());}});
+host.addEventListener('change',e=>{if(e.target.matches('[data-fs-scope]')){state.scope=e.target.value;render();if(detail)drawDetail(detail.g,detail.k);}});
+for(const key of ['league','day','market','min','quality','odd','search'])$('fs-'+key).addEventListener(key==='search'?'input':'change',e=>{state[key]=['min','quality','odd'].includes(key)?Math.max(0,Number(e.target.value)||0):e.target.value;if(key==='market')state.sort='date';render();});
+document.addEventListener('keydown',e=>{if(!detail)return;if(e.key==='Escape')close();if(e.key==='Tab'){const focusable=[...$('fs-modal').querySelectorAll('button:not(:disabled),input,select,a[href]')];const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+window.addEventListener('apostas-golos-ready',()=>{render();$('fs-data-stamp').textContent='Modelo publicado: '+(window.ApostasGolosModel?.generatedAt||'data não indicada')+' · sem resultados em direto';});
+async function load(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error(url);return r.json();}
+Promise.allSettled([load('./dados/ultimos10-'+D.start+'.json'),load('./dados/classificacoes-2026-10-22.json')]).then(([h,s])=>{if(h.status==='fulfilled'&&h.value.period?.start===D.start)hist=h.value;if(s.status==='fulfilled')standings=s.value;loading=false;render();});
+render();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

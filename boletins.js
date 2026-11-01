@@ -13,7 +13,7 @@
     const ALL = D.games;
     const byId = new Map(ALL.map(g => [Number(g.id), g]));
     const byLeague = new Map(D.leagues.map(l => [l.code, l]));
-    const MARKETS = [['BTTS','Ambas marcam'],['O25','Mais de 2,5 golos'],['AND','Ambas marcam E +2,5']    ];
+    const MARKETS = Object.entries(window.ApostasMercados.labels);
     const marketName = Object.fromEntries(MARKETS);
     const storageKey = 'apostas_semanal_slips_' + (D.start || 'semana') + '_' + (D.end || '');
     const settingsKey = 'apostas_semanal_filtro_v2';
@@ -37,12 +37,7 @@
       }catch(e){return new Date().toISOString().slice(0,10);}
     }
     const ptToday=todayInPortugal();
-    const marketChips=[
-      ['ALL','Todos'],['BTTS','AM'],['O25','+2,5'],['AND','AM e +2,5'],['OR','AM ou +2,5'],
-      ['O15','+1,5'],['W1','Casa'],['X','Empate'],['W2','Fora'],['1X2','1X2'],
-      ['C85','Cantos +8,5'],['C95','Cantos +9,5'],
-      ['HT1','Casa 1.ª p.'],['HT2','Fora 1.ª p.'],['SH1','Casa 2.ª p.'],['SH2','Fora 2.ª p.']
-    ];
+    const marketChips=[['ALL','Todos'],['1X2','1/X/2'],...MARKETS];
     function dateKey(g){
       if(typeof g.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(g.date))return g.date;
       return weekDays.find(d=>d.day===Number(g.day))?.key||'';
@@ -81,7 +76,7 @@
             marketChips.map(([k,label])=>'<button type="button" data-as-market="'+k+'" aria-pressed="'+(current===k?'true':'false')+'" class="'+(current===k?'active':'')+'">'+label+'</button>').join('')+'</div>');
         } else {
           const selected=$('metric-filter')?.value;
-          const possible=[['BTTS','AM'],['O25','+2,5'],['AND','AM e +2,5'],['OR','AM ou +2,5'],['O15','+1,5'],['W1','Casa'],['W2','Fora'],['C85','Cantos +8,5'],['C95','Cantos +9,5'],['HT1','Casa 1.ª p.'],['SH1','Casa 2.ª p.']];
+          const possible=MARKETS;
           node.insertAdjacentHTML('beforeend','<div class="as-market-chips" role="group" aria-label="Mercado em foco">'+
             possible.map(([k,label])=>'<button type="button" data-as-focus="'+k+'" aria-pressed="'+(selected===k?'true':'false')+'" class="'+(selected===k?'active':'')+'">'+label+'</button>').join('')+'</div>');
         }
@@ -110,26 +105,7 @@
       drawDateBars();
     }
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const probability = (g, k) => {
-      if (!g) return NaN;
-      // Apenas três mercados no novo modelo de golos. Nunca utilizar odds/probabilidades antigas.
-      if (!['BTTS','O25','AND'].includes(k)) return NaN;
-      const model=window.ApostasGolosModel;
-      const v=model?.games?.[g.id]?.prob?.[k];
-      return typeof v==='number' && Number.isFinite(v) && v>0 && v<=1 ? v : NaN;
-      /*
-      const p = g.p || {}, a = g.first || {}, b = g.second || {};
-      const values = {
-        W1:p.w1, X:p.draw, W2:p.w2, BTTS:p.btts, BTTS_NO:p.no,
-        O15:p.o15, O25:p.o25, AND:p.and, OR:p.or,
-        C85:g.c85, C95:g.c95, HT1:a.w1, HTX:a.draw, HT2:a.w2,
-        SH1:b.w1, SHX:b.draw, SH2:b.w2
-      };
-      if (values[k] === null || values[k] === undefined) return NaN;
-      const v = Number(values[k]);
-      return Number.isFinite(v) && v > 0 && v <= 1 ? v : NaN;
-      */
-    };
+    const probability = (g,k) => g ? (window.ApostasMercados.probability(g.id,k) ?? NaN) : NaN;
     const fairOdd = p => Number.isFinite(p) && p > 0 ? Number((1/p).toFixed(2)) : NaN;
     const fairEligible = p => Number.isFinite(p) && p > 0 && (fairMinimum <= 0 || 1/p + 1e-10 >= fairMinimum);
     const fmtOdd = x => Number.isFinite(Number(x)) ? Number(x).toFixed(2).replace('.',',') : '—';
@@ -147,7 +123,7 @@
     };
     const manualValid = odd => {
       const n = parseOdd(odd);
-      return Number.isFinite(n) && n >= 1.20 && n <= 1000;
+      return Number.isFinite(n) && n >= 1.19 && n <= 1000;
     };
     function restore() {
       try {
@@ -200,7 +176,8 @@
         toast('Esse prognóstico já está na Aposta '+n+'.');
       } else {
         slips[n].items=slips[n].items.filter(v=>v.id!==g.id);
-        slips[n].items.push({id:g.id,market:k,odd:''});
+        let initialOdd='';try{const q=JSON.parse(localStorage.getItem('apostas_odds_'+D.start)||'{}');if(manualValid(q[g.id+'_'+k]))initialOdd=q[g.id+'_'+k];}catch{}
+        slips[n].items.push({id:g.id,market:k,odd:initialOdd});
         toast((old?'Prognóstico substituído':'Adicionado')+' à Aposta '+n+'.');
       }
       active=n;expanded=true;save();renderDock();paintButtons();
@@ -239,6 +216,7 @@
       if(oddTotal)oddTotal.textContent=t.partialMultiplier!==null?fmtCombined(t.partialMultiplier):'—';
       if(returnLabel)returnLabel.textContent=partial?'Retorno parcial (não final)':'Retorno potencial bruto';
       if(returnTotal)returnTotal.textContent=t.partialReturn!==null?fmtEur(t.partialReturn):'—';
+      const profit=dock.querySelector('[data-slip-profit]');if(profit)profit.textContent=t.valid&&t.stakeValid&&t.partialReturn!==null?fmtEur(t.partialReturn-t.amount):'—';
       if(calculation) {
         let message='';
         if(t.entered&&t.stakeValid) {
@@ -248,7 +226,7 @@
         } else if(t.entered) {
           message='Introduz o valor da aposta para veres o retorno automaticamente.';
         } else if(t.total) {
-          message='Preenche as odds reais (mínimo 1,20) para calcular o retorno.';
+          message='Preenche as odds reais (mínimo 1,19) para calcular o retorno.';
         } else {
           message='Adiciona prognósticos para construir a aposta.';
         }
@@ -262,7 +240,7 @@
         if(warning) {
           warning.hidden=ok;
           if(!ok)warning.textContent=String(input.value).trim()?
-            'Odd inferior a 1,20 ou inválida.':'Preenche a odd para completar o retorno.';
+            'Odd inferior a 1,19 ou inválida.':'Preenche a odd para completar o retorno.';
         }
       });
     }
@@ -292,9 +270,9 @@
       return '<div class="as-slip-item"><div class="as-slip-item-head"><div>'+
         '<h4>'+esc(g.home)+' – '+esc(g.away)+'</h4><p><strong>'+esc(marketName[v.market])+'</strong> · '+fmtPct(p)+' · odd justa '+fmtOdd(fairOdd(p))+'</p></div>'+
         '<button type="button" class="as-slip-remove" data-slip-remove="'+n+'" data-game="'+g.id+'" data-market="'+esc(v.market)+'" aria-label="Remover seleção" title="Remover seleção">×</button></div>'+
-        '<div class="as-slip-oddrow"><label for="as-odd-'+n+'-'+g.id+'">Odd que encontraste<br><small>(mín. 1,20)</small></label>'+
+        '<div class="as-slip-oddrow"><label for="as-odd-'+n+'-'+g.id+'">Odd que encontraste<br><small>(mín. 1,19)</small></label>'+
         '<input id="as-odd-'+n+'-'+g.id+'" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,65" value="'+esc(v.odd)+'" data-slip-odd="'+n+'" data-game="'+g.id+'" data-market="'+esc(v.market)+'" /></div>'+
-        '<div class="as-slip-missing" data-slip-warning'+(oddOk?' hidden':'')+'>'+ (String(v.odd).trim()?'Odd inferior a 1,20 ou inválida.':'Preenche a odd para completar o retorno.')+'</div>'+
+        '<div class="as-slip-missing" data-slip-warning'+(oddOk?' hidden':'')+'>'+ (String(v.odd).trim()?'Odd inferior a 1,19 ou inválida.':'Preenche a odd para completar o retorno.')+'</div>'+
         '</div>';
     }
     function renderDock() {
@@ -318,6 +296,7 @@
           '<div class="as-slip-items">'+(current.items.length?current.items.map(v=>slipItem(v,active)).join(''):'<div class="as-slip-empty">Ainda não adicionaste escolhas à Aposta '+active+'. Seleciona um prognóstico em “Escolhas” ou nos cartões dos jogos e toca em + Aposta '+active+'.</div>')+'</div>'+
           '<div class="as-slip-stake"><label for="as-stake-'+active+'">Valor da aposta (€)</label><input id="as-stake-'+active+'" type="number" min="0" step="0.5" inputmode="decimal" value="'+esc(current.stake)+'" data-slip-stake="'+active+'" placeholder="0,00" /></div>'+
           '<div class="as-slip-return"><span data-slip-return-label>Retorno potencial bruto</span><strong data-slip-return-value>—</strong></div>'+
+          '<div class="as-slip-return"><span>Lucro potencial líquido</span><strong data-slip-profit>—</strong></div>'+
           '<div class="as-slip-calculation" data-slip-calculation aria-live="polite"></div>'+
           '<div class="as-slip-footer"><button type="button" data-slip-copy="'+active+'">Copiar boletim</button><button type="button" class="as-danger" data-slip-clear="'+active+'">Limpar aposta</button></div></div>';
       }
@@ -429,14 +408,14 @@
       if (header) {
         const h=header.querySelector('h1'),p=header.querySelector('p');
         if (h) h.textContent='Escolhas e Top 20 da semana';
-        if (p) p.textContent='Filtra probabilidade, odd justa estimada, mercado e dia separadamente. As odds reais devem ser preenchidas nos boletins e ser de pelo menos 1,20.';
+        if (p) p.textContent='Filtra probabilidade, odd justa estimada, mercado e dia separadamente. As odds reais devem ser preenchidas nos boletins e ser de pelo menos 1,19.';
       }
       const first=rank.querySelector('option[value="TOP"]'),all=rank.querySelector('option[value="PROB"]');
       if (first) first.textContent='Top 20 por probabilidade · análise do modelo';
       if (all) all.textContent='Todas as escolhas acima da percentagem';
       rank.value='TOP';
       const sectionNotice=view.querySelector('.notice');
-      if (sectionNotice) sectionNotice.innerHTML='<span class="notice-icon">i</span><div><b>Dois tipos de odds:</b> a <strong>odd justa</strong> é 1 ÷ probabilidade prevista e serve para analisar o modelo. A <strong>odd real</strong> é a cotação que introduzes no boletim e tem de ser ≥1,20. Não exigimos confirmação externa, mas o modelo não inventa cotações. Uma probabilidade alta não prova que uma aposta tenha valor.</div>';
+      if (sectionNotice) sectionNotice.innerHTML='<span class="notice-icon">i</span><div><b>Dois tipos de odds:</b> a <strong>odd justa</strong> é 1 ÷ probabilidade prevista e serve para analisar o modelo. A <strong>odd real</strong> é a cotação que introduzes no boletim e tem de ser ≥1,19. Não exigimos confirmação externa, mas o modelo não inventa cotações. Uma probabilidade alta não prova que uma aposta tenha valor.</div>';
       const controls=document.createElement('div');
       controls.className='as-choice-controls';controls.id='as-choice-controls';
       const minOpts=[40,45,50,55,60,65,70,75,80,85,90,95].map(v=>'<option value="'+v+'"'+(v===minimum?' selected':'')+'>'+v+'% ou mais</option>').join('');
@@ -452,10 +431,10 @@
       const more=document.createElement('button');more.className='as-more';more.id='as-more';more.type='button';more.textContent='Mostrar mais opções';list.after(more);
       const nnav=document.querySelectorAll('[data-go="rank"]');nnav.forEach(v=>v.textContent=v.closest('.bottomnav')?'⚽ Escolhas':'Escolhas por %');
       const hero=$('view-overview')?.querySelector('.hero-alert span:last-child');
-      if (hero) hero.innerHTML='<b>Odd mínima de aposta: 1,20 real.</b> As odds justas são apenas estimativas do modelo; vê todos os prognósticos, filtra por percentagem e preenche a cotação comercial no boletim.';
+      if (hero) hero.innerHTML='<b>Odd mínima de aposta: 1,19 real.</b> As odds justas são apenas estimativas do modelo; vê todos os prognósticos, filtra por percentagem e preenche a cotação comercial no boletim.';
       const method=$('view-method');
       if (method) method.querySelectorAll('.method-card p').forEach(p=>{
-        if (p.textContent.includes('Critério das apostas:')) p.textContent='A probabilidade e a odd justa são filtros independentes. A odd justa (1 ÷ probabilidade) não é a cotação de uma casa de apostas. Para registar apostas reais e calcular retornos, é preciso introduzir manualmente cotação ≥1,20 e valor apostado; dados sem validação externa.';
+        if (p.textContent.includes('Critério das apostas:')) p.textContent='A probabilidade e a odd justa são filtros independentes. A odd justa (1 ÷ probabilidade) não é a cotação de uma casa de apostas. Para registar apostas reais e calcular retornos, é preciso introduzir manualmente cotação ≥1,19 e valor apostado; dados sem validação externa.';
         else if (p.textContent.includes('Não foram verificadas odds atuais')) p.textContent='As odds comerciais não são recolhidas automaticamente. O cálculo do retorno só utiliza as odds introduzidas pelo utilizador. Não apresenta promessas de valor esperado ou rentabilidade garantida.';
       });
       $('as-min').addEventListener('change',e=>{
@@ -622,7 +601,7 @@
       const body=$('modal-content');
       if (body){new MutationObserver(enhanceModal).observe(body,{childList:true});}
     }
-    window.addEventListener('apostas-golos-ready',()=>{refreshInline();renderChoices();renderDock();});
+    window.addEventListener('apostas-golos-ready',()=>{restore();refreshInline();renderChoices();renderDock();});
     restore();
     setupChoices();
     renderDock();

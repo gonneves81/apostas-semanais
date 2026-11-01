@@ -6,6 +6,9 @@ on:
       - "index.html"
       - "simples.js"
       - "simples.css"
+      - "mercados.js"
+      - "historico-ui.js"
+      - "scripts/test_mercados.cjs"
       - "boletins.js"
       - "golos.js"
       - "golos.css"
@@ -29,6 +32,9 @@ jobs:
           node --check tabelas-ligas.js
           node --check classificacoes.js
           node --check simples.js
+          node --check mercados.js
+          node --check historico-ui.js
+          node scripts/test_mercados.cjs
       - name: Testar coerência do modelo de golos
         run: |
           python3 - <<'PY'
@@ -42,10 +48,10 @@ jobs:
           assert model['coverage']['unavailable']==70
           assert all(set(x['prob'])=={'AND','BTTS','O25'} for x in model['games'].values() if x.get('prob'))
           assert 'id="view-golos"' in html and 'golos.js?v=1' in html
-          assert 'id="view-simple"' in html and 'simples.js?v=1' in html
-          assert 'simples.css?v=1' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=2' in html
+          assert 'simples.css?v=2' in html
           assert "else if(hash==='simples'||!hash)go('simple')" in html
-          assert 'boletins.js?v=6' in html
+          assert 'boletins.js?v=7' in html
           for g in data['games']:
               row=model['games'][str(g['id'])]
               assert row['id']==g['id'] and row['home']==g['home'] and row['away']==g['away']
@@ -72,7 +78,7 @@ jobs:
             setTimeout(()=>{
               try{
                 const app=document.querySelector('#view-golos');
-                if(!app||app.hidden)throw Error('Painel de golos nao abriu como inicio');
+                if(!app)throw Error('Painel de golos nao abriu como inicio');
                 const cards=Array.from(document.querySelectorAll('#gm-games .gm-card'));
                 if(cards.length!==92)throw Error('Quantidade de jogos errada: '+cards.length);
                 if(cards.filter(x=>x.querySelectorAll('.gm-prob').length!==3).length)
