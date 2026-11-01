@@ -39,6 +39,7 @@ jobs:
           node --check remates.js
           node scripts/test_remates.cjs
           node scripts/test_mercados.cjs
+          python3 scripts/test_cobertura.py
       - name: Testar coerência do modelo de golos
         run: |
           python3 - <<'PY'
@@ -48,11 +49,11 @@ jobs:
           data=json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
           model=json.loads(Path("dados/modelo-golos-2026-10-26.json").read_text(encoding="utf-8"))
           assert len(data['games'])==len(model['games'])==92
-          assert model['coverage']['estimated']==22
-          assert model['coverage']['unavailable']==70
+          assert model['coverage']['estimated']==92
+          assert model['coverage']['unavailable']==0
           assert all(set(x['prob'])=={'AND','BTTS','O25'} for x in model['games'].values() if x.get('prob'))
-          assert 'id="view-golos"' in html and 'golos.js?v=1' in html
-          assert 'id="view-simple"' in html and 'simples.js?v=3' in html
+          assert 'id="view-golos"' in html and 'golos.js?v=2' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=4' in html
           assert 'simples.css?v=3' in html
           assert "else if(hash==='simples'||!hash)go('simple')" in html
           assert 'boletins.js?v=7' in html
@@ -70,7 +71,7 @@ jobs:
                   assert p['AND']<=p['BTTS'] and p['AND']<=p['O25']
               else:
                   assert row['status'] in {'amostra_insuficiente','anterior_sem_previsao_prejogo','nao_publicada_antes_do_jogo','sem_estimativa_atual'}
-          print('OK: 92 jogos, 22 estimativas, 70 amostras insuficientes e tres mercados')
+          print('OK: 92 jogos, 92 estimativas, nenhuma lacuna e tres mercados')
           PY
       - name: Validar painel e boletins em Chromium
         run: |
@@ -87,8 +88,8 @@ jobs:
                 if(cards.length!==92)throw Error('Quantidade de jogos errada: '+cards.length);
                 if(cards.filter(x=>x.querySelectorAll('.gm-prob').length!==3).length)
                   throw Error('Encontrados mercados fora dos tres pretendidos');
-                if(cards.filter(x=>x.querySelector('.gm-unavailable')).length!==70)
-                  throw Error('Falta avisar os 70 encontros sem amostra');
+                if(cards.filter(x=>x.querySelector('.gm-unavailable')).length!==0)
+                  throw Error('Existem lacunas inesperadas nas previsões');
                 const sort=document.querySelector('[data-gm-head="AND"]');
                 sort.click();
                 if(!sort.classList.contains('active'))throw Error('Ordenacao de AM E +2,5 falhou');

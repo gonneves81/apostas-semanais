@@ -36,7 +36,7 @@ function start(){
   const buttons=ok?[1,2,3].map(n=>'<button type="button" data-add-slip="'+n+'" data-game="'+g.id+'" data-market="'+vars.market+'">+ Aposta '+n+'</button>').join(''):
     '<span class="gm-unavailable">Sem previsão: amostra insuficiente</span>';
   return '<article class="gm-card" data-gm-id="'+g.id+'"><div class="gm-card-head"><span>'+esc(leagues.get(g.league)?.name||g.league)+' · '+esc(day(g).slice(8,10)+'/'+day(g).slice(5,7))+' '+esc(g.time)+' PT</span>'+
-    '<span class="gm-label">'+(ok?'Estimativa não calibrada':'Dados insuficientes')+'</span></div>'+
+    '<span class="gm-label">'+(m?.status==='estimativa_reconstruida'?'Calculada nesta revisão':ok?'Estimativa não calibrada':'Dados insuficientes')+'</span></div>'+
     '<h3>'+esc(g.home)+' <span>–</span> '+esc(g.away)+'</h3>'+
     '<div class="gm-pick-compare">'+lineup(g.home,m?.latest?.home||[],'C')+lineup(g.away,m?.latest?.away||[],'F')+'</div>'+
     '<div class="gm-prob-grid">'+pills+'</div>'+
@@ -94,6 +94,7 @@ function start(){
   window.dispatchEvent(new CustomEvent('apostas-golos-ready'));
   render();
  }).catch(e=>{
+  window.dispatchEvent(new Event('apostas-golos-error'));
   $('gm-summary').textContent='Não foi possível carregar o modelo de golos.';
   $('gm-games').innerHTML='<p class="gm-empty">Previsões indisponíveis: '+esc(e.message)+'. Não são apresentadas probabilidades antigas como alternativa.</p>';
  });

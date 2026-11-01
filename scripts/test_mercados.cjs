@@ -13,4 +13,4 @@ let n=0;for(const g of Object.values(context.window.ApostasGolosModel.games)){
  assert.ok(g.prob.AND<=Math.min(g.prob.BTTS,g.prob.O25));
  assert.equal(M.probability(g.id,'OR'),null);
 }
-assert.equal(n,22);console.log('OK: 22 distribuições 1/X/2 normalizadas; mercados conjuntos preservados; dados ausentes não fabricados.');
+assert.equal(n,92);console.log('OK: 92 distribuições 1/X/2 normalizadas; mercados conjuntos preservados; dados ausentes não fabricados.');
