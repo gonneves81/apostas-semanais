@@ -7,6 +7,8 @@ on:
       - "simples.js"
       - "simples.css"
       - "mercados.js"
+      - "remates.js"
+      - "dados/remates-*.json"
       - "historico-ui.js"
       - "scripts/test_mercados.cjs"
       - "boletins.js"
@@ -34,6 +36,8 @@ jobs:
           node --check simples.js
           node --check mercados.js
           node --check historico-ui.js
+          node --check remates.js
+          node scripts/test_remates.cjs
           node scripts/test_mercados.cjs
       - name: Testar coerência do modelo de golos
         run: |
@@ -48,8 +52,8 @@ jobs:
           assert model['coverage']['unavailable']==70
           assert all(set(x['prob'])=={'AND','BTTS','O25'} for x in model['games'].values() if x.get('prob'))
           assert 'id="view-golos"' in html and 'golos.js?v=1' in html
-          assert 'id="view-simple"' in html and 'simples.js?v=2' in html
-          assert 'simples.css?v=2' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=3' in html
+          assert 'simples.css?v=3' in html
           assert "else if(hash==='simples'||!hash)go('simple')" in html
           assert 'boletins.js?v=7' in html
           for g in data['games']:
