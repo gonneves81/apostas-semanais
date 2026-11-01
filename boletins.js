@@ -206,6 +206,7 @@
     function updateSlipNumbers() {
       const dock=$('as-ticket-dock');
       if(!dock||!expanded)return;
+      const risk=dock.querySelector('[data-slip-risk]');const selection=slips[active].items;const ps=selection.map(i=>probability(byId.get(i.id),i.market));if(risk){const seen=new Set(),repeated=selection.some(i=>{const g=byId.get(i.id);return [g.home,g.away].some(team=>{if(seen.has(team))return true;seen.add(team);return false;});});risk.textContent=selection.length&&ps.every(Number.isFinite)?'Probabilidade conjunta sob hipótese de independência: '+fmtPct(ps.reduce((a,b)=>a*b,1))+'. '+(repeated?'Há equipas repetidas: a independência pode não ser válida. ':'A dependência entre jogos não foi estimada. ')+'Estimativa não calibrada; não é garantia de retorno.':'Probabilidade conjunta indisponível.';}
       const t=slipTotals(active),partial=t.entered>0&&!t.valid;
       const oddLabel=dock.querySelector('[data-slip-odd-label]');
       const oddTotal=dock.querySelector('[data-slip-total-odd]');
@@ -298,6 +299,7 @@
           '<div class="as-slip-return"><span data-slip-return-label>Retorno potencial bruto</span><strong data-slip-return-value>—</strong></div>'+
           '<div class="as-slip-return"><span>Lucro potencial líquido</span><strong data-slip-profit>—</strong></div>'+
           '<div class="as-slip-calculation" data-slip-calculation aria-live="polite"></div>'+
+          '<p class="as-ticket-notice" data-slip-risk></p>'+
           '<div class="as-slip-footer"><button type="button" data-slip-copy="'+active+'">Copiar boletim</button><button type="button" class="as-danger" data-slip-clear="'+active+'">Limpar aposta</button></div></div>';
       }
       dock.innerHTML=content;

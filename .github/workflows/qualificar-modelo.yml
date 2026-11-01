@@ -1,0 +1,60 @@
+name: Auditar, testar e arquivar previsões
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'dados/modelo-golos-*.json'
+      - 'dados/ultimos10-*.json'
+      - 'scripts/qualificar_modelo.py'
+      - '.github/workflows/qualificar-modelo.yml'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: qualificacao-modelo
+  cancel-in-progress: false
+jobs:
+  qualificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Testar regras de corte temporal e métricas
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Atualizar fontes, auditar e arquivar
+        run: python scripts/qualificar_modelo.py
+      - name: Gravar relatório e arquivos novos
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dados/qualificacao.json dados/fontes-modelo.json historico/arquivo
+          if ! git diff --cached --quiet; then
+            git commit -m 'Atualizar auditoria, testes temporais e arquivo pré-jogo'
+            git push origin HEAD:main
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - uses: actions/deploy-pages@v4
+        id: deployment
+      - name: Atestar publicação concluída dos arquivos
+        env:
+          DEPLOYMENT_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python scripts/atestar_publicacao.py
+          git add historico/publicacoes.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Registar hora de publicação concluída dos arquivos'
+            git push origin HEAD:main
+          fi
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}

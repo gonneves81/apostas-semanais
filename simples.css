@@ -10,3 +10,4 @@
 .fs-table .fs-match{min-width:180px}.fs-side-standing .fs-table tbody th{min-width:90px}@media print{.fs-table .fs-match{min-width:0!important}}
 
 .fs-shots{margin:24px 0}.fs-shots-table{min-width:510px}.fs-shots details{margin-top:14px;font-size:12px}.fs-shots summary{cursor:pointer;font-weight:700;margin-bottom:9px}@media print{.fs-shots-table{min-width:0!important}.fs-shots .fs-two{display:block}}
+.pro-panel{margin-top:24px}.pro-panel h3{margin-top:26px}.pro-panel p,#pro-odds p{font-size:12px;line-height:1.7}.pro-panel details{margin:15px 0}.pro-panel summary{cursor:pointer;font-weight:700;margin-bottom:10px}.pro-table{min-width:700px}.pro-table td{white-space:normal;text-align:left}#pro-save-odd{padding:12px;border:0;background:#087f68;color:white;border-radius:9px;font-weight:700}#pro-odds{margin-bottom:18px}

@@ -22,7 +22,7 @@ function start(){
  const odd=v=>Number(String(v??'').trim().replace(',','.'));
  const fmt=v=>Number.isFinite(v)?v.toFixed(2).replace('.',','):'—';
  const euro=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(v):'—';
- const isValidOdd=v=>Number.isFinite(odd(v))&&odd(v)>=1.2&&odd(v)<=1000;
+ const isValidOdd=v=>Number.isFinite(odd(v))&&odd(v)>=1.19&&odd(v)<=1000;
  const isValidStake=v=>Number.isFinite(odd(v))&&odd(v)>0&&odd(v)<=10000000;
  const states={pending:'Por liquidar',won:'Ganha',lost:'Perdida',void:'Anulada / devolvida',cashout:'Cash out / parcial'};
  let records=[];
@@ -33,7 +33,7 @@ function start(){
    }catch(e){records=[];}
  }
  function write(){
-   try{localStorage.setItem(storeKey,JSON.stringify({schema:1,updated_at:new Date().toISOString(),bets:records}));return true;}
+   try{localStorage.setItem(storeKey,JSON.stringify({schema:1,updated_at:new Date().toISOString(),bets:records}));window.dispatchEvent(new Event('apostas-real-updated'));return true;}
    catch(e){message('Não foi possível guardar. Verifica se o navegador permite armazenamento local.');return false;}
  }
  function message(t){
@@ -52,7 +52,7 @@ function start(){
    const s=getDraft(n);
    if(!s||!s.items.length){message('Aposta '+n+' vazia; adiciona primeiro os prognósticos.');return;}
    if(!isValidStake(s.stake)){message('Introduz um valor apostado maior que zero para registar a aposta real.');return;}
-   if(!s.items.every(i=>isValidOdd(i.odd))){message('Preenche todas as odds reais com valores de pelo menos 1,20.');return;}
+   if(!s.items.every(i=>isValidOdd(i.odd))){message('Preenche todas as odds reais com valores de pelo menos 1,19.');return;}
    const seen=new Set();
    const picks=[];
    for(const i of s.items){
@@ -61,7 +61,7 @@ function start(){
        message('Existe um prognóstico inválido ou repetido no boletim.');return;
      }
      seen.add(g.id);
-     const pct=window.ApostasGolosModel?.games?.[g.id]?.prob?.[i.market];
+     const pct=window.ApostasMercados.probability(g.id,i.market);
      picks.push({game_id:g.id,league:g.league,home:g.home,away:g.away,market:i.market,
       odd:Number(odd(i.odd).toFixed(3)),probability:Number.isFinite(pct)?pct:null,
       scheduled:typeof g.date==='string'?g.date:String(D.start||'')+':dia '+g.day,
@@ -172,7 +172,7 @@ function start(){
      '<div><small>ROI liquidado</small><strong>'+(t.roi!==null?t.roi.toFixed(1).replace('.',',')+'%':'—')+'</strong></div></div>'+
      '<div class="qa-real-toolbar"><small>O ROI inclui apenas boletins liquidados com retorno definido. Boletins por liquidar são excluídos do cálculo.</small>'+
      '<button data-real-export="1" type="button">Exportar cópia JSON</button></div>'+
-     (records.length?'<div class="qa-real-list">'+rows+'</div>':'<div class="qa-empty">Ainda não registaste apostas reais. Abre um dos três boletins, indica odds comerciais ≥1,20 e montante, e seleciona “Registar como aposta REAL”.</div>');
+     (records.length?'<div class="qa-real-list">'+rows+'</div>':'<div class="qa-empty">Ainda não registaste apostas reais. Abre um dos três boletins, indica odds comerciais ≥1,19 e montante, e seleciona “Registar como aposta REAL”.</div>');
  }
  function escapeDate(t){
    const date=new Date(t);return !Number.isNaN(date.getTime())?new Intl.DateTimeFormat('pt-PT',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Lisbon'}).format(date):'data não disponível';
