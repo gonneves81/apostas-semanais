@@ -1,7 +1,5 @@
 name: Auditar, testar e arquivar previsões
 on:
-  schedule:
-    - cron: '15 6,12,18 * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -48,8 +46,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+          name: github-pages-${{ github.run_attempt }}
       - uses: actions/deploy-pages@v4
         id: deployment
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
       - name: Atestar publicação concluída dos arquivos
         env:
           DEPLOYMENT_URL: ${{ steps.deployment.outputs.page_url }}
