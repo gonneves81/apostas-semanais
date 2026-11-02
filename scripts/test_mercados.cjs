@@ -1,5 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const context={window:{ApostasGolosModel:JSON.parse(fs.readFileSync('dados/modelo-golos-2026-10-26.json','utf8'))}};
+const D=JSON.parse(fs.readFileSync('index.html','utf8').match(/<script id="data-json" type="application\/json">(.*?)<\/script>/s)[1]);
+const context={window:{ApostasGolosModel:JSON.parse(fs.readFileSync('dados/modelo-golos-'+D.start+'.json','utf8'))}};
 vm.runInNewContext(fs.readFileSync('mercados.js','utf8'),context);
 const M=context.window.ApostasMercados;
 assert.deepEqual(Object.keys(M.labels),['W1','X','W2','BTTS','O25','AND']);
@@ -13,4 +14,4 @@ let n=0;for(const g of Object.values(context.window.ApostasGolosModel.games)){
  assert.ok(g.prob.AND<=Math.min(g.prob.BTTS,g.prob.O25));
  assert.equal(M.probability(g.id,'OR'),null);
 }
-assert.equal(n,92);console.log('OK: 92 distribuições 1/X/2 normalizadas; mercados conjuntos preservados; dados ausentes não fabricados.');
+assert.equal(n,context.window.ApostasGolosModel.coverage.estimated);console.log('OK: '+n+' distribuições 1/X/2 normalizadas; mercados conjuntos preservados; dados ausentes não fabricados.');

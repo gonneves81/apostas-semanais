@@ -197,7 +197,7 @@ function start(){
   status.className='as-standings-intro';
   status.textContent='Classificação da competição selecionada, com golos marcados e sofridos, pontos e V/E/D nos últimos até 7 jogos. Seleciona uma equipa para destacar os jogos na tabela.';
   area.querySelector('.table-hint')?.after(status);
-  fetch('./dados/classificacoes-2026-10-22.json',{cache:'no-store'}).then(response=>{
+  fetch('./'+(D.standingsFile||'dados/classificacoes-2026-10-22.json'),{cache:'no-store'}).then(response=>{
     if(!response.ok)throw Error('Fonte indisponível ('+response.status+')');
     return response.json();
   }).then(documentData=>{

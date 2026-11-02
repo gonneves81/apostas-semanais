@@ -14,7 +14,7 @@ on:
       - "boletins.js"
       - "golos.js"
       - "golos.css"
-      - "dados/modelo-golos-2026-10-26.json"
+      - "dados/modelo-golos-*.json"
       - ".github/workflows/verificar-site.yml"
   workflow_dispatch:
 permissions:
@@ -49,13 +49,13 @@ jobs:
           from pathlib import Path
           html=Path("index.html").read_text(encoding="utf-8")
           data=json.loads(re.search(r'<script id="data-json" type="application/json">(.*?)</script>',html,re.S).group(1))
-          model=json.loads(Path("dados/modelo-golos-2026-10-26.json").read_text(encoding="utf-8"))
-          assert len(data['games'])==len(model['games'])==92
-          assert model['coverage']['estimated']==92
-          assert model['coverage']['unavailable']==0
+          model=json.loads(Path(f"dados/modelo-golos-{data['start']}.json").read_text(encoding="utf-8"))
+          assert len(data['games'])==len(model['games'])>0
+          assert model['coverage']['estimated']==sum(bool(g.get('prob')) for g in model['games'].values())
+          assert model['coverage']['unavailable']+model['coverage']['estimated']==len(data['games'])
           assert all(set(x['prob'])=={'AND','BTTS','O25'} for x in model['games'].values() if x.get('prob'))
           assert 'id="view-golos"' in html and 'golos.js?v=2' in html
-          assert 'id="view-simple"' in html and 'simples.js?v=5' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=6' in html
           assert 'simples.css?v=4' in html
           assert "else if(hash==='simples'||!hash)go('simple')" in html
           assert 'boletins.js?v=8' in html
@@ -73,7 +73,7 @@ jobs:
                   assert p['AND']<=p['BTTS'] and p['AND']<=p['O25']
               else:
                   assert row['status'] in {'amostra_insuficiente','anterior_sem_previsao_prejogo','nao_publicada_antes_do_jogo','sem_estimativa_atual'}
-          print('OK: 92 jogos, 92 estimativas, nenhuma lacuna e tres mercados')
+          print('OK: edição e modelo coerentes; probabilidades válidas ou ausência justificada')
           PY
       - name: Validar painel e boletins em Chromium
         run: |
@@ -84,13 +84,14 @@ jobs:
           document.addEventListener('DOMContentLoaded',()=>{
             setTimeout(()=>{
               try{
+                const D=JSON.parse(document.getElementById('data-json').textContent);
                 const app=document.querySelector('#view-golos');
                 if(!app)throw Error('Painel de golos nao abriu como inicio');
                 const cards=Array.from(document.querySelectorAll('#gm-games .gm-card'));
-                if(cards.length!==92)throw Error('Quantidade de jogos errada: '+cards.length);
+                if(cards.length!==D.games.length)throw Error('Quantidade de jogos errada: '+cards.length);
                 if(cards.filter(x=>x.querySelectorAll('.gm-prob').length!==3).length)
                   throw Error('Encontrados mercados fora dos tres pretendidos');
-                if(cards.filter(x=>x.querySelector('.gm-unavailable')).length!==0)
+                if(cards.filter(x=>x.querySelector('.gm-unavailable')).length!==window.ApostasGolosModel.coverage.unavailable)
                   throw Error('Existem lacunas inesperadas nas previsões');
                 const sort=document.querySelector('[data-gm-head="AND"]');
                 sort.click();
@@ -102,12 +103,12 @@ jobs:
                 const b=available.querySelector('[data-add-slip="1"]'),id=b.dataset.game;
                 if(b.dataset.market!=='AND')throw Error('Mercado do boletim nao acompanha a selecao');
                 b.click();
-                const saved=JSON.parse(localStorage.getItem('apostas_semanal_slips_2026-10-26_2026-11-01')||'{}');
+                const saved=JSON.parse(localStorage.getItem('apostas_semanal_slips_'+D.start+'_'+D.end)||'{}');
                 if(!saved['1']?.items.some(x=>String(x.id)===id && x.market==='AND'))
                   throw Error('Aposta foi guardada com mercado errado');
                 const select=document.querySelector('#gm-lg');
                 select.value='PT';select.dispatchEvent(new Event('change',{bubbles:true}));
-                if(document.querySelectorAll('#gm-games .gm-card').length!==8)
+                if(document.querySelectorAll('#gm-games .gm-card').length!==D.games.filter(g=>g.league==='PT').length)
                   throw Error('Filtro da Liga Portugal falhou');
                 const min=document.querySelector('#gm-min');
                 min.value='80';min.dispatchEvent(new Event('change',{bubbles:true}));
