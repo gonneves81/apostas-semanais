@@ -1,5 +1,8 @@
 name: Auditar, testar e arquivar previsões
 on:
+  schedule:
+    # Três publicações diárias autorizadas pelo proprietário; cron em UTC.
+    - cron: '15 6,12,18 * * *'
   workflow_dispatch:
   push:
     branches: [main]
