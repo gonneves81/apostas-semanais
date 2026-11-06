@@ -122,7 +122,7 @@ def archive(D,model,aud,now):
   if path.exists():continue
   # Without explicit kickoff verification this remains provisional, never scored as a confirmed pre-match forecast.
   verified=g.get('kickoffVerified') is True and str(g.get('kickoffSource','')).startswith('https://')
-  obj={'schema':1,'id':identity,'recordedAt':now.isoformat(),'game':g,'kickoff':kick.isoformat(),'kickoffVerified':verified,'evaluationEligible':verified and not aud['byGame'].get(str(g['id'])),'probabilities':probabilities(m['lambdaHome'],m['lambdaAway']),'modelVersion':'published-poisson-v1','sourceModelGeneratedAt':model.get('generatedAt'),'odds':[o for o in D.get('marketOdds',[]) if o.get('gameId')==g['id']],'status':'confirmed' if verified else 'provisional_kickoff_unverified'}
+  obj={'schema':1,'id':identity,'recordedAt':now.isoformat(),'game':g,'kickoff':kick.isoformat(),'kickoffVerified':verified,'evaluationEligible':verified and not aud['byGame'].get(str(g['id'])),'probabilities':probabilities(m['lambdaHome'],m['lambdaAway']),'modelVersion':m.get('modelVersion','published-poisson-v1'),'sourceModelGeneratedAt':model.get('generatedAt'),'odds':[o for o in D.get('marketOdds',[]) if o.get('gameId')==g['id']],'status':'confirmed' if verified else 'provisional_kickoff_unverified'}
   with path.open('x') as f:json.dump(obj,f,ensure_ascii=False,separators=(',',':'))
   created+=1
  files=[read(p) for p in dest.glob('*.json')]
