@@ -5,6 +5,10 @@ on:
     paths:
       - "index.html"
       - "simples.js"
+      - "estatisticas.js"
+      - "scripts/estatisticas.py"
+      - "scripts/test_estatisticas.py"
+      - "dados/estatisticas-*.json"
       - "simples.css"
       - "mercados.js"
       - "remates.js"
@@ -34,6 +38,8 @@ jobs:
           node --check tabelas-ligas.js
           node --check classificacoes.js
           node --check simples.js
+          node --check estatisticas.js
+          python3 -m unittest discover -s scripts -p 'test_*.py'
           node --check mercados.js
           node --check historico-ui.js
           node --check remates.js
@@ -55,8 +61,8 @@ jobs:
           assert model['coverage']['unavailable']+model['coverage']['estimated']==len(data['games'])
           assert all(set(x['prob'])=={'AND','BTTS','O25'} for x in model['games'].values() if x.get('prob'))
           assert 'id="view-golos"' in html and 'golos.js?v=2' in html
-          assert 'id="view-simple"' in html and 'simples.js?v=6' in html
-          assert 'simples.css?v=4' in html
+          assert 'id="view-simple"' in html and 'simples.js?v=7' in html
+          assert 'simples.css?v=5' in html
           assert "else if(hash==='simples'||!hash)go('simple')" in html
           assert 'boletins.js?v=8' in html
           for g in data['games']:
